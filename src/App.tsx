@@ -1,10 +1,11 @@
 import './App.css'
-import PrincipalEdition from './pages/editionSection/PrincipalEdition'
-import AboutUsEdition from './pages/editionSection/AboutUsEdition'
-import ServicesEdition from './pages/editionSection/ServicesEdition'
-import FAQEdition from './pages/editionSection/FAQEdition'
-import AssociatesEdition from './pages/editionSection/AssociatesEdition'
-import VolunteersEdition from './pages/editionSection/VolunteersEdition'
+import PrincipalEdition from './pages/editionPage/PrincipalEdition'
+import AboutUsEdition from './pages/editionPage/AboutUsEdition'
+import ServicesEdition from './pages/editionPage/ServicesEdition'
+import FAQEdition from './pages/editionPage/FAQEdition'
+import AssociatesEdition from './pages/editionPage/AssociatesEdition'
+import VolunteersEdition from './pages/editionPage/VolunteersEdition'
+import StaffManagementPage from './pages/StaffManagementPage'
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
     <AssociatesEdition />
     <VolunteersEdition />
     <FAQEdition />
+    <StaffManagementPage />
     </>
   )
 }
