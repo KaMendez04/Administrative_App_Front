@@ -8,7 +8,13 @@ import {
 } from '@tanstack/react-router'
 
 import Home from './Home'
-import PrincipalEdition from '../pages/editionSection/PrincipalEdition'
+import PrincipalEdition from '../pages/editionPage/PrincipalEdition'
+import AboutUsEdition from '../pages/editionPage/AboutUsEdition'
+import FAQEdition from '../pages/editionPage/FAQEdition'
+import ServicesEdition from '../pages/editionPage/ServicesEdition'
+import VolunteersEdition from '../pages/editionPage/VolunteersEdition'
+import AssociatesEdition from '../pages/editionPage/AssociatesEdition'
+import StaffManagementPage from '../pages/StaffManagementPage'
 
 // Ruta raíz con layout general
 const rootRoute = new RootRoute({
@@ -33,13 +39,13 @@ const editionLayoutRoute = new Route({
 const aboutUsEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/about',
-  component: lazyRouteComponent(() => import('../pages/editionSection/AboutUsEdition')),
+  component: AboutUsEdition
 })
 
 const faqEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/faq',
-  component: lazyRouteComponent(() => import('../pages/editionSection/FAQEdition')),
+  component: FAQEdition
 })
 
 const principalEdition = new Route({
@@ -51,20 +57,27 @@ const principalEdition = new Route({
 const servicesEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/servicios',
-  component: lazyRouteComponent(() => import('../pages/editionSection/ServicesEdition')),
+  component: ServicesEdition
 })
 
 const volunteersEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/voluntarios',
-  component: lazyRouteComponent(() => import('../pages/editionSection/VolunteersEdition')),
+  component: VolunteersEdition
 })
 
 const associatesEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/asociados',
-  component: lazyRouteComponent(() => import('../pages/editionSection/AssociatesEdition')),
+  component: AssociatesEdition
 })
+
+const staffManagement = new Route({
+  getParentRoute: () => rootRoute,
+  path: '/staff',
+  component: StaffManagementPage
+})
+
 
 // Ensamblar el árbol completo
 const routeTree = rootRoute.addChildren([
@@ -75,7 +88,8 @@ const routeTree = rootRoute.addChildren([
     principalEdition,
     servicesEdition,
     volunteersEdition,
-    associatesEdition,
+    staffManagement,
+    associatesEdition
   ]),
 ])
 
