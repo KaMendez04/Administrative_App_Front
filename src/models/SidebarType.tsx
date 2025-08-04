@@ -48,9 +48,9 @@ export const sidebarItems: SidebarItem[] = [
     href: "/manuales",
     icon: Book,
   },
-  {
+]
+ {/*
     title: "Historial",
     href: "/historial",
-    icon: History,
-  },
-]
+    icon: History,*/
+  }

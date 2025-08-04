@@ -1,9 +1,22 @@
+import { useEffect, useRef } from "react"
 import { ChevronLeft } from "lucide-react"
 import { Link, useRouterState } from "@tanstack/react-router"
 import { sidebarItems } from "../models/SidebarType"
 
+
 export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const sidebarRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMobile && isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isOpen, isMobile, setIsOpen])
 
   const SidebarLink = ({ href, title, icon: Icon }: any) => {
     const isActive = pathname === href
@@ -11,44 +24,53 @@ export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
       <Link
         to={href}
         onClick={() => isMobile && setIsOpen(false)}
-        className={`flex items-center gap-3 p-2 rounded-md text-sm font-medium transition-colors
-        ${
-          isActive
-            ? "bg-[#708C3E] text-[#FAF9F5] shadow"
-            : "text-[#2E321B] hover:bg-[#FAF9F5] hover:text-[#2E321B]"
-        }`}
+        className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all border
+          ${
+            isActive
+              ? "bg-[#708C3E] text-white border-[#708C3E]"
+              : "text-[#708C3E] border-transparent hover:border-[#A3853D] hover:bg-[#F0EFEB]"
+          }`}
       >
         <Icon className="w-4 h-4 shrink-0" />
-        <span className="truncate">{title}</span>
+        <span>{title}</span>
       </Link>
     )
   }
 
   return (
     <div
-      className={`fixed inset-y-0 left-0 z-40 transition-transform duration-300 ${
+      ref={sidebarRef}
+      className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 ${
         isOpen ? "translate-x-0" : "-translate-x-full"
-      } w-64 bg-[#A3853D] text-white flex flex-col shadow-xl`}
+      } w-64 bg-[#FAF9F5] text-[#2E321B] flex flex-col shadow-xl`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-[#FAF9F5]/40">
-        <span className="text-lg font-semibold text-[#2E321B]">Menú</span>
+      <div className="flex flex-col items-center justify-center p-6 border-b border-[#DCD6C9]">
+      
+          <img src="https://res.cloudinary.com/dqaseydi6/image/upload/v1754008574/logo-camara_rmdpur.png" alt="Logo Cámara" className="w-16 h-16 object-contain mb-2 rounded" />
+       
+        <h1 className="text-center text-sm font-semibold text-[#708C3E] leading-tight tracking-tight">
+          Cámara de Ganaderos<br />de Hojancha
+        </h1>
       </div>
 
       {/* Links */}
-      <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
+      <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
         {sidebarItems.map((item) => (
           <SidebarLink key={item.title} {...item} />
         ))}
       </nav>
 
-      {/* Botón circular para cerrar - SIEMPRE visible */}
-      <button
-        onClick={() => setIsOpen(false)}
-        className="absolute top-4 -right-5 z-50 w-10 h-10 rounded-full bg-[#FAF9F5] border border-[#2E321B] text-[#2E321B] hover:bg-[#708C3E] hover:text-white shadow-lg flex items-center justify-center transition-all"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
+      {/* Botón de cerrar */}
+      <div className="p-4 border-t border-[#DCD6C9]">
+        <button
+          onClick={() => setIsOpen(false)}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#708C3E] text-white hover:bg-[#5d741c] transition-all text-sm font-medium shadow"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>Cerrar menú</span>
+        </button>
+      </div>
     </div>
   )
 }

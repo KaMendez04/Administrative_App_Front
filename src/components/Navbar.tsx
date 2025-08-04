@@ -5,6 +5,7 @@ export default function Navbar({ setSidebarOpen }: { setSidebarOpen: (open: bool
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
   const dropdownRef = React.useRef<HTMLDivElement>(null)
+  const [isDesktop, setIsDesktop] = React.useState<boolean>(window.innerWidth >= 768)
 
   const toggleDropdown = () => setIsDropdownOpen((prev) => !prev)
 
@@ -21,14 +22,25 @@ export default function Navbar({ setSidebarOpen }: { setSidebarOpen: (open: bool
       }
     }
 
-    if (isDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768)
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [isDropdownOpen])
+
+    document.addEventListener("mousedown", handleClickOutside)
+    window.addEventListener("resize", handleResize)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [])
 
   return (
-    <nav className="sticky top-0 w-full z-50 bg-[#FAF9F5] border-b border-[#DCD6C9] shadow-sm px-4 py-3">
+    <nav
+      className={`sticky top-0 z-50 bg-[#FAF9F5] border-b border-[#DCD6C9] shadow-sm px-4 py-3 transition-all duration-300 ${
+        isSidebarOpen && isDesktop ? "pl-64" : ""
+      }`}
+    >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Solo botón de hamburguesa (nunca logo o texto) */}
         <button
