@@ -1,7 +1,7 @@
 import { Outlet } from '@tanstack/react-router'
 import { AppSidebar } from '../components/Sidebar'
 import { useState, useEffect } from 'react'
-import Navbar from '../components/navbar'
+import Navbar from '../components/Navbar'
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
