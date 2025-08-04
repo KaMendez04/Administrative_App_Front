@@ -1,4 +1,11 @@
-import { Globe, Users, FolderOpen, UserCheck, DollarSign, type LucideIcon } from "lucide-react"
+import {
+  Globe,
+  Users,
+  FolderOpen,
+  UserCheck,
+  DollarSign,
+  type LucideIcon,
+} from "lucide-react"
 
 export type PrincipalType = {
   title: string
@@ -8,6 +15,7 @@ export type PrincipalType = {
   secondaryAction: string
   color: string
   subtitle?: string
+  route: string // ← agregado para navegación
 }
 
 export const JsonPrincipalType: PrincipalType[] = [
@@ -18,6 +26,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Editar",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
+    route: "/edition/principal",
   },
   {
     title: "Cantidad de Voluntarios",
@@ -26,6 +35,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Gestión",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
+    route: "/edicion/voluntarios",
   },
   {
     title: "Cantidad de Proyectos",
@@ -34,6 +44,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Gestión",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
+    route: "/edicion/servicios", // si quieres cambiar a 'proyectos', también debes cambiar el path en router
   },
   {
     title: "Cantidad Asociados",
@@ -43,6 +54,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Gestión",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
+    route: "/edicion/asociados",
   },
   {
     title: "Presupuesto Actual",
@@ -52,6 +64,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Gestión",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
+    route: "/edicion/faq", // ejemplo si usas esa página como presupuestos, si no, crea la ruta real
   },
   {
     title: "Cantidad de Personal",
@@ -60,5 +73,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Gestión",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
+    route: "/edicion/about",
   },
 ]
+

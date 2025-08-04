@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-router'
 
 import Home from './Home'
+import PrincipalEdition from '../pages/editionSection/PrincipalEdition'
 
 // Ruta raíz con layout general
 const rootRoute = new RootRoute({
@@ -24,7 +25,7 @@ const principalRoute = new Route({
 // Rutas de edición agrupadas en un layout (usa el mismo Home layout)
 const editionLayoutRoute = new Route({
   getParentRoute: () => rootRoute,
-  path: '/edicion',
+  path: '/edition',
   component: () => <Outlet />, // Hereda layout del root
 })
 
@@ -43,8 +44,8 @@ const faqEdition = new Route({
 
 const principalEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/principal',
-  component: lazyRouteComponent(() => import('../pages/editionSection/PrincipalEdition')),
+    path: "/principal",
+    component: PrincipalEdition,
 })
 
 const servicesEdition = new Route({

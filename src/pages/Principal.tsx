@@ -1,7 +1,9 @@
+import { useNavigate } from "@tanstack/react-router"
 import { JsonPrincipalType } from "../models/PrincipalType"
 
 export default function Principal() {
   const modules = JsonPrincipalType
+    const navigate = useNavigate()
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -30,9 +32,12 @@ export default function Principal() {
                 <div className="flex justify-end mt-6">
                   {" "}
                   {/* Adjusted to justify-end for single button alignment */}
-                  <button className="bg-gradient-to-r from-[#6F8C1F] to-[#475C1D] hover:from-[#5d741c] hover:to-[#384c17] text-white px-6 py-2 rounded-md text-sm font-medium duration-200 shadow-md">
-                    {module.primaryAction}
-                  </button>
+                   <button
+                    className="bg-gradient-to-r from-[#6F8C1F] to-[#475C1D] hover:from-[#5d741c] hover:to-[#384c17] text-white px-6 py-2 rounded-md text-sm font-medium duration-200 shadow-md"
+                    onClick={() => navigate({ to: module.route as any })}
+                    >
+                      {module.primaryAction}
+                    </button>
                 </div>
               </div>
             )
