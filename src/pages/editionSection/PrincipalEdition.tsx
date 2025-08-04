@@ -3,7 +3,7 @@ import NavbarEditionSection from "../../components/NavbarEditionSection"
 function PrincipalEdition() {
   return (
     <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-3xl mx-auto">
 
         {/* Navegación superior */}
         <NavbarEditionSection/>

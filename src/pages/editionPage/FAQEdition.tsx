@@ -1,30 +1,12 @@
+import NavbarEditionSection from "../../components/NavbarEditionSection"
 
 function FAQEdition() {
   return (
     <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
 
-        {/* 🔘 Navegación superior */}
-        <div className="flex flex-wrap gap-4 justify-center mb-12 border-b pb-4">
-          <button className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100">
-            Principal
-          </button>
-          <button className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100">
-            Sobre Nosotros
-          </button>
-          <button className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100">
-            Servicios
-          </button>
-          <button className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100">
-            Asociados
-          </button>
-          <button className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100">
-            Voluntarios
-          </button>
-          <button className="px-4 py-2 border border-[#708C3E] rounded-md text-[#708C3E] font-medium bg-[#F5F7EC] hover:bg-[#EEF4D8]">
-            Preguntas
-          </button>
-        </div>
+        {/* Navegación superior */}
+        <NavbarEditionSection/>
 
         {/* 🆕 Agregar nueva pregunta */}
         <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow mb-12">
