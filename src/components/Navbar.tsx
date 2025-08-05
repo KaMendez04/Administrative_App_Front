@@ -1,18 +1,21 @@
-import { Menu, User, X } from "lucide-react"
+import { Menu, User } from "lucide-react"
 import React from "react"
 
-export default function Navbar({ setSidebarOpen }: { setSidebarOpen: (open: boolean) => void }) {
+export default function Navbar({
+  isSidebarOpen,
+  setSidebarOpen,
+}: {
+  isSidebarOpen: boolean
+  setSidebarOpen: (open: boolean) => void
+}) {
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
   const dropdownRef = React.useRef<HTMLDivElement>(null)
   const [isDesktop, setIsDesktop] = React.useState<boolean>(window.innerWidth >= 768)
 
   const toggleDropdown = () => setIsDropdownOpen((prev) => !prev)
 
   const toggleSidebar = () => {
-    const newState = !isSidebarOpen
-    setSidebarOpen(newState)
-    setIsSidebarOpen(newState)
+    setSidebarOpen(!isSidebarOpen)
   }
 
   React.useEffect(() => {
@@ -36,21 +39,21 @@ export default function Navbar({ setSidebarOpen }: { setSidebarOpen: (open: bool
   }, [])
 
   return (
-    <nav
-      className={`sticky top-0 z-50 bg-[#FAF9F5] border-b border-[#DCD6C9] shadow-sm px-4 py-3 transition-all duration-300 ${
-        isSidebarOpen && isDesktop ? "pl-64" : ""
-      }`}
-    >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Solo botón de hamburguesa (nunca logo o texto) */}
+    <nav className="sticky top-0 z-50 bg-white/60 backdrop-blur-md border-b border-[#DCD6C9] px-4 py-3 shadow-sm">
+
+      {/* 👇 Este contenedor es el que realmente se mueve */}
+      <div
+        className={`flex items-center justify-between max-w-7xl mx-auto transition-transform duration-300 ${
+          isSidebarOpen && isDesktop ? "translate-x-64" : "translate-x-0"
+        }`}
+      >
         <button
           onClick={toggleSidebar}
           className="text-[#2E321B] hover:text-[#708C3E] p-2 rounded-md transition"
         >
-          {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          <Menu className="w-6 h-6" />
         </button>
 
-        {/* Dropdown de usuario */}
         <div className="relative" ref={dropdownRef}>
           <button
             className="flex items-center gap-2 text-[#2E321B] hover:text-[#A3853D] transition"
