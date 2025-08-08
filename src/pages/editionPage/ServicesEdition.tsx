@@ -8,6 +8,14 @@ function ServicesEdition() {
         {/* Navegación superior */}
         <NavbarEditionSection/>
 
+        {/* 📝 Encabezado */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-2">Edición de la Sección Servicios</h1>
+          <p className="text-base text-[#475C1D]">
+            Modifica o agrega los servicios que la Cámara ofrece a sus asociados y al público en general.
+          </p>
+        </div>
+
         {/* 🆕 Agregar nuevo servicio */}
         <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow mb-12">
           <h2 className="text-2xl font-semibold mb-6">Agregar nueva sección Servicios</h2>

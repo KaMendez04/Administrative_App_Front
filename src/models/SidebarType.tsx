@@ -15,7 +15,7 @@ export const sidebarItems: SidebarItem[] = [
   },
   {
     title: "Informativa",
-    href: "/informativa",
+    href: "/edition/principal",
     icon: FileText,
   },
   {
@@ -35,7 +35,7 @@ export const sidebarItems: SidebarItem[] = [
   },
   {
     title: "Personal",
-    href: "/personal",
+    href: "/staff",
     icon: User,
   },
   {
