@@ -14,7 +14,7 @@ import FAQEdition from '../pages/editionPage/FAQEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
 import VolunteersEdition from '../pages/editionPage/VolunteersEdition'
 import AssociatesEdition from '../pages/editionPage/AssociatesEdition'
-import StaffManagementPage from '../pages/StaffManagementPage'
+import StaffManagementPage from '../pages/PersonalPage'
 
 // Ruta raíz con layout general
 const rootRoute = new RootRoute({
