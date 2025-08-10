@@ -1,6 +1,6 @@
 // src/pages/PersonalPage.ts
 import { useMemo } from "react"
-import { useReactTable, getCoreRowModel } from "@tanstack/react-table"
+import { useReactTable, getCoreRowModel, getPaginationRowModel } from "@tanstack/react-table"
 
 import type { PersonalPageType } from "../models/PersonalPageType"
 import { getPersonalPageList } from "../services/personalPageService"
@@ -9,9 +9,10 @@ import { usePersonalPageColumns } from "../hooks/usePersonalPageColumns"
 import { PersonalPageHeader } from "../components/Personal/PersonalPageHeader"
 import { PersonalPageSearch } from "../components/Personal/PersonalPageSearch"
 import { PersonalPageTable } from "../components/Personal/PersonalPageTable"
+import { PersonalPagePagination } from "../components/Personal/PersonalPagePagination"
 import { PersonalPageInfoModal } from "../components/Personal/PersonalPageInfoModal"
 import { EditPersonalPageModal } from "../components/Personal/EditPersonalPageModal"
-
+import BackButton from "../components/Personal/BackButton"
 
 
 export default function PersonalPage() {
@@ -46,6 +47,8 @@ export default function PersonalPage() {
     data: filtered,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),     //  habilita paginación
+    initialState: { pagination: { pageIndex: 0, pageSize: 6 } }, //  6 por página
   })
 
   return (
@@ -57,6 +60,12 @@ export default function PersonalPage() {
         </div>
         <div className="overflow-x-auto bg-white rounded-2xl shadow">
           <PersonalPageTable table={table} />
+        </div>
+
+        {/* Controles de paginación */}
+        <div className="mt-6">
+          <PersonalPagePagination table={table} />
+          <BackButton />
         </div>
       </div>
 
