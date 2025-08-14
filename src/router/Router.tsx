@@ -15,10 +15,11 @@ import ServicesEdition from '../pages/editionPage/ServicesEdition'
 import VolunteersEdition from '../pages/editionPage/VolunteersEdition'
 import AssociatesEdition from '../pages/editionPage/AssociatesEdition'
 import StaffManagementPage from '../pages/PersonalPage'
+import LoginPage from '../pages/LoginPage' // ⬅️ importamos login
 
 // Ruta raíz con layout general
 const rootRoute = new RootRoute({
-  component: Home, // Esto es tu layout general (Navbar + Sidebar)
+  component: Home, // tu layout (Navbar + Sidebar)
 })
 
 // Página principal
@@ -28,56 +29,61 @@ const principalRoute = new Route({
   component: lazyRouteComponent(() => import('../pages/Principal')),
 })
 
-// Rutas de edición agrupadas en un layout (usa el mismo Home layout)
+// Rutas de edición agrupadas
 const editionLayoutRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/edition',
-  component: () => <Outlet />, // Hereda layout del root
+  component: () => <Outlet />,
 })
 
-// Subrutas de edición
 const aboutUsEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/about',
-  component: AboutUsEdition
+  component: AboutUsEdition,
 })
 
 const faqEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/faq',
-  component: FAQEdition
+  component: FAQEdition,
 })
 
 const principalEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-    path: "/principal",
-    component: PrincipalEdition,
+  path: '/principal',
+  component: PrincipalEdition,
 })
 
 const servicesEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/servicios',
-  component: ServicesEdition
+  component: ServicesEdition,
 })
 
 const volunteersEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/voluntarios',
-  component: VolunteersEdition
+  component: VolunteersEdition,
 })
 
 const associatesEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
   path: '/asociados',
-  component: AssociatesEdition
+  component: AssociatesEdition,
 })
 
 const staffManagement = new Route({
   getParentRoute: () => rootRoute,
   path: '/staff',
-  component: StaffManagementPage
+  component: StaffManagementPage,
 })
 
+// ✅ Nueva ruta /login (usa mismo layout actual)
+const loginRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: '/login',
+  component: LoginPage,
+})
 
 // Ensamblar el árbol completo
 const routeTree = rootRoute.addChildren([
@@ -88,9 +94,10 @@ const routeTree = rootRoute.addChildren([
     principalEdition,
     servicesEdition,
     volunteersEdition,
-    staffManagement,
-    associatesEdition
+    associatesEdition,
   ]),
+  staffManagement,
+  loginRoute, // ⬅️ añadida al root
 ])
 
 export const router = new Router({ routeTree })

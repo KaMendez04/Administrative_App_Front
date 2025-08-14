@@ -1,46 +1,57 @@
-import { Menu, User } from "lucide-react"
-import React from "react"
+import { Menu, User } from "lucide-react";
+import React from "react";
+import { useNavigate } from "@tanstack/react-router"; // ⬅️ TanStack Router
 
-export default function Navbar({
-  isSidebarOpen,
-  setSidebarOpen,
-}: {
-  isSidebarOpen: boolean
-  setSidebarOpen: (open: boolean) => void
-}) {
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
-  const dropdownRef = React.useRef<HTMLDivElement>(null)
-  const [isDesktop, setIsDesktop] = React.useState<boolean>(window.innerWidth >= 768)
+type Props = {
+  isSidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+};
 
-  const toggleDropdown = () => setIsDropdownOpen((prev) => !prev)
+export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const [isDesktop, setIsDesktop] = React.useState<boolean>(
+    typeof window !== "undefined" ? window.innerWidth >= 768 : true
+  );
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen)
-  }
+  const navigate = useNavigate();
+
+  const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
+  const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+
+  // 👉 Cerrar sesión: limpia token y navega al login
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("user");
+    } catch {}
+    setIsDropdownOpen(false);
+    navigate({ to: "/login" }); // Ruta donde renderizas <LoginPage />
+  };
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false)
+        setIsDropdownOpen(false);
       }
-    }
+    };
 
     const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768)
-    }
+      setIsDesktop(window.innerWidth >= 768);
+    };
 
-    document.addEventListener("mousedown", handleClickOutside)
-    window.addEventListener("resize", handleResize)
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [])
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-white/60 backdrop-blur-md border-b border-[#DCD6C9] px-4 py-3 shadow-sm">
-
       {/* 👇 Este contenedor es el que realmente se mueve */}
       <div
         className={`flex items-center justify-between max-w-7xl mx-auto transition-transform duration-300 ${
@@ -66,10 +77,20 @@ export default function Navbar({
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg border border-gray-200 z-50">
               <div className="py-2">
-                <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                <div
+                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    // abre modal/cambio de contraseña si lo tienes
+                  }}
+                >
                   Cambiar Contraseña
                 </div>
-                <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+
+                <div
+                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={handleLogout}
+                >
                   Cerrar Sesión
                 </div>
               </div>
@@ -78,5 +99,5 @@ export default function Navbar({
         </div>
       </div>
     </nav>
-  )
+  );
 }

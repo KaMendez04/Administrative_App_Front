@@ -1,3 +1,4 @@
+// src/router/Home.tsx
 import { Outlet } from '@tanstack/react-router'
 import { AppSidebar } from '../components/Sidebar'
 import { useState, useEffect } from 'react'
@@ -18,7 +19,8 @@ export default function Home() {
 
   return (
     <>
-      <Navbar setSidebarOpen={setSidebarOpen} />
+      {/* ✅ Ahora pasamos también isSidebarOpen */}
+      <Navbar isSidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <AppSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} isMobile={isMobile} />
       <Outlet />
     </>
