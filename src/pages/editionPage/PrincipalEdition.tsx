@@ -6,13 +6,12 @@ function PrincipalEdition() {
   const { data, loading, saving, error, save } = usePrincipalEdit()
 
   // estados controlados del formulario
-  const [title, setTitle] = useState("")
+  const [title] = useState("")
   const [description, setDescription] = useState("")
 
   // Cargar valores cuando llegue "data"
   useEffect(() => {
     if (data) {
-      setTitle(data.title ?? "")
       setDescription(data.description ?? "")
     }
   }, [data])
@@ -46,21 +45,6 @@ function PrincipalEdition() {
             <p className="text-red-600">No hay registro de principal para editar.</p>
           ) : (
             <form className="space-y-6" onSubmit={onSubmit}>
-              {/* Título */}
-               {/* 
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                  Título
-                </label>
-                <input
-                  id="title"
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-                />
-              </div>*/}
-
               {/* Descripción */}
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
