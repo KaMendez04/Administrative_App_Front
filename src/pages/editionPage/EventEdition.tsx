@@ -1,7 +1,7 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection"
 import { useEvents } from "../../hooks/EditionSection/EventHook"
-import EventCreator from "./Event/EventCreator"
-import EventEditor from "./Event/EventEditor"
+import EventCreator from "./event/EventCreator"
+import EventEditor from "./event/EventEditor"
 
 
 export default function EventEdition() {

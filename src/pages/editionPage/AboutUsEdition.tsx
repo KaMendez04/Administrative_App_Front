@@ -1,80 +1,89 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection"
+import { useEffect, useState } from "react"
+import { useAboutUsEdit } from "../../hooks/EditionSection/AboutUsHook"
 
-function AboutUsEdition() {
+export default function AboutUsEdition() {
+  const { data, loading, saving, error, save } = useAboutUsEdit()
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+
+  useEffect(() => {
+    if (data) {
+      setTitle(data.title ?? "")
+      setDescription(data.description ?? "")
+    }
+  }, [data])
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    save({ title, description })
+  }
+
   return (
     <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
-        
-        {/* Navegación superior */}
-        <NavbarEditionSection/>
+        {/* Nav superior */}
+        <NavbarEditionSection />
 
-        {/* 📝 Encabezado */}
+        {/* Encabezado */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-2">Edición de la Sección Sobre Nosotros</h1>
+          <h1 className="text-4xl font-bold mb-2">Sobre Nosotros</h1>
           <p className="text-base text-[#475C1D]">
-            Modifica la historia, misión y visión institucional de la Cámara.
+            Modifica el contenido principal de la sección “Sobre Nosotros”.
           </p>
         </div>
 
-        {/* 📄 Formulario */}
+        {/* Contenido */}
         <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow">
-          <h2 className="text-2xl font-semibold mb-6">Editar Contenido</h2>
+          <h2 className="text-2xl font-semibold mb-6">Editar existente</h2>
 
-          {/* Historia */}
-          <div className="mb-6">
-            <label htmlFor="history" className="block text-sm font-medium text-gray-700 mb-1">
-              Historia
-            </label>
-            <textarea
-              id="history"
-              rows={4}
-              defaultValue="Nuestra historia inicia con la unión de ganaderos locales en busca de representación y desarrollo..."
-              className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-            />
-          </div>
+          {loading ? (
+            <p>Cargando…</p>
+          ) : !data ? (
+            <p className="text-red-600">No hay registro para editar.</p>
+          ) : (
+            <form className="space-y-6" onSubmit={onSubmit}>
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                  Título
+                </label>
+                <input
+                  id="title"
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                />
+              </div>
 
-          {/* Misión */}
-          <div className="mb-6">
-            <label htmlFor="mission" className="block text-sm font-medium text-gray-700 mb-1">
-              Misión
-            </label>
-            <textarea
-              id="mission"
-              rows={3}
-              defaultValue="Representar y fortalecer al sector ganadero mediante servicios que impulsen su sostenibilidad."
-              className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-            />
-          </div>
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  id="description"
+                  rows={5}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                />
+              </div>
 
-          {/* Visión */}
-          <div className="mb-8">
-            <label htmlFor="vision" className="block text-sm font-medium text-gray-700 mb-1">
-              Visión
-            </label>
-            <textarea
-              id="vision"
-              rows={3}
-              defaultValue="Ser una organización líder en innovación ganadera con impacto regional y nacional."
-              className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-            />
-          </div>
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-2 rounded-md border border-green-600 text-green-600 hover:bg-green-50 font-semibold disabled:opacity-60"
+                >
+                  {saving ? "Guardando…" : "Guardar"}
+                </button>
+              </div>
 
-          {/* Botones */}
-          <div className="flex justify-end gap-4">
-            <button className="px-4 py-2 rounded-md border border-gray-400 text-gray-700 hover:bg-gray-100">
-              Editar
-            </button>
-            <button className="px-4 py-2 rounded-md border border-green-600 text-green-600 hover:bg-green-50 font-semibold">
-              Guardar
-            </button>
-            <button className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 font-semibold">
-              Eliminar
-            </button>
-          </div>
+              {error && <p className="text-sm text-red-600">{error}</p>}
+            </form>
+          )}
         </div>
       </div>
     </div>
   )
 }
-
-export default AboutUsEdition

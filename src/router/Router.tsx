@@ -10,12 +10,13 @@ import {
 import Home from './Home'
 import PrincipalEdition from '../pages/editionPage/PrincipalEdition'
 import AboutUsEdition from '../pages/editionPage/AboutUsEdition'
-import FAQEdition from '../pages/editionPage/FAQEdition'
-import ServicesEdition from '../pages/editionPage/ServicesEdition'
+import FAQEdition from '../pages/editionPage/faq/FAQEdition'
 import VolunteersEdition from '../pages/editionPage/VolunteersEdition'
 import AssociatesEdition from '../pages/editionPage/AssociatesEdition'
 import StaffManagementPage from '../pages/PersonalPage'
 import LoginPage from '../pages/LoginPage' // ⬅️ importamos login
+import EventEdition from '../pages/editionPage/EventEdition'
+import ServicesEdition from '../pages/editionPage/ServicesEdition'
 
 // Ruta raíz con layout general
 const rootRoute = new RootRoute({
@@ -72,6 +73,12 @@ const associatesEdition = new Route({
   component: AssociatesEdition,
 })
 
+const eventsEdition = new Route({
+  getParentRoute: () => editionLayoutRoute,
+  path: '/events',
+  component: EventEdition,
+})
+
 const staffManagement = new Route({
   getParentRoute: () => rootRoute,
   path: '/staff',
@@ -95,6 +102,7 @@ const routeTree = rootRoute.addChildren([
     servicesEdition,
     volunteersEdition,
     associatesEdition,
+    eventsEdition
   ]),
   staffManagement,
   loginRoute, // ⬅️ añadida al root

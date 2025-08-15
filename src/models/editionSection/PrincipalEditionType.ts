@@ -1,8 +1,7 @@
-import type { ReactNode } from "react"
-
-export type PrincipalEditionType = {
-  date: ReactNode
-  illustration: string
+export interface PrincipalEdition {
+  id: number
   title: string
   description: string
 }
+
+export type PrincipalUpdate = Omit<PrincipalEdition, 'id'>

@@ -1,11 +1,11 @@
 import './App.css'
 import PrincipalEdition from './pages/editionPage/PrincipalEdition'
 import AboutUsEdition from './pages/editionPage/AboutUsEdition'
-import ServicesEdition from './pages/editionPage/ServicesEdition'
-import FAQEdition from './pages/editionPage/FAQEdition'
+import FAQEdition from './pages/editionPage/faq/FAQEdition'
 import AssociatesEdition from './pages/editionPage/AssociatesEdition'
 import VolunteersEdition from './pages/editionPage/VolunteersEdition'
 import StaffManagementPage from './pages/PersonalPage'
+import ServicesEdition from './pages/editionPage/ServicesEdition'
 
 function App() {
 

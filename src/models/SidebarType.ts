@@ -1,4 +1,4 @@
-import { Book, Briefcase, DollarSign, FileText, Home, User, Users, History } from "lucide-react"
+import { Book, Briefcase, DollarSign, FileText, Home, User, Users, CalendarDays  } from "lucide-react"
 import type { LucideIcon } from "lucide-react" 
 
 export type SidebarItem = {
@@ -28,6 +28,11 @@ export const sidebarItems: SidebarItem[] = [
     href: "/asociados",
     icon: Briefcase,
   },
+   {
+    title: "Eventos",
+    href: "/events",
+    icon: CalendarDays ,
+  },
   {
     title: "Presupuesto",
     href: "/presupuesto",
@@ -48,6 +53,7 @@ export const sidebarItems: SidebarItem[] = [
     href: "/manuales",
     icon: Book,
   },
+
 ]
  {/*
     title: "Historial",
