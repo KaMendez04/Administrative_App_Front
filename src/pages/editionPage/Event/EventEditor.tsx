@@ -37,7 +37,7 @@ export default function EventEditor({
     <div className="space-y-6">
       <select
         value={selectedEventId ?? ""}
-        onChange={(e) => setSelectedEventId(Number(e.target.value))}
+        onChange={(e) => setSelectedEventId(e.target.value ? Number(e.target.value) : null)}
         className="w-full border border-gray-300 rounded-md px-4 py-2"
       >
         <option value="" disabled>

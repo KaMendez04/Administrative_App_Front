@@ -7,6 +7,7 @@ const sections = [
   { label: "Asociados", path: "/edition/asociados" },
   { label: "Voluntarios", path: "/edition/voluntarios" },
   { label: "Preguntas", path: "/edition/faq" },
+  { label: "Eventos", path: "/edition/events" },
 ]
 
 export default function NavbarEditionSection() {

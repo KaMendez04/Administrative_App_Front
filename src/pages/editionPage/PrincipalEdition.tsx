@@ -1,13 +1,33 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection"
+import { useEffect, useState } from "react"
+import { usePrincipalEdit } from "../../hooks/EditionSection/PrincipalHook"
 
 function PrincipalEdition() {
+  const { data, loading, saving, error, save } = usePrincipalEdit()
+
+  // estados controlados del formulario
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+
+  // Cargar valores cuando llegue "data"
+  useEffect(() => {
+    if (data) {
+      setTitle(data.title ?? "")
+      setDescription(data.description ?? "")
+    }
+  }, [data])
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    save({ title, description })
+  }
+
   return (
     <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
-
         {/* Navegación superior */}
-        <NavbarEditionSection/>
-        
+        <NavbarEditionSection />
+
         {/* Encabezado */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-2">Edición de la Sección Principal</h1>
@@ -16,61 +36,60 @@ function PrincipalEdition() {
           </p>
         </div>
 
-        {/* Formulario */}
+        {/* Contenido */}
         <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow">
-          <h2 className="text-2xl font-semibold mb-6">Editar Existente</h2>
+          <h2 className="text-2xl font-semibold mb-6">Editar existente</h2>
 
-          {/* Título */}
-          <div className="mb-6">
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-              Título
-            </label>
-            <input
-              type="text"
-              id="title"
-              defaultValue="Asociación Cámara de Ganaderos"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-            />
-          </div>
+          {loading ? (
+            <p>Cargando…</p>
+          ) : !data ? (
+            <p className="text-red-600">No hay registro de principal para editar.</p>
+          ) : (
+            <form className="space-y-6" onSubmit={onSubmit}>
+              {/* Título */}
+               {/* 
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                  Título
+                </label>
+                <input
+                  id="title"
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                />
+              </div>*/}
 
-          {/* Descripción */}
-          <div className="mb-6">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Descripción
-            </label>
-            <textarea
-              id="description"
-              rows={5}
-              defaultValue="Lorem ipsum dolor sit amet consectetur adipiscing elit tellus mauris..."
-              className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-            />
-          </div>
+              {/* Descripción */}
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  id="description"
+                  rows={5}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                />
+              </div>
 
-          {/* Imagen */}
-          <div className="mb-8">
-            <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
-              Imagen
-            </label>
-            <input
-              type="text"
-              id="image"
-              defaultValue="https://www.google.com/imgres?q=bookmgu40gQAA"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-            />
-          </div>
+              {/* Botones (solo Guardar) */}
+              <div className="flex justify-end gap-4">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-2 rounded-md border border-green-600 text-green-600 hover:bg-green-50 font-semibold disabled:opacity-60"
+                >
+                  {saving ? "Guardando…" : "Guardar"}
+                </button>
+              </div>
 
-          {/* Botones */}
-          <div className="flex justify-end gap-4">
-            <button className="px-4 py-2 rounded-md border border-gray-400 text-gray-700 hover:bg-gray-100">
-              Editar
-            </button>
-            <button className="px-4 py-2 rounded-md border border-green-600 text-green-600 hover:bg-green-50 font-semibold">
-              Guardar
-            </button>
-            <button className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 font-semibold">
-              Eliminar
-            </button>
-          </div>
+              {/* Errores */}
+              {error && <p className="text-sm text-red-600">{error}</p>}
+            </form>
+          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 
-import type { EventEdition } from "../../models/editionSection/EventEditionType"
-import { fetchEvents, updateEvent } from "../../services/EditionSection/EventService"
+import type { EventEdition, EventInput } from "../../models/editionSection/EventEditionType"
+import { fetchEvents, createEvent, updateEvent, deleteEvent } from "../../services/EditionSection/EventService"
 
 export function useEvents() {
   const [events, setEvents] = useState<EventEdition[]>([])
@@ -16,22 +16,23 @@ export function useEvents() {
   }, [])
 
   // Crear nuevo evento
-  const handleCreate = async (newEvent: Omit<Event, "id">) => {
+  const handleCreate = async (newEvent: EventInput) => {
     try {
       await createEvent(newEvent)
-      const updatedEvents = await fetchEvents()
-      setEvents(updatedEvents)
+      const updated = await fetchEvents()
+      setEvents(updated)
     } catch (err) {
       console.error("Error creando evento:", err)
     }
   }
 
   // Actualizar evento existente
-  const handleUpdate = async (updatedEvent: Event) => {
+  const handleUpdate = async (updatedEvent: EventEdition) => {
     try {
-      await updateEvent(updatedEvent.id, updatedEvent)
-      const updatedEvents = await fetchEvents()
-      setEvents(updatedEvents)
+      const { id, ...input } = updatedEvent
+      await updateEvent(id, input)
+      const updated = await fetchEvents()
+      setEvents(updated)
     } catch (err) {
       console.error("Error actualizando evento:", err)
     }
@@ -41,8 +42,8 @@ export function useEvents() {
   const handleDelete = async (id: number) => {
     try {
       await deleteEvent(id)
-      const updatedEvents = await fetchEvents()
-      setEvents(updatedEvents)
+      const updated = await fetchEvents()
+      setEvents(updated)
       setSelectedEventId(null)
     } catch (err) {
       console.error("Error eliminando evento:", err)
@@ -59,7 +60,3 @@ export function useEvents() {
     handleDelete,
   }
 }
-function createEvent(newEvent: Omit<Event, "id">) {
-    throw new Error("Function not implemented.")
-}
-

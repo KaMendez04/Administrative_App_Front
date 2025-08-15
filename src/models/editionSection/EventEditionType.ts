@@ -5,3 +5,5 @@ export interface EventEdition {
   description: string
   illustration: string
 }
+
+export type EventInput = Omit<EventEdition, 'id'>

@@ -1,7 +1,7 @@
 import { useState } from "react"
+import type { EventInput } from "../../../models/editionSection/EventEditionType"
 
-
-export default function EventCreator({ onSubmit }: any) {
+export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput) => void }) {
   const [title, setTitle] = useState("")
   const [date, setDate] = useState("")
   const [description, setDescription] = useState("")

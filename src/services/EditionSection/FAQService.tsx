@@ -1,6 +1,5 @@
 import type { FAQEdition } from "../../models/editionSection/FAQEditionType"
 
-
 const API_URL = "http://localhost:3000/api/faqs"
 
 export async function fetchFaqs(): Promise<FAQEdition[]> {
