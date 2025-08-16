@@ -42,6 +42,4 @@ export async function updateService(id: number, input: ServicesInformativeInput)
 export async function deleteService(id: number) {
   const res = await fetch(`${BASE}/${id}`, { method: "DELETE" })
   if (!res.ok) throw new Error("No se pudo eliminar el servicio")
-  // Devuelve DeleteResult. :contentReference[oaicite:6]{index=6}
-  return res.json()
 }

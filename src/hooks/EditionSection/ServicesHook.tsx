@@ -1,7 +1,7 @@
 // src/hooks/editionSection/ServicesInformativeHook.tsx
 import { useEffect, useState } from "react"
 import type { ServicesInformative, ServicesInformativeInput } from "../../models/editionSection/ServiceEditionType"
-import { createService, deleteService, fetchServices, updateService } from "../../services/EditionSection/ServicesService"
+import { createService, deleteService, fetchServices, updateService } from "../../services/EditionSection/ServicesInformativeService"
 
 export function useServicesInformative() {
   const [items, setItems] = useState<ServicesInformative[]>([])
@@ -26,8 +26,9 @@ export function useServicesInformative() {
   useEffect(() => { load() }, [])
 
   const handleCreate = async (input: ServicesInformativeInput) => {
-    await createService(input)
+    const created = await createService(input)
     await load()
+    setSelectedId(created.id) // ← ver inmediatamente el creado
   }
 
   const handleUpdate = async (entity: ServicesInformative) => {
