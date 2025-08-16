@@ -1,7 +1,7 @@
 import NavbarEditionSection from "../../../components/NavbarEditionSection"
 import { useFaqManager } from "../../../hooks/EditionSection/FAQHook"
-import FAQCreator from "./FAQCreator"
-import FAQEditor from "./FAQEditor"
+import FAQCreator from "../FAQ/FAQCreator"
+import FAQEditor from "../FAQ/FAQEditor"
 
 
 export default function FAQEdition() {

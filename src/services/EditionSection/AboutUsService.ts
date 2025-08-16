@@ -1,23 +1,22 @@
-import type { AboutUsEdition, AboutUsUpdate } from "../../models/editionSection/AboutUsEditionType"
+import type { AboutUsType } from "../../models/editionSection/AboutUsEditionType"
 
 const API_BASE = (import.meta as any)?.env?.VITE_API_URL ?? "http://localhost:3000"
-const BASE = `${API_BASE}/aboutUs`
+const BASE_URL = `${API_BASE}/aboutUs`
 
-// Si manejas un único registro de "Sobre Nosotros":
-export async function fetchSingleAboutUs(): Promise<AboutUsEdition | null> {
-  const res = await fetch(BASE)
+export async function getAllAboutUs(): Promise<AboutUsType[]> {
+  const res = await fetch(BASE_URL)
   if (!res.ok) throw new Error("Error al obtener Sobre Nosotros")
-  const list: AboutUsEdition[] = await res.json()
-  return list.length ? list[0] : null
+  return res.json();
 }
 
-export async function updateAboutUs(id: number, input: AboutUsUpdate) {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "PUT",
+export async function updateAboutUs(id: number, description: string): Promise<AboutUsType> {
+  const res = await fetch(`${BASE_URL}/${id}`, {
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
+    body: JSON.stringify({ description }),
   })
   if (!res.ok) throw new Error("No se pudo actualizar Sobre Nosotros")
-  // Tu servicio devuelve UpdateResult por defecto
   return res.json()
 }
+
+

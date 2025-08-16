@@ -1,7 +1,12 @@
-export interface AboutUsEdition {
+export interface AboutUsType {
   id: number
   title: string
   description: string
 }
 
-export type AboutUsUpdate = Omit<AboutUsEdition, 'id'>
+export const AboutUsInitialState: AboutUsUpdate = {
+  title: "",
+  description: ""
+}
+
+export type AboutUsUpdate = Omit<AboutUsType, 'id'>

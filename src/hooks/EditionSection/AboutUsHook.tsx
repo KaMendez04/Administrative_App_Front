@@ -1,41 +1,58 @@
 import { useEffect, useState } from "react"
-import type { AboutUsEdition, AboutUsUpdate } from "../../models/editionSection/AboutUsEditionType"
-import { fetchSingleAboutUs, updateAboutUs } from "../../services/EditionSection/AboutUsService"
+import { getAllAboutUs, updateAboutUs } from "../../services/EditionSection/AboutUsService"
+import type { AboutUsType } from "../../models/editionSection/AboutUsEditionType"
 
 export function useAboutUsEdit() {
-  const [data, setData] = useState<AboutUsEdition | null>(null)
+   const [items, setItems] = useState<AboutUsType[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const load = async () => {
-    setLoading(true)
-    setError(null)
+  const [selectedId, setSelectedId] = useState<number | null>(null) // <-- ahora con setter
+  const [isEditing, setIsEditing] = useState(false)
+
+  // Cargar datos al seleccionar un elemento
+  useEffect(() => { (async () => {
     try {
-      const a = await fetchSingleAboutUs()
-      setData(a)
-    } catch (e: any) {
+      const data = await getAllAboutUs()
+      setItems(data)
+    } catch(e:any){
       setError(e?.message ?? "Error cargando datos")
     } finally {
       setLoading(false)
     }
-  }
+  })() }, [])
 
-  useEffect(() => { load() }, [])
+  // Cargar datos al seleccionar un elemento
+  const selected = items.find(item => item.id === selectedId) ?? null
 
-  const save = async (input: AboutUsUpdate) => {
-    if (!data) return
+  // Guardar cambios
+  async function saveDescription(description: string){
+    if(!selected) return
     setSaving(true)
     setError(null)
     try {
-      await updateAboutUs(data.id, input)
-      await load() // refrescar (tu backend retorna UpdateResult)
+      await updateAboutUs(selected.id, description)
+      const refreshed = await getAllAboutUs()
+      setItems(refreshed)
+      setIsEditing(false)
     } catch (e: any) {
-      setError(e?.message ?? "No se pudo guardar")
+      setError(e?.message ?? "Error guardando datos")
     } finally {
       setSaving(false)
     }
   }
 
-  return { data, loading, saving, error, save, reload: load }
+  return {
+    items,
+    loading,
+    saving,
+    error,
+    selected,
+    selectedId,
+    setSelectedId,
+    isEditing,
+    setIsEditing,
+    saveDescription,
+  }
 }
