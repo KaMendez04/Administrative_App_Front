@@ -10,11 +10,11 @@ import {
 import Home from './Home'
 import PrincipalEdition from '../pages/editionPage/PrincipalEdition'
 import AboutUsEdition from '../pages/editionPage/AboutUsEdition'
-import FAQEdition from '../pages/editionPage/faq/FAQEdition'
+import FAQEdition from '../pages/editionPage/FAQ/FAQEdition'
 import VolunteersEdition from '../pages/editionPage/VolunteersEdition'
 import AssociatesEdition from '../pages/editionPage/AssociatesEdition'
 import StaffManagementPage from '../pages/PersonalPage'
-import LoginPage from '../pages/LoginPage' // ⬅️ importamos login
+import LoginPage from '../pages/LoginPage' 
 import EventEdition from '../pages/editionPage/EventEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
 
