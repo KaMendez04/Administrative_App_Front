@@ -1,5 +1,6 @@
 import React from "react"
 import { Mail, Lock } from "lucide-react"
+import { useNavigate } from "@tanstack/react-router"
 
 interface LoginFormProps {
   email: string
@@ -24,8 +25,16 @@ export default function LoginForm({
   error,
   handleSubmit,
 }: LoginFormProps) {
+  const navigate = useNavigate()
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()            // evita recarga del form
+    handleSubmit(e)               
+    navigate({ to: "/Principal" })         // redirige a Principal
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-10">
+    <form onSubmit={onSubmit} className="space-y-10">
       {/* Email */}
       <div className="relative">
         <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-[20px] w-[20px] text-gray-400" />

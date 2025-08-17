@@ -1,11 +1,13 @@
-// src/router/router.tsx
 import {
   Router,
   RootRoute,
   Route,
   Outlet,
   lazyRouteComponent,
+  NotFoundRoute,
+  useNavigate,
 } from '@tanstack/react-router'
+import { useEffect } from 'react'
 
 import Home from './Home'
 import PrincipalEdition from '../pages/editionPage/PrincipalEdition'
@@ -14,7 +16,7 @@ import FAQEdition from '../pages/editionPage/FAQ/FAQEdition'
 import VolunteersEdition from '../pages/editionPage/VolunteersEdition'
 import AssociatesEdition from '../pages/editionPage/AssociatesEdition'
 import StaffManagementPage from '../pages/PersonalPage'
-import LoginPage from '../pages/LoginPage' 
+import LoginPage from '../pages/LoginPage'
 import EventEdition from '../pages/editionPage/EventEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
 
@@ -24,9 +26,11 @@ const rootRoute = new RootRoute({
 })
 
 // Página principal
+const routePaths = { root: '/Principal' }
+
 const principalRoute = new Route({
   getParentRoute: () => rootRoute,
-  path: '/',
+  path: routePaths.root,
   component: lazyRouteComponent(() => import('../pages/Principal')),
 })
 
@@ -85,14 +89,28 @@ const staffManagement = new Route({
   component: StaffManagementPage,
 })
 
-// ✅ Nueva ruta /login (usa mismo layout actual)
+// /login
 const loginRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/login',
   component: LoginPage,
 })
 
-// Ensamblar el árbol completo
+// Fallback: si alguna ruta no existe, redirige a "/"
+function RedirectHome() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    navigate({ to: '/Principal', replace: true })
+  }, [navigate])
+  return null
+}
+
+const notFoundRoute = new NotFoundRoute({
+  getParentRoute: () => rootRoute,
+  component: RedirectHome,
+})
+
+// Ensamblar
 const routeTree = rootRoute.addChildren([
   principalRoute,
   editionLayoutRoute.addChildren([
@@ -102,10 +120,10 @@ const routeTree = rootRoute.addChildren([
     servicesEdition,
     volunteersEdition,
     associatesEdition,
-    eventsEdition
+    eventsEdition,
   ]),
   staffManagement,
-  loginRoute, // ⬅️ añadida al root
+  loginRoute,
 ])
 
-export const router = new Router({ routeTree })
+export const router = new Router({ routeTree, notFoundRoute })
