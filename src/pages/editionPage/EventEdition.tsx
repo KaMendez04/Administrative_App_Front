@@ -1,14 +1,15 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection"
+import BackButton from "../../components/PagesEdition/BackButton"
 import { useEvents } from "../../hooks/EditionSection/EventHook"
-import EventCreator from "./event/EventCreator"
-import EventEditor from "./event/EventEditor"
+import EventCreator from "./Event/EventCreator"
+import EventEditor from "./Event/EventEditor"
+
 
 
 export default function EventEdition() {
   const {
     events,
     selectedEventId,
-    selectedEvent,
     setSelectedEventId,
     handleCreate,
     handleUpdate,
@@ -44,6 +45,10 @@ export default function EventEdition() {
             onDelete={handleDelete}
           />
         </div>
+        {/* Botón de regresar abajo a la derecha */}
+                <div className="flex justify-end mt-8">
+                  <BackButton label="Regresar" />
+                </div>
       </div>
     </div>
   )

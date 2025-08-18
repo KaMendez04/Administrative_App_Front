@@ -1,5 +1,5 @@
-// src/pages/editionPage/ServicesEdition.tsx
 import NavbarEditionSection from "../../components/NavbarEditionSection"
+import BackButton from "../../components/PagesEdition/BackButton"
 import { useServicesInformative } from "../../hooks/EditionSection/ServicesHook"
 import ServicesInformativeEditor from "./service/ServiceEditor"
 import ServicesInformativeCreator from "./service/ServicesCreator"
@@ -43,6 +43,11 @@ export default function ServicesEdition() {
             onDelete={handleDelete}
           />
         </div>
+
+        {/*Botón de regresar abajo a la derecha */}
+                <div className="flex justify-end mt-8">
+                  <BackButton label="Regresar" />
+                </div>
       </div>
     </div>
   )

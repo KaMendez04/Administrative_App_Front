@@ -1,6 +1,8 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection"
 import { useEffect, useState } from "react"
 import { usePrincipalEdit } from "../../hooks/EditionSection/PrincipalHook"
+import BackButton from "../../components/PagesEdition/BackButton"
+
 
 function PrincipalEdition() {
   const { data, loading, saving, error, save } = usePrincipalEdit()
@@ -75,6 +77,10 @@ function PrincipalEdition() {
             </form>
           )}
         </div>
+        {/*Botón de regresar abajo a la derecha */}
+                <div className="flex justify-end mt-8">
+                  <BackButton label="Regresar" />
+                </div>
       </div>
     </div>
   )

@@ -1,3 +1,4 @@
+// src/router/router.tsx
 import {
   Router,
   RootRoute,
@@ -21,23 +22,32 @@ import EventEdition from '../pages/editionPage/EventEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
 import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 
-// Ruta raíz con layout general
+// Root vacío (NO layout). Desde aquí colgamos:
+// - appLayout (con Home)
+// - rutas sin layout (login, forgot-password)
 const rootRoute = new RootRoute({
-  component: Home, // tu layout (Navbar + Sidebar)
+  component: () => <Outlet />,
 })
 
-// Página principal
+// Layout general con Navbar + Sidebar
+const appLayoutRoute = new Route({
+  getParentRoute: () => rootRoute,
+  id: 'app', // opcional, útil para debugging
+  component: Home,
+})
+
+// Rutas que usan el layout (Home)
 const routePaths = { root: '/Principal' }
 
 const principalRoute = new Route({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appLayoutRoute,
   path: routePaths.root,
   component: lazyRouteComponent(() => import('../pages/Principal')),
 })
 
-// Rutas de edición agrupadas
+// Grupo /edition dentro del layout
 const editionLayoutRoute = new Route({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appLayoutRoute,
   path: '/edition',
   component: () => <Outlet />,
 })
@@ -85,25 +95,25 @@ const eventsEdition = new Route({
 })
 
 const staffManagement = new Route({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appLayoutRoute,
   path: '/staff',
   component: StaffManagementPage,
 })
 
-// /login
+// Rutas SIN layout (no muestran Navbar/Sidebar)
 const loginRoute = new Route({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
   path: '/login',
   component: LoginPage,
 })
 
 const forgotPasswordRoute = new Route({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRoute, // <- también sin layout
   path: '/forgot-password',
   component: ForgotPasswordPage,
 })
 
-// Fallback: si alguna ruta no existe, redirige a "/"
+// Fallback: si alguna ruta no existe, redirige a "/Principal"
 function RedirectHome() {
   const navigate = useNavigate()
   useEffect(() => {
@@ -117,21 +127,26 @@ const notFoundRoute = new NotFoundRoute({
   component: RedirectHome,
 })
 
-// Ensamblar
+// Ensamblar árbol de rutas
 const routeTree = rootRoute.addChildren([
-  principalRoute,
-  editionLayoutRoute.addChildren([
-    aboutUsEdition,
-    faqEdition,
-    principalEdition,
-    servicesEdition,
-    volunteersEdition,
-    associatesEdition,
-    eventsEdition,
-  ]),
-  staffManagement,
+  // Ramas SIN layout
   loginRoute,
   forgotPasswordRoute,
+
+  // Rama CON layout (Home)
+  appLayoutRoute.addChildren([
+    principalRoute,
+    editionLayoutRoute.addChildren([
+      aboutUsEdition,
+      faqEdition,
+      principalEdition,
+      servicesEdition,
+      volunteersEdition,
+      associatesEdition,
+      eventsEdition,
+    ]),
+    staffManagement,
+  ]),
 ])
 
 export const router = new Router({ routeTree, notFoundRoute })

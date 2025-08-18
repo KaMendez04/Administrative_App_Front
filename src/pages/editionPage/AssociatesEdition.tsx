@@ -1,4 +1,6 @@
+
 import NavbarEditionSection from "../../components/NavbarEditionSection"
+import BackButton from "../../components/PagesEdition/BackButton"
 
 function AssociatesEdition() {
   return (
@@ -104,6 +106,10 @@ function AssociatesEdition() {
             <option>REQUISITOS</option>
           </select>
         </div>
+        {/*Botón de regresar abajo a la derecha */}
+                <div className="flex justify-end mt-8">
+                  <BackButton label="Regresar" />
+                </div>
       </div>
     </div>
   )

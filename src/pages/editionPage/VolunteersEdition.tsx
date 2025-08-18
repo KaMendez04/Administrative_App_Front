@@ -1,4 +1,5 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection"
+import BackButton from "../../components/PagesEdition/BackButton"
 
 function VolunteersEdition() {
   return (
@@ -110,6 +111,10 @@ function VolunteersEdition() {
             <option>NORMAS DE CUMPLIMIENTO</option>
           </select>
         </div>
+        {/*Botón de regresar abajo a la derecha */}
+                <div className="flex justify-end mt-8">
+                  <BackButton label="Regresar" />
+                </div>
       </div>
     </div>
   )

@@ -17,6 +17,7 @@ export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput
   }
 
   return (
+    
     <div className="space-y-4">
       <input
         type="text"
@@ -54,5 +55,6 @@ export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput
         </button>
       </div>
     </div>
+    
   )
 }
