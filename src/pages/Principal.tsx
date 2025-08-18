@@ -18,7 +18,7 @@ export default function Principal() {
               >
                 {/* Icon in top-right corner */}
                 <div className="absolute top-4 right-4">
-                  <IconComponent className="h-5 w-5 text-gray-500" />
+                  <IconComponent className="h-8 w-8 text-gray-500" />
                 </div>
 
                 {/* Module Content */}

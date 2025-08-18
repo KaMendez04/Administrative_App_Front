@@ -1,125 +1,213 @@
+// src/components/Personal/EditPersonalPageModal.tsx
+import React from "react"
 import type { PersonalPageType } from "../../models/PersonalPageType"
+import { personalApi } from "../../services/personalPageService"
 
 interface EditPersonalPageModalProps {
-  personalPage: PersonalPageType
-  setPersonalPage: (s: PersonalPageType | null) => void
-  isNew?: boolean
+  personalPage: PersonalPageType;
+  setPersonalPage: React.Dispatch<React.SetStateAction<PersonalPageType | null>>;
+  isNew?: boolean;
+  onSaved?: () => void;
+  lookup: (id: string) => Promise<any>;
 }
 
 export function EditPersonalPageModal({
   personalPage,
   setPersonalPage,
   isNew = false,
+  onSaved,
+  lookup,
 }: EditPersonalPageModalProps) {
   const field =
-    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white"
-
+    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white";
   const label =
-    "block text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide mb-1"
+    "block text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide mb-1";
+
+  const readOnlyStyle =
+  "bg-gray-100 text-gray-500 border-dashed border-gray-300 cursor-not-allowed opacity-80 select-none";
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+
+  // UI -> API (no mandes id/IdUser en body)
+  const { id, IdUser, ...rest } = personalPage as any;
+  const payload: any = { ...rest }; // birthDate ya lo tienes en UI como tal
+
+  if (isNew) {
+    await personalApi.create(payload);
+  } else {
+    const realId = id ?? IdUser;           // ← usa la PK real del backend
+    if (!realId) {
+      console.error("No hay id para actualizar");
+      return;
+    }
+    // si bloqueaste cédula/nombre/apellidos en edición, evita enviarlos:
+    delete payload.IDE;
+    delete payload.name;
+    delete payload.lastname1;
+    delete payload.lastname2;
+
+    await personalApi.update(realId, payload);
+  }
+
+  onSaved?.();
+  setPersonalPage(null);
+}
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-[#FAF9F5] border border-[#E6E1D6] rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
-        {/* Header */}
         <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white/60">
           <h2 className="text-xl font-bold text-[#374321]">
             {isNew ? "Registrar nuevo personal" : "Editar información"}
           </h2>
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            console.log(isNew ? "Nuevo personal:" : "Actualizado:", personalPage)
-            setPersonalPage(null)
-          }}
-          className="px-6 py-6 space-y-6"
-        >
-          {/* Sección: Identificación */}
+        <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
+          {/* Identificación */}
           <section>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">
-              Identificación
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">Identificación</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className={label} htmlFor="name">Nombre</label>
-                <input
-                  id="name"
-                  type="text"
-                  value={personalPage.name}
-                  onChange={(e) => setPersonalPage({ ...personalPage, name: e.target.value })}
-                  placeholder="Nombre"
-                  className={field}
-                  required
-                />
-              </div>
-              <div>
-                <label className={label} htmlFor="lastname1">Primer apellido</label>
-                <input
-                  id="lastname1"
-                  type="text"
-                  value={personalPage.lastname1}
-                  onChange={(e) => setPersonalPage({ ...personalPage, lastname1: e.target.value })}
-                  placeholder="Primer apellido"
-                  className={field}
-                  required
-                />
-              </div>
-              <div>
-                <label className={label} htmlFor="lastname2">Segundo apellido</label>
-                <input
-                  id="lastname2"
-                  type="text"
-                  value={personalPage.lastname2}
-                  onChange={(e) => setPersonalPage({ ...personalPage, lastname2: e.target.value })}
-                  placeholder="Segundo apellido"
-                  className={field}
-                  required
-                />
+                <label className={label} htmlFor="ide">
+                    Cédula
+                  </label>
+
+                  <input
+                    id="ide"
+                    type="text"
+                    placeholder="Número de cédula"
+                    value={personalPage.IDE ?? ""}
+                    disabled={!isNew}               // sigue bloqueando la edición
+                    readOnly={!isNew}               // refuerza a11y
+                    title={!isNew ? "Este campo no se puede modificar al editar" : undefined}
+                    onChange={async (e) => {
+                      if (!isNew) return; // no lookup en edición
+                      const IDE = e.target.value.replace(/[-\s]/g, "");
+                      let next = { ...personalPage, IDE };
+                      if (IDE.length >= 9) {
+                        const r = await lookup(IDE).catch(() => null);
+                        if (r) {
+                          next = {
+                            ...next,
+                            name: r.firstname ?? next.name ?? "",
+                            lastname1: r.lastname1 ?? next.lastname1 ?? "",
+                            lastname2: r.lastname2 ?? next.lastname2 ?? "",
+                          };
+                        }
+                      }
+                      setPersonalPage(next);
+                    }}
+                    className={`${field} ${!isNew ? readOnlyStyle : ""}`}
+                  />
+
+                  {!isNew && (
+                    <p className="mt-1 text-xs text-gray-500">
+                      La cédula es un identificador y no puede modificarse al editar.
+                    </p>
+                  )}
               </div>
 
               <div>
-                <label className={label} htmlFor="ide">Cédula</label>
+                <label className={label} htmlFor="name">
+                  Nombre 
+                </label>
                 <input
-                  id="ide"
+                  id="name"
                   type="text"
-                  value={personalPage.IDE}
-                  onChange={(e) => setPersonalPage({ ...personalPage, IDE: e.target.value })}
-                  placeholder="Cédula"
-                  className={field}
+                  value={personalPage.name ?? ""}
+                  disabled={!isNew}
+                  readOnly={!isNew}
+                  aria-disabled={!isNew}
+                  onChange={(e) => setPersonalPage({ ...personalPage, name: e.target.value })}
+                  placeholder="Nombre"
+                  className={`${field} ${!isNew ? readOnlyStyle : ""}`}
                   required
                 />
+                {!isNew && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    El nombre no se puede modificar en edición.
+                  </p>
+                )}
               </div>
+
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+             <div>
+              <label className={label} htmlFor="lastname1">
+                Primer apellido 
+              </label>
+              <input
+                id="lastname1"
+                type="text"
+                disabled={!isNew}
+                readOnly={!isNew}
+                aria-disabled={!isNew}
+                value={personalPage.lastname1 ?? ""}
+                onChange={(e) => setPersonalPage({ ...personalPage, lastname1: e.target.value })}
+                placeholder="Primer apellido"
+                className={`${field} ${!isNew ? readOnlyStyle : ""}`}
+                required
+              />
+              {!isNew && (
+                <p className="mt-1 text-xs text-gray-500">
+                  El primer apellido no se puede modificar en edición.
+                </p>
+              )}
+            </div>
+            <div>
+              <label className={label} htmlFor="lastname2">
+                Segundo apellido 
+              </label>
+              <input
+                id="lastname2"
+                type="text"
+                disabled={!isNew}
+                readOnly={!isNew}
+                aria-disabled={!isNew}
+                value={personalPage.lastname2 ?? ""}
+                onChange={(e) => setPersonalPage({ ...personalPage, lastname2: e.target.value })}
+                placeholder="Segundo apellido"
+                className={`${field} ${!isNew ? readOnlyStyle : ""}`}
+                required
+              />
+              {!isNew && (
+                <p className="mt-1 text-xs text-gray-500">
+                  El segundo apellido no se puede modificar en edición.
+                </p>
+              )}
+            </div>
+
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={label} htmlFor="birthdate">Fecha de nacimiento</label>
                 <input
                   id="birthdate"
                   type="date"
-                  value={personalPage.birthdate}
-                  onChange={(e) => setPersonalPage({ ...personalPage, birthdate: e.target.value })}
+                  value={personalPage.birthDate ?? ""}
+                  onChange={(e) => setPersonalPage({ ...personalPage, birthDate: e.target.value })}
                   className={field}
                   required
                 />
               </div>
-              <div className="hidden md:block" />
+              <div />
             </div>
           </section>
 
-          {/* Divider */}
-          <div className="my-2 h-px w-full bg-gradient-to-r from-transparent via-[#E6E1D6] to-transparent" />
-
-          {/* Sección: Contacto & Datos */}
+          {/* Contacto y Datos */}
           <section>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">
-              Contacto y Datos
-            </h3>
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">Contacto y Datos</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={label} htmlFor="email">Correo</label>
                 <input
                   id="email"
                   type="email"
-                  value={personalPage.email}
+                  value={personalPage.email ?? ""}
                   onChange={(e) => setPersonalPage({ ...personalPage, email: e.target.value })}
                   placeholder="correo@dominio.com"
                   className={field}
@@ -130,7 +218,7 @@ export function EditPersonalPageModal({
                 <input
                   id="phone"
                   type="text"
-                  value={personalPage.phone}
+                  value={personalPage.phone ?? ""}
                   onChange={(e) => setPersonalPage({ ...personalPage, phone: e.target.value })}
                   placeholder="Ej. 8888-8888"
                   className={field}
@@ -142,7 +230,7 @@ export function EditPersonalPageModal({
                 <input
                   id="direction"
                   type="text"
-                  value={personalPage.direction}
+                  value={personalPage.direction ?? ""}
                   onChange={(e) => setPersonalPage({ ...personalPage, direction: e.target.value })}
                   placeholder="Distrito, cantón, provincia…"
                   className={field}
@@ -152,21 +240,16 @@ export function EditPersonalPageModal({
             </div>
           </section>
 
-          {/* Divider */}
-          <div className="my-2 h-px w-full bg-gradient-to-r from-transparent via-[#E6E1D6] to-transparent" />
-
-          {/* Sección: Perfil laboral & Estado */}
+          {/* Perfil laboral y Estado */}
           <section>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">
-              Perfil laboral y Estado
-            </h3>
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">Perfil laboral y Estado</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className={label} htmlFor="occupation">Ocupación</label>
                 <input
                   id="occupation"
                   type="text"
-                  value={personalPage.occupation}
+                  value={personalPage.occupation ?? ""}
                   onChange={(e) => setPersonalPage({ ...personalPage, occupation: e.target.value })}
                   placeholder="Puesto / rol"
                   className={field}
@@ -178,9 +261,7 @@ export function EditPersonalPageModal({
                 <select
                   id="isActive"
                   value={personalPage.isActive ? "activo" : "inactivo"}
-                  onChange={(e) =>
-                    setPersonalPage({ ...personalPage, isActive: e.target.value === "activo" })
-                  }
+                  onChange={(e) => setPersonalPage({ ...personalPage, isActive: e.target.value === "activo" })}
                   className={field}
                 >
                   <option value="activo">Activo</option>
@@ -209,5 +290,5 @@ export function EditPersonalPageModal({
         </form>
       </div>
     </div>
-  )
+  );
 }

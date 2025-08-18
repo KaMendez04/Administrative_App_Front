@@ -1,7 +1,8 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { PersonalPageType } from "../models/PersonalPageType"
 import { Pencil } from "lucide-react"
+import { fetchCedulaData } from "../services/personalPageService"
 
 interface UsePersonalPageColumnsProps {
   onView: (item: PersonalPageType) => void
@@ -13,30 +14,12 @@ export function usePersonalPageColumns({
   onEdit,
 }: UsePersonalPageColumnsProps) {
   return useMemo<ColumnDef<PersonalPageType>[]>(() => [
-    {
-      header: "Nombre",
-      cell: (info) => info.row.original.name,
-    },
-    {
-      header: "Primer Apellido",
-      cell: (info) => info.row.original.lastname1,
-    },
-    {
-      header: "Segundo Apellido",
-      cell: (info) => info.row.original.lastname2,
-    },
-    {
-      header: "Cédula",
-      cell: (info) => info.row.original.IDE,
-    },
-    {
-      header: "Teléfono",
-      cell: (info) => info.row.original.phone,
-    },
-    {
-      header: "Puesto",
-      cell: (info) => info.row.original.occupation,
-    },
+    { header: "Nombre",          cell: (info) => info.row.original.name },
+    { header: "Primer Apellido", cell: (info) => info.row.original.lastname1 },
+    { header: "Segundo Apellido",cell: (info) => info.row.original.lastname2 },
+    { header: "Cédula",          cell: (info) => info.row.original.IDE },
+    { header: "Teléfono",        cell: (info) => info.row.original.phone },
+    { header: "Puesto",          cell: (info) => info.row.original.occupation },
     {
       header: "Información Adicional",
       cell: (info) => (
@@ -63,4 +46,25 @@ export function usePersonalPageColumns({
       ),
     },
   ], [onView, onEdit])
+}
+
+export function useCedulaLookup() {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const lookup = async (cedula: string) => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const persona = await fetchCedulaData(cedula)
+      return persona
+    } catch (err: any) {
+      setError(err.message || "Error desconocido")
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return { lookup, isLoading, error }
 }

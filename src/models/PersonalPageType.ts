@@ -6,12 +6,26 @@ export interface PersonalPageType {
   name: string
   lastname1: string
   lastname2: string
-  birthdate: string
+  birthDate: string
   phone: string
   email: string
   direction: string
   occupation: string
   isActive: boolean
+}
+
+export const PersonalPageInitialState: PersonalPageType = {
+  IdUser: 0,
+  IDE: "",
+  name: "",
+  lastname1: "",
+  lastname2: "",
+  birthDate: "",
+  phone: "",
+  email: "",
+  direction: "",
+  occupation: "",
+  isActive: true,
 }
 
 export const personalPages: PersonalPageType[] = [
@@ -21,7 +35,7 @@ export const personalPages: PersonalPageType[] = [
     name: "Greilyn",
     lastname1: "Esquivel",
     lastname2: "Salazar",
-    birthdate: "1995-06-20",
+    birthDate: "1995-06-20",
     phone: "60345678",
     email: "greilyn@ejemplo.com",
     direction: "Nicoya",
@@ -34,7 +48,7 @@ export const personalPages: PersonalPageType[] = [
     name: "Angélica",
     lastname1: "Ortiz",
     lastname2: "Barrantes",
-    birthdate: "1992-04-10",
+    birthDate: "1992-04-10",
     phone: "84558012",
     email: "angelica@ejemplo.com",
     direction: "Santa Cruz",
@@ -47,7 +61,7 @@ export const personalPages: PersonalPageType[] = [
     name: "Katheryn",
     lastname1: "Méndez",
     lastname2: "Quirós",
-    birthdate: "1990-09-12",
+    birthDate: "1990-09-12",
     phone: "12345678",
     email: "katheryn@ejemplo.com",
     direction: "Hojancha",
@@ -60,7 +74,7 @@ export const personalPages: PersonalPageType[] = [
     name: "Krystel",
     lastname1: "Salazar",
     lastname2: "Chavarría",
-    birthdate: "1993-11-01",
+    birthDate: "1993-11-01",
     phone: "65432109",
     email: "krystel@ejemplo.com",
     direction: "Liberia",
@@ -73,7 +87,7 @@ export const personalPages: PersonalPageType[] = [
     name: "Marvin",
     lastname1: "Méndez",
     lastname2: "Cruz",
-    birthdate: "1991-01-15",
+    birthDate: "1991-01-15",
     phone: "71234567",
     email: "marvin@ejemplo.com",
     direction: "Carrillo",
@@ -86,7 +100,7 @@ export const personalPages: PersonalPageType[] = [
     name: "Vivian",
     lastname1: "Lopez",
     lastname2: "Chavarría",
-    birthdate: "1993-11-01",
+    birthDate: "1993-11-01",
     phone: "65432109",
     email: "vivian@ejemplo.com",
     direction: "Liberia",
@@ -99,7 +113,7 @@ export const personalPages: PersonalPageType[] = [
     name: "Raymond",
     lastname1: "Pérez",
     lastname2: "Meza",
-    birthdate: "1993-11-01",
+    birthDate: "1993-11-01",
     phone: "65432109",
     email: "raymond@ejemplo.com",
     direction: "Liberia",

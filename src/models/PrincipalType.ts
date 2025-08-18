@@ -38,15 +38,6 @@ export const JsonPrincipalType: PrincipalType[] = [
     route: "/edition/voluntarios",
   },
   {
-    title: "Cantidad de Proyectos",
-    description: "Gestión de Proyectos",
-    icon: FolderOpen,
-    primaryAction: "Gestión",
-    secondaryAction: "Configurar",
-    color: "bg-white border-gray-200",
-    route: "/edition/servicios", // si quieres cambiar a 'proyectos', también debes cambiar el path en router
-  },
-  {
     title: "Cantidad Asociados",
     subtitle: "20",
     description: "Gestión de Miembros",
@@ -56,6 +47,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     color: "bg-white border-gray-200",
     route: "/edition/asociados",
   },
+
   {
     title: "Presupuesto Actual",
     subtitle: "$4000",
@@ -74,6 +66,15 @@ export const JsonPrincipalType: PrincipalType[] = [
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
     route: "/staff",
+  },
+    {
+    title: "Capacitación de Manuales",
+    description: "Manuales",
+    icon: FolderOpen,
+    primaryAction: "Visualizar",
+    secondaryAction: "Configurar",
+    color: "bg-white border-gray-200",
+    route: "/edition/manuales", // si quieres cambiar a 'proyectos', también debes cambiar el path en router
   },
 ]
 
