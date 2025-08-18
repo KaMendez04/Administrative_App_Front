@@ -1,6 +1,6 @@
 import React from "react"
 import { Mail, Lock } from "lucide-react"
-import { useNavigate } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 
 interface LoginFormProps {
   email: string
@@ -65,20 +65,21 @@ export default function LoginForm({
 
       {/* Recordarme / Olvidé */}
       <div className="mt-2 flex items-center justify-between text-[15px]">
-        <label className="flex items-center gap-2 text-[#1E293B]">
-          <input
-            type="checkbox"
-            checked={remember}
-            onChange={(e) => setRemember(e.target.checked)}
-            className="h-[16px] w-[16px] rounded-full border border-[#CBD5E1] accent-[#7FB347]"
-          />
-          Recordarme
-        </label>
+          <label className="flex items-center gap-2 text-[#1E293B]">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="h-[16px] w-[16px] rounded-full border border-[#CBD5E1] accent-[#7FB347]"
+            />
+            Recordarme
+          </label>
 
-        <button type="button" className="text-[#324B73] hover:underline">
-          Olvidé mi contraseña
-        </button>
-      </div>
+          {/* 👇 Redirige a /forgot-password */}
+          <Link to="/forgot-password" className="text-[#324B73] hover:underline">
+            Olvidé mi contraseña
+          </Link>
+        </div>
 
       {/* Error */}
       {error && <p className="text-red-500 text-sm">{error}</p>}

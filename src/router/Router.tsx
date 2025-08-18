@@ -19,6 +19,7 @@ import StaffManagementPage from '../pages/PersonalPage'
 import LoginPage from '../pages/LoginPage'
 import EventEdition from '../pages/editionPage/EventEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
+import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 
 // Ruta raíz con layout general
 const rootRoute = new RootRoute({
@@ -96,6 +97,12 @@ const loginRoute = new Route({
   component: LoginPage,
 })
 
+const forgotPasswordRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: '/forgot-password',
+  component: ForgotPasswordPage,
+})
+
 // Fallback: si alguna ruta no existe, redirige a "/"
 function RedirectHome() {
   const navigate = useNavigate()
@@ -124,6 +131,7 @@ const routeTree = rootRoute.addChildren([
   ]),
   staffManagement,
   loginRoute,
+  forgotPasswordRoute,
 ])
 
 export const router = new Router({ routeTree, notFoundRoute })
