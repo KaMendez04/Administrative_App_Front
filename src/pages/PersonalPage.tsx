@@ -1,4 +1,4 @@
-// src/pages/PersonalPage.tsx
+
 import { useEffect, useMemo, useState } from "react"
 import { useReactTable, getCoreRowModel, getPaginationRowModel } from "@tanstack/react-table"
 import type { PersonalPageType } from "../models/PersonalPageType"
@@ -11,7 +11,10 @@ import { PersonalPagePagination } from "../components/Personal/PersonalPagePagin
 import { PersonalPageInfoModal } from "../components/Personal/PersonalPageInfoModal"
 import { EditPersonalPageModal } from "../components/Personal/EditPersonalPageModal"
 import BackButton from "../components/Personal/BackButton"
-import { fetchCedulaData, personalApi } from "../services/personalPageService"
+import { personalApi } from "../services/personalPageService"
+import { fetchCedulaData } from "../services/cedulaService"; 
+
+
 
 // API -> UI
 function mapApiToUi(p: any): PersonalPageType {
@@ -177,3 +180,6 @@ export default function PersonalPage() {
     </div>
   )
 }
+
+
+

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { PersonalPageType } from "../models/PersonalPageType"
 import { Pencil } from "lucide-react"
-import { fetchCedulaData } from "../services/personalPageService"
+
 
 interface UsePersonalPageColumnsProps {
   onView: (item: PersonalPageType) => void
@@ -67,4 +67,8 @@ export function useCedulaLookup() {
   }
 
   return { lookup, isLoading, error }
+}
+
+function fetchCedulaData(cedula: string) {
+  throw new Error("Function not implemented.")
 }

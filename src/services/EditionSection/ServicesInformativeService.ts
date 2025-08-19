@@ -1,45 +1,40 @@
-// src/services/EditionSection/ServicesInformativeService.ts
+import apiConfig from "../apiConfig";
+import type {
+  ServicesInformative,
+  ServicesInformativeInput,
+} from "../../models/editionSection/ServiceEditionType";
 
-import type { ServicesInformative, ServicesInformativeInput } from "../../models/editionSection/ServiceEditionType"
-
-const API_BASE = (import.meta as any)?.env?.VITE_API_URL ?? "http://localhost:3000"
-const BASE = `${API_BASE}/servicesInformative` // ← coincide con tu controlador
-// GET /servicesInformative, GET /:id, POST, PUT /:id, DELETE /:id  :contentReference[oaicite:4]{index=4}
-
+// GET /servicesInformative
 export async function fetchServices(): Promise<ServicesInformative[]> {
-  const res = await fetch(BASE)
-  if (!res.ok) throw new Error("Error al listar servicios")
-  return res.json()
+  const { data } = await apiConfig.get<ServicesInformative[]>("/servicesInformative");
+  return data;
 }
 
+// GET /servicesInformative/:id
 export async function getService(id: number): Promise<ServicesInformative> {
-  const res = await fetch(`${BASE}/${id}`)
-  if (!res.ok) throw new Error("Servicio no encontrado")
-  return res.json()
+  const { data } = await apiConfig.get<ServicesInformative>(`/servicesInformative/${id}`);
+  return data;
 }
 
-export async function createService(input: ServicesInformativeInput): Promise<ServicesInformative> {
-  const res = await fetch(BASE, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  })
-  if (!res.ok) throw new Error("No se pudo crear el servicio")
-  return res.json()
+// POST /servicesInformative
+export async function createService(
+  input: ServicesInformativeInput,
+): Promise<ServicesInformative> {
+  const { data } = await apiConfig.post<ServicesInformative>("/servicesInformative", input);
+  return data;
 }
 
-export async function updateService(id: number, input: ServicesInformativeInput) {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  })
-  if (!res.ok) throw new Error("No se pudo actualizar el servicio")
-  // Tu backend devuelve UpdateResult por defecto. :contentReference[oaicite:5]{index=5}
-  return res.json()
+// PUT /servicesInformative/:id
+export async function updateService(
+  id: number,
+  input: ServicesInformativeInput,
+) {
+
+  const { data } = await apiConfig.put(`/servicesInformative/${id}`, input);
+  return data;
 }
 
+// DELETE /servicesInformative/:id
 export async function deleteService(id: number) {
-  const res = await fetch(`${BASE}/${id}`, { method: "DELETE" })
-  if (!res.ok) throw new Error("No se pudo eliminar el servicio")
+  await apiConfig.delete(`/servicesInformative/${id}`);
 }

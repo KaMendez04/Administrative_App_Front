@@ -1,30 +1,26 @@
-import type { FAQEdition } from "../../models/editionSection/FAQEditionType"
+import apiConfig from "../apiConfig";
+import type { FAQEdition } from "../../models/editionSection/FAQEditionType";
 
-const API_URL = "http://localhost:3000/faq"
-
+// GET /faq
 export async function fetchFaqs(): Promise<FAQEdition[]> {
-  const res = await fetch(API_URL)
-  return res.json()
+  const { data } = await apiConfig.get<FAQEdition[]>("/faq");
+  return data;
 }
 
+// POST /faq
 export async function createFaq(faq: Omit<FAQEdition, "id">) {
-  return fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(faq),
-  })
+  const { data } = await apiConfig.post("/faq", faq);
+  return data;
 }
 
+// PUT /faq/:id
 export async function updateFaq(id: number, faq: Omit<FAQEdition, "id">) {
-  return fetch(`${API_URL}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(faq),
-  })
+  const { data } = await apiConfig.put(`/faq/${id}`, faq);
+  return data;
 }
 
+// DELETE /faq/:id
 export async function deleteFaq(id: number) {
-  return fetch(`${API_URL}/${id}`, {
-    method: "DELETE",
-  })
+  const { data } = await apiConfig.delete(`/faq/${id}`);
+  return data; 
 }
