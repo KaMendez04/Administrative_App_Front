@@ -21,6 +21,7 @@ import LoginPage from '../pages/LoginPage'
 import EventEdition from '../pages/editionPage/EventEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
 import ForgotPasswordPage from '../pages/ForgotPasswordPage'
+import ResetPasswordPage from '../pages/ResetPasswordPage'
 
 // Root vacío (NO layout). Desde aquí colgamos:
 // - appLayout (con Home)
@@ -113,6 +114,13 @@ const forgotPasswordRoute = new Route({
   component: ForgotPasswordPage,
 })
 
+//ruta /reset-password
+const resetPasswordRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: '/reset-password',
+  component: ResetPasswordPage,
+})
+
 // Fallback: si alguna ruta no existe, redirige a "/Principal"
 function RedirectHome() {
   const navigate = useNavigate()
@@ -144,6 +152,7 @@ const routeTree = rootRoute.addChildren([
       volunteersEdition,
       associatesEdition,
       eventsEdition,
+      resetPasswordRoute,
     ]),
     staffManagement,
   ]),
