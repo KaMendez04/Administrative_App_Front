@@ -19,7 +19,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="w-full max-w-2xl rounded-3xl bg-[#FAF9F5] shadow-2xl border border-[#E6E1D6] ring-1 ring-black/5 overflow-hidden">
-        {/* Header (sin botón) */}
+        {/* Header */}
         <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white/60">
           <h2 className="text-xl font-bold text-[#374321]">Información adicional</h2>
         </div>
@@ -32,7 +32,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
               <span className="block text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide mb-1">
                 Nombre completo
               </span>
-              <div className="text-[22px] leading-7 font-semibold text-[#2E321B]">
+              <div className="text-[24px] leading-8 font-semibold text-[#2E321B]">
                 {item.name} {item.lastname1} {item.lastname2}
               </div>
             </div>
@@ -53,7 +53,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
             </div>
           </div>
 
-          {/* Divider sutil */}
+          {/* Divider */}
           <div className="my-5 h-px w-full bg-gradient-to-r from-transparent via-[#E6E1D6] to-transparent" />
 
           {/* Grid de datos */}
@@ -70,7 +70,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
                 </svg>
                 <span className="text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide">Cédula</span>
               </div>
-              <span className="text-sm font-medium text-[#374321] ">
+              <span className="text-base font-medium text-[#374321]">
                 {item.IDE}
               </span>
             </div>
@@ -89,7 +89,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
                   Fecha de nacimiento
                 </span>
               </div>
-              <div className="text-sm font-medium text-[#374321]">{formatDate(item.birthDate)}</div>
+              <div className="text-base font-medium text-[#374321]">{formatDate(item.birthDate)}</div>
             </div>
 
             <div className="rounded-xl border border-[#E6E1D6] bg-white/90 px-5 py-4 shadow-sm hover:shadow-md transition-shadow">
@@ -106,7 +106,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
                   Correo electrónico
                 </span>
               </div>
-              <div className="text-sm font-medium text-[#374321] break-words">{item.email || "—"}</div>
+              <div className="text-base font-medium text-[#374321] break-words">{item.email || "—"}</div>
             </div>
 
             <div className="rounded-xl border border-[#E6E1D6] bg-white/90 px-5 py-4 shadow-sm hover:shadow-md transition-shadow">
@@ -121,7 +121,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
                 </svg>
                 <span className="text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide">Teléfono</span>
               </div>
-              <div className="text-sm font-medium text-[#374321]">{item.phone}</div>
+              <div className="text-base font-medium text-[#374321]">{item.phone}</div>
             </div>
 
             <div className="md:col-span-2 rounded-xl border border-[#E6E1D6] bg-white/90 px-5 py-4 shadow-sm hover:shadow-md transition-shadow">
@@ -142,7 +142,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
                 </svg>
                 <span className="text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide">Dirección</span>
               </div>
-              <div className="text-sm font-medium text-[#374321]">{item.direction}</div>
+              <div className="text-base font-medium text-[#374321]">{item.direction}</div>
             </div>
           </div>
 

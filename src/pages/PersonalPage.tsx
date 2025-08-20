@@ -1,9 +1,8 @@
-
 import { useEffect, useMemo, useState } from "react"
 import { useReactTable, getCoreRowModel, getPaginationRowModel } from "@tanstack/react-table"
 import type { PersonalPageType } from "../models/PersonalPageType"
-import { usePersonalPageState } from "../hooks/usePersonalPageState"
-import { usePersonalPageColumns } from "../hooks/usePersonalPageColumns"
+import { usePersonalPageState } from "../hooks/Personal/usePersonalPageState"
+import { usePersonalPageColumns } from "../hooks/Personal/usePersonalPageColumns"
 import { PersonalPageHeader } from "../components/Personal/PersonalPageHeader"
 import { PersonalPageSearch } from "../components/Personal/PersonalPageSearch"
 import { PersonalPageTable } from "../components/Personal/PersonalPageTable"
@@ -19,7 +18,7 @@ import { fetchCedulaData } from "../services/cedulaService";
 // API -> UI
 function mapApiToUi(p: any): PersonalPageType {
   return {
-    id: p.id as unknown as number, // si tu UI lo requiere
+    id: p.id as unknown as number, 
     IdUser: 0, // opcional solo para UI
     IDE: p.IDE,
     name: p.name,
@@ -97,8 +96,6 @@ export default function PersonalPage() {
 
   const lookupCedula = (id: string) => fetchCedulaData(id);
 
-  const readOnlyStyle =
-  "bg-gray-100 text-gray-500 border-dashed border-gray-300 cursor-not-allowed opacity-80 select-none";
 
   // 7) UI de carga / error mínima
   if (loading) {
