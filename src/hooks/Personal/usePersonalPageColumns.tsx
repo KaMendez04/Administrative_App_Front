@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import type { ColumnDef } from "@tanstack/react-table"
-import type { PersonalPageType } from "../models/PersonalPageType"
+import type { PersonalPageType } from "../../models/PersonalPageType"
 import { Pencil } from "lucide-react"
 
 
