@@ -22,10 +22,14 @@ import EventEdition from '../pages/editionPage/EventEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
 import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
+import ChangePasswordPage from '../pages/ChangePasswordPage'
+
+// 👇 NUEVO: pantalla de cambio de contraseña (ya creada por ti)
+
 
 // Root vacío (NO layout). Desde aquí colgamos:
 // - appLayout (con Home)
-// - rutas sin layout (login, forgot-password)
+// - rutas sin layout (login, forgot-password, reset-password)
 const rootRoute = new RootRoute({
   component: () => <Outlet />,
 })
@@ -101,6 +105,13 @@ const staffManagement = new Route({
   component: StaffManagementPage,
 })
 
+// ✅ NUEVO: Ruta de Cambiar Contraseña (con layout)
+const changePasswordRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: '/account/change-password',
+  component: ChangePasswordPage,
+})
+
 // Rutas SIN layout (no muestran Navbar/Sidebar)
 const loginRoute = new Route({
   getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
@@ -114,7 +125,7 @@ const forgotPasswordRoute = new Route({
   component: ForgotPasswordPage,
 })
 
-//ruta /reset-password
+// ✅ Se mantiene sin layout (root)
 const resetPasswordRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/reset-password',
@@ -140,6 +151,7 @@ const routeTree = rootRoute.addChildren([
   // Ramas SIN layout
   loginRoute,
   forgotPasswordRoute,
+  resetPasswordRoute, // 👈 aquí (root), no dentro de /edition
 
   // Rama CON layout (Home)
   appLayoutRoute.addChildren([
@@ -152,9 +164,10 @@ const routeTree = rootRoute.addChildren([
       volunteersEdition,
       associatesEdition,
       eventsEdition,
-      resetPasswordRoute,
+      // ❌ ya NO agregamos resetPasswordRoute aquí
     ]),
     staffManagement,
+    changePasswordRoute, // 👈 nueva ruta con layout
   ]),
 ])
 
