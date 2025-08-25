@@ -1,6 +1,7 @@
 import { Menu, User } from "lucide-react";
 import React from "react";
-import { useNavigate } from "@tanstack/react-router"; // ⬅️ TanStack Router
+import { useNavigate } from "@tanstack/react-router";
+import { getCurrentUser, clearSession } from "../services/auth"; // 👈 Importa utilidades
 
 type Props = {
   isSidebarOpen: boolean;
@@ -16,18 +17,26 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
 
   const navigate = useNavigate();
 
+  // 👉 Usuario actual
+  const user = getCurrentUser();
+  const roleName = user?.role?.name?.toUpperCase();
+
+  // 👇 Texto según rol
+  const roleLabel =
+    roleName === "ADMIN"
+      ? "Administrador"
+      : roleName === "JUNTA"
+      ? "Junta Directiva"
+      : "Usuario";
+
   const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
   // 👉 Cerrar sesión: limpia token y navega al login
   const handleLogout = () => {
-    try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("user");
-    } catch {}
+    clearSession(); // 👈 usa tu helper
     setIsDropdownOpen(false);
-    navigate({ to: "/login" }); // Ruta donde renderizas <LoginPage />
+    navigate({ to: "/login" });
   };
 
   React.useEffect(() => {
@@ -52,7 +61,6 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
 
   return (
     <nav className="sticky top-0 z-50 bg-white/60 backdrop-blur-md border-b border-[#DCD6C9] px-4 py-3 shadow-sm">
-      {/* 👇 Este contenedor es el que realmente se mueve */}
       <div
         className={`flex items-center justify-between max-w-7xl mx-auto transition-transform duration-300 ${
           isSidebarOpen && isDesktop ? "translate-x-64" : "translate-x-0"
@@ -71,7 +79,7 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
             onClick={toggleDropdown}
           >
             <User className="w-5 h-5" />
-            <span className="text-sm font-medium">Administrador</span>
+            <span className="text-sm font-medium">{roleLabel}</span>
           </button>
 
           {isDropdownOpen && (
@@ -81,7 +89,7 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
                   className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
                     setIsDropdownOpen(false);
-                    // abre modal/cambio de contraseña si lo tienes
+                    // aquí iría lógica para abrir modal de cambio de contraseña
                   }}
                 >
                   Cambiar Contraseña

@@ -2,10 +2,15 @@ import { useEffect, useRef } from "react"
 import { ChevronLeft } from "lucide-react"
 import { Link, useRouterState } from "@tanstack/react-router"
 import { sidebarItems } from "../models/SidebarType"
+import { getCurrentUser } from "../services/auth"
 
 export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const sidebarRef = useRef<HTMLDivElement>(null)
+
+  // Rol actual
+  const role = getCurrentUser()?.role?.name?.toUpperCase()
+  const isAdmin = role === "ADMIN"
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -36,12 +41,19 @@ export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
     )
   }
 
+  //Oculta enlaces de edición pública para JUNTA
+  const filteredItems = sidebarItems.filter((item) => {
+    if (isAdmin) return true
+    const href = String(item.href )
+    // Oculta todo lo que cuelgue /edition/principal
+    return !(href === "/edition/principal")
+  })
+
   return (
     <>
-      {/* Overlay para oscurecer el fondo */}
       {isOpen && (
         <div
-           className="fixed inset-0 z-40 bg-[#2E321B]/60 backdrop-blur-sm transition-opacity duration-300"
+          className="fixed inset-0 z-40 bg-[#2E321B]/60 backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -64,13 +76,15 @@ export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
             de Hojancha
           </h1>
         </div>
+
         {/* Links */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
-          {sidebarItems.map((item) => (
+          {filteredItems.map((item) => (
             <SidebarLink key={item.title} {...item} />
           ))}
         </nav>
-        {/* Botón de cerrar */}
+
+        {/* Botón cerrar */}
         <div className="p-4 border-t border-[#DCD6C9]">
           <button
             onClick={() => setIsOpen(false)}
