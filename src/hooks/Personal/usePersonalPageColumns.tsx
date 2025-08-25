@@ -69,6 +69,6 @@ export function useCedulaLookup() {
   return { lookup, isLoading, error }
 }
 
-function fetchCedulaData(cedula: string) {
+function fetchCedulaData(_cedula: string) {
   throw new Error("Function not implemented.")
 }
