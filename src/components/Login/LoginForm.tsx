@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router"
 import { useLoginTanForm } from "../../hooks/useLoginTanform"
 import { loginSchema, zodFieldValidator } from "../../schemas/loginSchema"
 
-
 interface LoginFormProps {
   email: string
   setEmail: (v: string) => void
@@ -15,6 +14,9 @@ interface LoginFormProps {
   loading: boolean
   error: string | null
   handleSubmit: (e: React.FormEvent) => void
+  // ⛔️ nuevos
+  isRateLimited?: boolean
+  remainingSeconds?: number | null
 }
 
 export default function LoginForm(props: LoginFormProps) {
@@ -28,6 +30,8 @@ export default function LoginForm(props: LoginFormProps) {
     loading,
     error,
     handleSubmit,
+    isRateLimited = false,
+    remainingSeconds = null,
   } = props
 
   const { form, onSubmit } = useLoginTanForm({
@@ -40,6 +44,8 @@ export default function LoginForm(props: LoginFormProps) {
     handleSubmit,
   })
 
+  const buttonDisabled = loading || isRateLimited
+
   return (
     <form onSubmit={onSubmit} className="space-y-10">
       {/* Email */}
@@ -51,7 +57,6 @@ export default function LoginForm(props: LoginFormProps) {
           const err = field.state.meta.errors[0]
           return (
             <div>
-              {/* Contenedor SOLO del input e ícono (evita que el ícono se mueva con el error) */}
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
                   <Mail className="h-[20px] w-[20px] text-gray-400" />
@@ -151,18 +156,27 @@ export default function LoginForm(props: LoginFormProps) {
 
       {/* Botón */}
       <form.Subscribe selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}>
-        {({ canSubmit, isSubmitting }) => (
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={loading || isSubmitting || !canSubmit}
-              className="w-full h-[40px] rounded-full bg-[#C4A661] text-white text-[16px] font-semibold
-                         transition-opacity hover:opacity-95 disabled:opacity-50"
-            >
-              {loading || isSubmitting ? "Ingresando..." : "Ingresar"}
-            </button>
-          </div>
-        )}
+        {({ canSubmit, isSubmitting }) => {
+          const disabled = buttonDisabled || isSubmitting || !canSubmit
+          const label = isRateLimited
+            ? remainingSeconds && remainingSeconds > 0
+              ? `Demasiados intentos • espera ${remainingSeconds}s`
+              : "Demasiados intentos"
+            : (loading || isSubmitting ? "Ingresando..." : "Ingresar")
+
+          return (
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={disabled}
+                className="w-full h-[40px] rounded-full bg-[#C4A661] text-white text-[16px] font-semibold
+                           transition-opacity hover:opacity-95 disabled:opacity-50"
+              >
+                {label}
+              </button>
+            </div>
+          )
+        }}
       </form.Subscribe>
     </form>
   )

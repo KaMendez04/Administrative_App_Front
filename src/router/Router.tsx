@@ -26,12 +26,8 @@ import AssociatesPage from '../pages/AssociatesPage'
 import VolunteersPage from '../pages/VolunteersPage'
 import ManualPage from '../pages/ManualPage'
 import BudgetPage from '../pages/BudgetPage'
-
-import AssociatesPage from '../pages/AssociatesPage'
-import VolunteersPage from '../pages/VolunteersPage'
-import ManualPage from '../pages/ManualPage'
-import BudgetPage from '../pages/BudgetPage'
 import ChangePasswordPage from '../pages/ChangePasswordPage'
+
 
 
 // Root vacío (NO layout). Desde aquí colgamos:

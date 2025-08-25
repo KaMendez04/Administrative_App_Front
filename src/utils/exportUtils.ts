@@ -70,7 +70,7 @@ export function downloadPDFFromRows(
 
   // 👇 Tipamos 'data' para TP
   didDrawPage: (data: any) => {
-    const str = `Página ${data.pageNumber} de ${doc.getNumberOfPages()}`;
+    const str = `Página ${data.pageNumber} de ${doc.internal.getNumberOfPages()}`;
     doc.setFontSize(10);
     doc.setTextColor(120);
     doc.text(str, pageWidth - 40, pageHeight - 20, { align: "right" });
