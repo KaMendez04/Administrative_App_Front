@@ -22,9 +22,12 @@ import EventEdition from '../pages/editionPage/EventEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
 import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
-import ChangePasswordPage from '../pages/ChangePasswordPage'
 
-// 👇 NUEVO: pantalla de cambio de contraseña (ya creada por ti)
+import AssociatesPage from '../pages/AssociatesPage'
+import VolunteersPage from '../pages/VolunteersPage'
+import ManualPage from '../pages/ManualPage'
+import BudgetPage from '../pages/BudgetPage'
+import ChangePasswordPage from '../pages/ChangePasswordPage'
 
 
 // Root vacío (NO layout). Desde aquí colgamos:
@@ -83,13 +86,13 @@ const servicesEdition = new Route({
 
 const volunteersEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/voluntarios',
+  path: '/volunteers',
   component: VolunteersEdition,
 })
 
 const associatesEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/asociados',
+  path: '/associates',
   component: AssociatesEdition,
 })
 
@@ -117,6 +120,30 @@ const loginRoute = new Route({
   getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
   path: '/login',
   component: LoginPage,
+})
+
+const associatesPage = new Route({
+  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
+  path: '/associates',
+  component: AssociatesPage,
+})
+
+const volunteersPage = new Route({
+  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
+  path: '/volunteers',
+  component: VolunteersPage,
+})
+
+const manualPage = new Route({
+  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
+  path: '/manuals',
+  component: ManualPage,
+})
+
+const budgetPage = new Route({
+  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
+  path: '/budget',
+  component: BudgetPage,
 })
 
 const forgotPasswordRoute = new Route({
@@ -158,6 +185,10 @@ const routeTree = rootRoute.addChildren([
     principalRoute,
     editionLayoutRoute.addChildren([
       aboutUsEdition,
+      associatesPage,
+      volunteersPage,
+      budgetPage,
+      manualPage, 
       faqEdition,
       principalEdition,
       servicesEdition,

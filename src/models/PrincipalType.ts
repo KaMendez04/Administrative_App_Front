@@ -35,7 +35,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Gestión",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
-    route: "/edition/voluntarios",
+    route: "/volunteers",
   },
   {
     title: "Cantidad Asociados",
@@ -45,7 +45,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Gestión",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
-    route: "/edition/asociados",
+    route: "/associates",
   },
 
   {
@@ -56,7 +56,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Gestión",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
-    route: "/edition/faq", // ejemplo si usas esa página como presupuestos, si no, crea la ruta real
+    route: "/budget", // ejemplo si usas esa página como presupuestos, si no, crea la ruta real
   },
   {
     title: "Cantidad de Personal",
@@ -74,7 +74,7 @@ export const JsonPrincipalType: PrincipalType[] = [
     primaryAction: "Visualizar",
     secondaryAction: "Configurar",
     color: "bg-white border-gray-200",
-    route: "/edition/manuales", // si quieres cambiar a 'proyectos', también debes cambiar el path en router
+    route: "/manuals", // si quieres cambiar a 'proyectos', también debes cambiar el path en router
   },
 ]
 
