@@ -4,8 +4,8 @@ const sections = [
   { label: "Principal", path: "/edition/principal" },
   { label: "Sobre Nosotros", path: "/edition/about" },
   { label: "Servicios", path: "/edition/servicios" },
-  { label: "Asociados", path: "/edition/asociados" },
-  { label: "Voluntarios", path: "/edition/voluntarios" },
+  { label: "Asociados", path: "/edition/associates" },
+  { label: "Voluntarios", path: "/edition/volunteers" },
   { label: "Preguntas", path: "/edition/faq" },
   { label: "Eventos", path: "/edition/events" },
 ]
