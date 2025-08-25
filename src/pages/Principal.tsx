@@ -1,12 +1,12 @@
 import { useNavigate } from "@tanstack/react-router"
 import { JsonPrincipalType } from "../models/PrincipalType"
-import { getCurrentUser } from "../services/auth"   // 👈 trae el rol desde tu sesión
+import { getCurrentUser } from "../services/auth"
 
 export default function Principal() {
   const modules = JsonPrincipalType
   const navigate = useNavigate()
 
-  // 👇 Rol actual
+  // Rol actual
   const role = getCurrentUser()?.role?.name?.toUpperCase()
   const isAdmin = role === "ADMIN"
 
@@ -17,8 +17,7 @@ export default function Principal() {
           {modules.map((module, index) => {
             const IconComponent = module.icon
 
-            // Oculta card de "Gestión de contenido público" para JUNTA:
-            // Si ese card navega a cualquier ruta bajo /edition, no lo renderizamos
+            // Oculta “Gestión de contenido público” para JUNTA
             if (!isAdmin && typeof module.route === "string" && module.route.startsWith("/edition/principal")) {
               return null
             }
@@ -26,27 +25,31 @@ export default function Principal() {
             return (
               <div
                 key={index}
-                className="relative bg-white border border-gray-200 rounded-lg p-6 flex flex-col h-full shadow-sm"
+                className="relative bg-white border border-gray-200 rounded-lg p-6 flex flex-col h-full shadow-sm hover:shadow-md transition-shadow"
               >
-                {/* Icono arriba-derecha */}
+                {/* Ícono con badge suave (paleta Cámara) */}
                 <div className="absolute top-4 right-4">
-                  <IconComponent className="h-8 w-8 text-gray-500" />
+                  <div className="w-12 h-12 rounded-full bg-[#FAF9F5] ring-1 ring-gray-200 shadow-sm flex items-center justify-center">
+                    <IconComponent className={`h-7 w-7 ${module.iconColor}`} aria-hidden />
+                  </div>
                 </div>
 
                 {/* Contenido */}
-                <div className="flex-1 mb-4 pr-8">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">{module.title}</h3>
-                  <p className="text-base text-gray-700 mb-2">{module.description}</p>
+                <div className="flex-1 mb-4 pr-16">
+                  <h3 className="text-lg font-semibold text-gray-900">{module.title}</h3>
+                  <p className="text-sm text-gray-600">{module.description}</p>
                   {module.subtitle && (
-                    <div className="text-2xl font-bold text-gray-800">{module.subtitle}</div>
+                    <div className="text-2xl font-bold text-gray-800 mt-2">{module.subtitle}</div>
                   )}
                 </div>
 
-                {/* Botón */}
-                <div className="flex justify-end mt-6">
+                {/* Botón neutro */}
+                <div className="flex justify-end mt-4">
                   <button
-                    className="bg-gradient-to-r from-[#6F8C1F] to-[#475C1D] hover:from-[#5d741c] hover:to-[#384c17] text-white px-6 py-2 rounded-md text-sm font-medium duration-200 shadow-md"
+                    type="button"
+                    className="inline-flex items-center border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-5 py-2 rounded-md text-sm font-medium transition"
                     onClick={() => navigate({ to: module.route as any })}
+                    aria-label={module.primaryAction}
                   >
                     {module.primaryAction}
                   </button>
