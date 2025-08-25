@@ -1,6 +1,6 @@
 import { Menu, User } from "lucide-react";
 import React from "react";
-import { useNavigate } from "@tanstack/react-router"; // ⬅️ TanStack Router
+import { useNavigate } from "@tanstack/react-router"; 
 
 type Props = {
   isSidebarOpen: boolean;
@@ -77,11 +77,12 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg border border-gray-200 z-50">
               <div className="py-2">
+                {/* ✅ Cambiado: cierra el dropdown y redirige a /account/change-password */}
                 <div
                   className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
                     setIsDropdownOpen(false);
-                    // abre modal/cambio de contraseña si lo tienes
+                    navigate({ to: "/account/change-password" });
                   }}
                 >
                   Cambiar Contraseña
