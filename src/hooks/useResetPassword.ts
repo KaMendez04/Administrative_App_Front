@@ -1,31 +1,63 @@
-import { useState } from "react"
-import { useRouter } from "@tanstack/react-router"
-import type { ResetPasswordType } from "../models/ResetPasswordType"
-import { resetPassword } from "../services/authResetService"
+// src/hooks/useResetPassword.ts
+import * as React from "react"
+import { useForm } from "@tanstack/react-form"
+import { useNavigate } from "@tanstack/react-router"
+import { ResetPasswordFormSchema } from "../schemas/resetPasswordSchema";
+import { resetPassword } from "../services/authResetService";
+
+
+//acá es el resetear contraseña
+export type BannerState = { type: "success" | "error"; text: string } | null
+
+function zodToFormErrors(
+  result: ReturnType<typeof ResetPasswordFormSchema.safeParse>
+) {
+  if (result.success) return undefined
+  const fieldErrors: Record<string, string> = {}
+  for (const issue of result.error.issues) {
+    const path = issue.path?.[0]
+    if (typeof path === "string" && !fieldErrors[path]) {
+      fieldErrors[path] = issue.message
+    }
+  }
+  return { fields: fieldErrors }
+}
 
 export function useResetPassword(token: string) {
-  const router = useRouter()
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
+  const navigate = useNavigate()
+  const [loading, setLoading] = React.useState(false)
+  const [banner, setBanner] = React.useState<BannerState>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
+  const form = useForm({
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+    validators: {
+      // el form en onChange con Zod.safeParse
+      onChange: ({ value }) => {
+        const parsed = ResetPasswordFormSchema.safeParse(value)
+        return zodToFormErrors(parsed)
+      },
+    },
+    onSubmit: async ({ value, formApi }) => {
+      setBanner(null)
+      setLoading(true)
+      const res = await resetPassword({
+        resetPasswordToken: token,
+        password: value.password,
+      })
+      setLoading(false)
 
-    const payload: ResetPasswordType = { resetPasswordToken: token, password }
-    const res = await resetPassword(payload)
+      if (res.ok) {
+        setBanner({ type: "success", text: "¡Contraseña actualizada! Redirigiendo al login…" })
+        formApi.reset()
+        setTimeout(() => navigate({ to: "/login" }), 800)
+      } else {
+        setBanner({ type: "error", text: res.message || "No se pudo actualizar la contraseña." })
+      }
+    },
+  })
 
-    if (res.ok) {
-      setDone(true)
-      router.navigate({ to: "/login" })
-    } else {
-      setError(res.message || "No se pudo actualizar la contraseña.")
-    }
-    setLoading(false)
-  }
-
-  return { password, setPassword, loading, error, done, handleSubmit }
+  return { form, loading, banner, setBanner }
 }

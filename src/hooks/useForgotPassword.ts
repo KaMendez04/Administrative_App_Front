@@ -7,6 +7,7 @@ export function useForgotPassword() {
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  //acá es para enviar el email
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
