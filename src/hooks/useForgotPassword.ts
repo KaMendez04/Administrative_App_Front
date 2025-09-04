@@ -1,5 +1,8 @@
+// src/hooks/useForgotPassword.ts
 import { useState } from "react"
 import { forgotPasswordService } from "../services/forgotPasswordService"
+import type { ForgotPasswordFormValues } from "../models/ForgotPasswordTypes"
+
 
 export function useForgotPassword() {
   const [email, setEmail] = useState("")
@@ -7,30 +10,22 @@ export function useForgotPassword() {
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  //acá es para enviar el email
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const submit = async (values: ForgotPasswordFormValues) => {
     setLoading(true)
     setError(null)
 
-    const result = await forgotPasswordService.requestReset(email)
+    const result = await forgotPasswordService.requestReset(values.email)
 
-    // Mensaje genérico aunque el correo no exista
-    if (result.ok) {
-      setSent(true)
-    } else {
-      setError("Hubo un problema enviando el enlace. Intenta de nuevo.")
-    }
+    if (result.ok) setSent(true)
+    else setError("Hubo un problema enviando el enlace. Intenta de nuevo.")
 
     setLoading(false)
   }
 
-  return {
-    email,
-    setEmail,
-    loading,
-    sent,
-    error,
-    handleSubmit,
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await submit({ email })
   }
+
+  return { email, setEmail, loading, sent, error, handleSubmit, submit }
 }
