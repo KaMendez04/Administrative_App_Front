@@ -1,4 +1,4 @@
-// src/hooks/useEditPersonalPageModal.ts
+
 import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
 import type { PersonalPageType } from "../../models/PersonalPageType"
@@ -26,6 +26,8 @@ export function useEditPersonalPageModal(defaults: PersonalPageType) {
       direction: defaults.direction ?? "",
       occupation: defaults.occupation ?? "",
       isActive: !!defaults.isActive,
+      startWorkDate: defaults.startWorkDate ?? "",
+      endWorkDate: (defaults.endWorkDate ?? "") as string | null,
     },
     onSubmit: async () => {
       // La validación corre con los validators de cada Field

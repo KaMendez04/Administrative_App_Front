@@ -1,4 +1,3 @@
-// src/components/Personal/EditPersonalPageModal.tsx
 import React from "react"
 import type { PersonalPageType } from "../../models/PersonalPageType"
 import { personalApi } from "../../services/personalPageService"
@@ -27,19 +26,39 @@ export function EditPersonalPageModal({
   const readOnlyStyle =
     "bg-gray-100 text-gray-500 border-dashed border-gray-300 cursor-not-allowed opacity-80 select-none";
 
+  const todayISO = () => new Date().toISOString().slice(0, 10);
+
   // TanStack Form + validadores (extraídos al hook)
   const { form, validators } = useEditPersonalPageModal(personalPage)
 
   // 🔒 Fecha máxima permitida (hoy) en formato YYYY-MM-DD
   const todayStr = new Date().toISOString().split("T")[0]
 
-  // Submit (misma lógica)
+  // ===== PASO 2: Normalizador del payload (sin cambiar diseño/lógica) =====
+  const normalizePayload = (formData: PersonalPageType, base: any) => ({
+    ...base,
+    startWorkDate:
+      formData.startWorkDate && formData.startWorkDate.trim() !== ""
+        ? formData.startWorkDate
+        : undefined,
+    endWorkDate: formData.isActive
+      ? null
+      : (formData.endWorkDate && formData.endWorkDate.trim() !== ""
+          ? formData.endWorkDate
+          : todayISO()),
+  })
+  // =======================================================================
+
+  // Submit (misma lógica, solo integramos normalizePayload)
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     await form.handleSubmit()
 
     const { id, IdUser, ...rest } = personalPage as any
-    const payload: any = { ...rest }
+    let payload: any = { ...rest }
+
+    // 🔄 Normaliza fechas antes de enviar (PASO 2)
+    payload = normalizePayload(personalPage, payload)
 
     if (isNew) {
       await personalApi.create(payload)
@@ -49,6 +68,7 @@ export function EditPersonalPageModal({
         console.error("No hay id para actualizar")
         return
       }
+      // Mantienes tu regla: no se actualizan los identificadores en edición
       delete payload.IDE
       delete payload.name
       delete payload.lastname1
@@ -239,7 +259,6 @@ export function EditPersonalPageModal({
                         max={todayStr}            // ⛔ no permite fechas futuras en el picker
                         onChange={(e) => {
                           const v = e.target.value
-                          // Si el usuario intenta escribir una fecha futura manualmente, la ignoramos
                           if (v && v > todayStr) return
                           setPersonalPage({ ...personalPage, birthDate: v })
                           fieldApi.handleChange(v)
@@ -379,7 +398,12 @@ export function EditPersonalPageModal({
                       value={personalPage.isActive ? "activo" : "inactivo"}
                       onChange={(e) => {
                         const v = e.target.value === "activo"
-                        setPersonalPage({ ...personalPage, isActive: v })
+                        // si cambia a inactivo y no hay fecha fin, auto-coloca hoy; si vuelve a activo, limpia
+                        setPersonalPage({
+                          ...personalPage,
+                          isActive: v,
+                          endWorkDate: v ? null : (personalPage.endWorkDate && personalPage.endWorkDate.trim() !== "" ? personalPage.endWorkDate : todayISO()),
+                        })
                         fieldApi.handleChange(v)
                       }}
                       className={inputClass}
@@ -390,6 +414,61 @@ export function EditPersonalPageModal({
                   </div>
                 )}
               </form.Field>
+            </div>
+
+            {/* Fechas laborales */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              {/* Fecha de inicio laboral */}
+              <form.Field name="startWorkDate">
+                {(fieldApi) => (
+                  <div>
+                    <label className={label} htmlFor="startWorkDate">Fecha de inicio laboral</label>
+                    <input
+                      id="startWorkDate"
+                      type="date"
+                      value={personalPage.startWorkDate ?? ""}
+                      max={todayStr}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        if (v && v > todayStr) return
+                        setPersonalPage({ ...personalPage, startWorkDate: v })
+                        fieldApi.handleChange(v)
+                      }}
+                      placeholder="YYYY-MM-DD"
+                      className={inputClass}
+                    />
+                  </div>
+                )}
+              </form.Field>
+
+              {/* Fecha de salida */}
+              <form.Field name="endWorkDate">
+                {(fieldApi) => (
+                  <div>
+                    <label className={label} htmlFor="endWorkDate">Fecha de salida</label>
+                    <input
+                      id="endWorkDate"
+                      type="date"
+                      value={personalPage.endWorkDate ?? ""}
+                      max={todayStr}
+                      onChange={(e) => {
+                        // Permite edición manual solo si está inactivo
+                        if (personalPage.isActive) return
+                        const v = e.target.value
+                        if (v && v > todayStr) return
+                        setPersonalPage({ ...personalPage, endWorkDate: v })
+                        fieldApi.handleChange(v)
+                      }}
+                      placeholder="YYYY-MM-DD"
+                      className={`${inputClass} ${personalPage.isActive ? readOnlyStyle : ""}`}
+                      readOnly={personalPage.isActive}
+                      disabled={personalPage.isActive}
+                    />
+                  </div>
+                )}
+              </form.Field>
+
+              <div className="hidden md:block" />
             </div>
           </section>
 
@@ -409,6 +488,7 @@ export function EditPersonalPageModal({
               {isNew ? "Registrar" : "Guardar cambios"}
             </button>
           </div>
+
         </form>
       </div>
     </div>

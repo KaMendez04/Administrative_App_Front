@@ -10,6 +10,9 @@ export interface PersonalPageType {
   direction: string
   occupation: string
   isActive: boolean
+
+  startWorkDate?: string;           // 'YYYY-MM-DD'
+  endWorkDate?: string | null;      // 'YYYY-MM-DD' | null
 }
 
 export const PersonalPageInitialState: PersonalPageType = {
@@ -24,5 +27,8 @@ export const PersonalPageInitialState: PersonalPageType = {
   direction: "",
   occupation: "",
   isActive: true,
+
+  startWorkDate: undefined,
+  endWorkDate: null,
 }
 
