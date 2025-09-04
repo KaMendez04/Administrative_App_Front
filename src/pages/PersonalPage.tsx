@@ -30,7 +30,7 @@ function mapApiToUi(p: any): PersonalPageType {
     email: p.email,
     direction: p.direction,
     occupation: p.occupation,
-    isActive: true,
+    isActive: !!p.isActive,
   } as unknown as PersonalPageType;
 }
 
