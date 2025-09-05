@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { postLogin } from "../services/loginService";
 import type { LoginPayload } from "../models/LoginType";
 import { setSession } from "../services/auth";
+import { connectAdminSocket } from "../lib/socket";
 
 export function useLogin() {
   const [email, setEmail] = useState("");
@@ -47,6 +48,8 @@ export function useLogin() {
       const { user, token } = await postLogin(payload);
 
       setSession(token, user, remember);
+
+      connectAdminSocket(token);
       // redirección (ajusta si usas Router.navigate)
       window.location.href = "/Home";
     } catch (err: any) {

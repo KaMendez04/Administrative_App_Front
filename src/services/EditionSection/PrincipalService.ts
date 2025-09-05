@@ -15,3 +15,8 @@ export async function updatePrincipal(id: number, input: PrincipalUpdate) {
   const { data } = await apiConfig.put(`/principal/${id}`, input);
   return data;
 }
+
+export async function createPrincipal(input: PrincipalUpdate) {
+  const { data } = await apiConfig.post(`/principal`, input);
+  return data;
+}
