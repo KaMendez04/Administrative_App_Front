@@ -1,58 +1,61 @@
-import { useEffect, useState } from "react"
-import { getAllAboutUs, updateAboutUs } from "../../services/EditionSection/AboutUsService"
+import { useEffect, useMemo, useState } from "react"
 import type { AboutUsType } from "../../models/editionSection/AboutUsEditionType"
+import { fetchAllAboutUs, slugifyTitle, upsertAboutUsSections, SECTION_DEFS } from "../../services/EditionSection/AboutUsService"
 
 export function useAboutUsEdit() {
-   const [items, setItems] = useState<AboutUsType[]>([])
+  const [records, setRecords] = useState<AboutUsType[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [selectedId, setSelectedId] = useState<number | null>(null) // <-- ahora con setter
-  const [isEditing, setIsEditing] = useState(false)
+  // Campos del formulario
+  const [whoWeAre, setWhoWeAre] = useState("")
+  const [mission, setMission]   = useState("")
+  const [vision, setVision]     = useState("")
 
-  // Cargar datos al seleccionar un elemento
-  useEffect(() => { (async () => {
+  const load = async () => {
+    setLoading(true)
+    setError(null)
     try {
-      const data = await getAllAboutUs()
-      setItems(data)
-    } catch(e:any){
-      setError(e?.message ?? "Error cargando datos")
+      const list = await fetchAllAboutUs() // GET /aboutUs  :contentReference[oaicite:5]{index=5}
+      setRecords(list)
+
+      // Mapear por título (slug) a los 3 campos
+      const map = new Map(list.map(i => [slugifyTitle(i.title), i]))
+      setWhoWeAre(map.get(SECTION_DEFS[0].slug)?.description ?? "")
+      setMission(  map.get(SECTION_DEFS[1].slug)?.description ?? "")
+      setVision(   map.get(SECTION_DEFS[2].slug)?.description ?? "")
+    } catch (e: any) {
+      setError(e?.message ?? "Error cargando 'Sobre Nosotros'")
     } finally {
       setLoading(false)
     }
-  })() }, [])
+  }
 
-  // Cargar datos al seleccionar un elemento
-  const selected = items.find(item => item.id === selectedId) ?? null
+  useEffect(() => { load() }, [])
 
-  // Guardar cambios
-  async function saveDescription(description: string){
-    if(!selected) return
+  const saveAll = async () => {
     setSaving(true)
     setError(null)
     try {
-      await updateAboutUs(selected.id, description)
-      const refreshed = await getAllAboutUs()
-      setItems(refreshed)
-      setIsEditing(false)
+      await upsertAboutUsSections({ whoWeAre, mission, vision })
+      await load()
     } catch (e: any) {
-      setError(e?.message ?? "Error guardando datos")
+      setError(e?.message ?? "No se pudo guardar")
     } finally {
       setSaving(false)
     }
   }
 
+  const isEditing = useMemo(() => records.length > 0, [records])
+
   return {
-    items,
-    loading,
-    saving,
-    error,
-    selected,
-    selectedId,
-    setSelectedId,
+    loading, saving, error,
+    whoWeAre, setWhoWeAre,
+    mission, setMission,
+    vision, setVision,
     isEditing,
-    setIsEditing,
-    saveDescription,
+    reload: load,
+    saveAll,
   }
 }

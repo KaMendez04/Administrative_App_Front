@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import type { PrincipalEdition, PrincipalUpdate } from "../../models/editionSection/PrincipalEditionType"
-import { fetchSinglePrincipal, updatePrincipal } from "../../services/EditionSection/PrincipalService"
+import { fetchSinglePrincipal, updatePrincipal, createPrincipal } from "../../services/EditionSection/PrincipalService"
+
 
 export function usePrincipalEdit() {
   const [data, setData] = useState<PrincipalEdition | null>(null)
@@ -31,7 +32,6 @@ export function usePrincipalEdit() {
     setError(null)
     try {
       await updatePrincipal(data.id, input)
-      // re-cargar para ver valores actuales del backend (opcional)
       await load()
     } catch (e: any) {
       setError(e?.message ?? "No se pudo guardar")
@@ -40,5 +40,18 @@ export function usePrincipalEdit() {
     }
   }
 
-  return { data, loading, saving, error, save, reload: load }
+  const create = async (input: PrincipalUpdate) => {
+    setSaving(true)
+    setError(null)
+    try {
+      await createPrincipal(input)
+      await load()
+    } catch (e: any) {
+      setError(e?.message ?? "No se pudo crear")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return { data, loading, saving, error, save, create, reload: load }
 }
