@@ -25,8 +25,16 @@ import ResetPasswordPage from '../pages/ResetPasswordPage'
 import AssociatesPage from '../pages/AssociatesPage'
 import VolunteersPage from '../pages/VolunteersPage'
 import ManualPage from '../pages/ManualPage'
-import BudgetPage from '../pages/BudgetPage'
 import ChangePasswordPage from '../pages/ChangePasswordPage'
+import BudgetSubnav from '../pages/Budget/Navbar/BudgetSubnav'
+import Initial from '../pages/Budget/Initial'
+import Projection from '../pages/Budget/Projection'
+import Categories from '../pages/Budget/Categories'
+import Expenses from '../pages/Budget/Expenses'
+import Income from '../pages/Budget/Income'
+import Extraordinary from '../pages/Budget/Extraordinary'
+import Reports from '../pages/Budget/Reports'
+import Budget from '../pages/Budget/Budget'
 
 
 
@@ -140,11 +148,6 @@ const manualPage = new Route({
   component: ManualPage,
 })
 
-const budgetPage = new Route({
-  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
-  path: '/budget',
-  component: BudgetPage,
-})
 
 const forgotPasswordRoute = new Route({
   getParentRoute: () => rootRoute, // <- también sin layout
@@ -157,6 +160,65 @@ const resetPasswordRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/reset-password',
   component: ResetPasswordPage,
+})
+
+const budgetLayoutRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/budget",
+  component: () => (
+    <>
+      <BudgetSubnav />
+      <Outlet />
+    </>
+  ),
+})
+
+const budgetHomeRoute = new Route({
+  getParentRoute: () => budgetLayoutRoute,
+  path: "/", // index
+  component: Initial,
+})
+
+const budgetRoute = new Route({
+  getParentRoute: () => budgetLayoutRoute,
+  path: "/budget", 
+  component: Budget,
+})
+
+const budgetProjectionRoute = new Route({
+  getParentRoute: () => budgetLayoutRoute,
+  path: "/projection",
+  component: Projection
+})
+
+const budgetCategoriesRoute = new Route({
+  getParentRoute: () => budgetLayoutRoute,
+  path: "/categories",
+  component: Categories
+})
+
+const budgetExpensesRoute = new Route({
+  getParentRoute: () => budgetLayoutRoute,
+  path: "/expenses",
+  component: Expenses
+})
+
+const budgetIncomeRoute = new Route({
+  getParentRoute: () => budgetLayoutRoute,
+  path: "/income",
+  component: Income
+})
+
+const budgetExtraRoute = new Route({
+  getParentRoute: () => budgetLayoutRoute,
+  path: "/extra",
+  component: Extraordinary
+})
+
+const budgetReportsRoute = new Route({
+  getParentRoute: () => budgetLayoutRoute,
+  path: "/reports",
+  component:  Reports
 })
 
 // Fallback: si alguna ruta no existe, redirige a "/Principal"
@@ -187,7 +249,6 @@ const routeTree = rootRoute.addChildren([
       aboutUsEdition,
       associatesPage,
       volunteersPage,
-      budgetPage,
       manualPage, 
       faqEdition,
       principalEdition,
@@ -195,7 +256,15 @@ const routeTree = rootRoute.addChildren([
       volunteersEdition,
       associatesEdition,
       eventsEdition,
-      // ❌ ya NO agregamos resetPasswordRoute aquí
+      budgetLayoutRoute,
+      budgetHomeRoute,
+      budgetRoute,
+      budgetProjectionRoute,
+      budgetCategoriesRoute,
+      budgetExpensesRoute,
+      budgetIncomeRoute,
+      budgetExtraRoute,
+      budgetReportsRoute,
     ]),
     staffManagement,
     changePasswordRoute, // 👈 nueva ruta con layout
