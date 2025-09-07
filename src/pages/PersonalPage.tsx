@@ -1,3 +1,4 @@
+// src/pages/PersonalPage.tsx
 import { useEffect, useMemo, useState } from "react"
 import { useReactTable, getCoreRowModel, getPaginationRowModel } from "@tanstack/react-table"
 import type { PersonalPageType } from "../models/PersonalPageType"
@@ -13,24 +14,28 @@ import BackButton from "../components/Personal/BackButton"
 import { personalApi } from "../services/personalPageService"
 import { fetchCedulaData } from "../services/cedulaService"
 import { downloadPDFFromRows } from "../utils/exportUtils"
-import { getCurrentUser } from "../services/auth"   // 👈 función que ya usas en PrincipalPage
+import { getCurrentUser } from "../services/auth"
 
-// API -> UI
+// ===== API -> UI (incluye fechas laborales) =====
 function mapApiToUi(p: any): PersonalPageType {
   return {
-    IdUser: p.IdUser ?? p.id ?? 0,   // ajusta al nombre real que devuelve tu API
+    IdUser: p.IdUser ?? p.id ?? 0,   // ajusta si tu API devuelve otro nombre
     IDE: p.IDE,
     name: p.name,
     lastname1: p.lastname1,
     lastname2: p.lastname2,
-    birthDate: p.birthDate,
+    birthDate: p.birthDate,          // 'YYYY-MM-DD'
     phone: p.phone,
     email: p.email,
     direction: p.direction,
     occupation: p.occupation,
     isActive: !!p.isActive,
-  };
+    // 👇 claves nuevas para que el modal se prellene
+    startWorkDate: p.startWorkDate ?? "",
+    endWorkDate: p.endWorkDate ?? null,
+  }
 }
+// =================================================
 
 export default function PersonalPage() {
   const [items, setItems] = useState<PersonalPageType[]>([])
@@ -49,14 +54,14 @@ export default function PersonalPage() {
     openNewPersonalPage,
   } = usePersonalPageState()
 
-  // 👇 Rol actual
+  // Rol (solo JUNTA es read-only)
   const role = getCurrentUser()?.role?.name?.toUpperCase()
   const isReadOnly = role === "JUNTA"
 
   async function load() {
     try {
       const data = await personalApi.list()
-      setItems(data.map(mapApiToUi))
+      setItems(data.map(mapApiToUi)) // 👈 asegura fechas en UI
       setError(null)
     } catch (e: any) {
       setError(e?.message ?? "Error al cargar el personal")
@@ -71,9 +76,7 @@ export default function PersonalPage() {
 
   const filtered = useMemo(() => {
     return items.filter((s: any) =>
-      `${s.name} ${s.lastname1} ${s.lastname2} ${s.IDE}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      `${s.name} ${s.lastname1} ${s.lastname2} ${s.IDE}`.toLowerCase().includes(search.toLowerCase())
     )
   }, [search, items])
 
