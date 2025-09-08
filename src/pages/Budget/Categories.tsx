@@ -1,9 +1,20 @@
-import React from 'react'
+import CategoryForm from "../../components/Budget/Categories/CategoryForm";
 
-function BudgetCategories() {
+
+export default function RegisterCategory() {
   return (
-    <div>Partidas</div>
-  )
+    <div className="max-w-6xl mx-auto p-6">
+      <CategoryForm
+        onSuccess={(created) => {
+          // Aquí puedes hacer navegación o mostrar un toast
+          console.log("Partida registrada:", created);
+          alert("Partida registrada con éxito ");
+        }}
+        onCancel={() => {
+          // Por ejemplo, regresar a la página anterior
+          window.history.back();
+        }}
+      />
+    </div>
+  );
 }
-
-export default BudgetCategories
