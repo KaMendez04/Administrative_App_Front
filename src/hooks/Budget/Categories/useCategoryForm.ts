@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
-import type { CategoryPayload } from "../../../models/Categories/categories";
+import type { CategoryPayload } from "../../../models/Budget/categoriesType";
 import { createCategory } from "../../../services/Budget/Categories/categoriesService";
 
-// límites locales al hook (en lugar de constants/)
 const MAX_NAME = 50;
 const MAX_DESC = 250;
 
@@ -37,7 +36,7 @@ export function useCategoryForm({ initialValue, onSuccess, onCancel }: Options =
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (loading) return; // evita doble submit
+    if (loading) return; 
     resetError();
 
     const payload: CategoryPayload = {
@@ -57,20 +56,16 @@ export function useCategoryForm({ initialValue, onSuccess, onCancel }: Options =
   };
 
   return {
-    // estado
     name,
     setName,
     description,
     setDescription,
     nameCount,
     descCount,
-    // flags
     loading,
     error,
-    // límites
     MAX_NAME,
     MAX_DESC,
-    // acciones
     submit,
     cancel: onCancel,
   };

@@ -1,4 +1,4 @@
-import type { Category, CategoryPayload } from "../../../models/Categories/categories";
+import type { Category, CategoryPayload } from "../../../models/Budget/categoriesType";
 import apiConfig from "../../apiConfig";
 
 

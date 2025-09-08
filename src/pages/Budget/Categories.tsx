@@ -6,12 +6,11 @@ export default function RegisterCategory() {
     <div className="max-w-6xl mx-auto p-6">
       <CategoryForm
         onSuccess={(created) => {
-          // Aquí puedes hacer navegación o mostrar un toast
           console.log("Partida registrada:", created);
           alert("Partida registrada con éxito ");
         }}
         onCancel={() => {
-          // Por ejemplo, regresar a la página anterior
+          // Por ejemplo, regresar a la página anterior (debo cambiarlo)
           window.history.back();
         }}
       />

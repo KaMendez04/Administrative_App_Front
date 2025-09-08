@@ -9,21 +9,16 @@ type CategoryFormProps = {
 
 export default function CategoryForm({ initialValue, onSuccess, onCancel }: CategoryFormProps) {
   const {
-    // estado y setters
     name,
     setName,
     description,
     setDescription,
-    // contadores
     nameCount,
     descCount,
-    // límites (expuestos por el hook)
     MAX_NAME,
     MAX_DESC,
-    // acciones
     submit,
     cancel,
-    // estado de red y errores
     loading,
     error,
   } = useCategoryForm({ initialValue, onSuccess, onCancel });
