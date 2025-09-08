@@ -20,7 +20,7 @@ export default function FAQEdition() {
         <NavbarEditionSection />
 
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-2">Edición de las Preguntas Frecuentes</h1>
+          <h1 className="text-4xl font-bold mb-2">Edición de la Sección Preguntas Frecuentes</h1>
           <p className="text-base text-[#475C1D]">
             Modifica o agrega las preguntas frecuentes que los usuarios suelen tener.
           </p>

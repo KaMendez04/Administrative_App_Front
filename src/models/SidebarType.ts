@@ -20,17 +20,17 @@ export const sidebarItems: SidebarItem[] = [
   },
   {
     title: "Voluntariado",
-    href: "/voluntariado",
+    href: "/volunteers",
     icon: Users,
   },
   {
     title: "Asociados",
-    href: "/asociados",
+    href: "/associates",
     icon: Briefcase,
   },
   {
     title: "Presupuesto",
-    href: "/presupuesto",
+    href: "/budget",
     icon: DollarSign,
   },
   {
@@ -40,12 +40,12 @@ export const sidebarItems: SidebarItem[] = [
   },
   {
     title: "Usuarios",
-    href: "/usuarios",
+    href: "/users",
     icon: Users,
   },
   {
     title: "Manuales",
-    href: "/manuales",
+    href: "/manuals",
     icon: Book,
   },
 

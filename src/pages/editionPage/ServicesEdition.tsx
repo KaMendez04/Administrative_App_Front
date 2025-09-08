@@ -20,7 +20,7 @@ export default function ServicesEdition() {
         <NavbarEditionSection />
 
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-2">Edición de Servicios</h1>
+          <h1 className="text-4xl font-bold mb-2">Edición de la Sección Servicios</h1>
           <p className="text-base text-[#475C1D]">
             Agrega, edita o elimina los servicios que se muestran públicamente.
           </p>
