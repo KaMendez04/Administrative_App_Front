@@ -1,5 +1,6 @@
 import { useState } from "react"
 import type { EventInput } from "../../../models/editionSection/EventEditionType"
+import { CharCounter } from "../../../components/CharCounter"
 
 export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput) => void }) {
   const [title, setTitle] = useState("")

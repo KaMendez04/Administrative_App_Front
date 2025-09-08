@@ -2,6 +2,7 @@ import NavbarEditionSection from "../../components/NavbarEditionSection"
 import { useEffect, useMemo, useState } from "react"
 import { usePrincipalEdit } from "../../hooks/EditionSection/PrincipalHook"
 import BackButton from "../../components/PagesEdition/BackButton"
+import { CharCounter } from "../../components/CharCounter"
 
 // Título por defecto para la creación (no editable)
 const DEFAULT_TITLE = "Asociación Cámara Ganaderos Hojancha"
@@ -80,10 +81,12 @@ function PrincipalEdition() {
                   id="description"
                   rows={5}
                   value={description}
+                  maxLength={250}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
                   placeholder="Escribe aquí la descripción que se mostrará en la página de inicio…"
                 />
+                <CharCounter value={description} max={250} />
                 {!isEditing && (
                   <p className="mt-2 text-xs text-[#6B7280]">
                     Se creará un único registro con el título por defecto. Luego podrás editar solo la descripción.

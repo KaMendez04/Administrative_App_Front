@@ -22,7 +22,7 @@ export default function EventEdition() {
         <NavbarEditionSection />
 
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-2">Edición de Eventos</h1>
+          <h1 className="text-4xl font-bold mb-2">Edición de la Sección Eventos</h1>
           <p className="text-base text-[#475C1D]">
             Agrega, edita o elimina los eventos que se muestran públicamente.
           </p>
