@@ -3,11 +3,10 @@ import { motion } from "framer-motion"
 
 const items = [
   { to: "/budget", label: "Inicio", exact: true },
-  { to: "/budget/projection", label: "Proyección" },
-  { to: "/budget/budget", label: "Presupuesto" },
-  { to: "/budget/categories", label: "Partidas" },
+  { to: "/budget/pincome", label: "Proyección Ingresos" },
+  { to: "/budget/pexpense", label: "Proyección Egresos" },
   { to: "/budget/income", label: "Ingresos" },
-  { to: "/budget/expenses", label: "Gastos" },
+  { to: "/budget/expenses", label: "Egresos" },
   { to: "/budget/extra", label: "Extraordinario" },
   { to: "/budget/reports", label: "Reportes" },
 ]

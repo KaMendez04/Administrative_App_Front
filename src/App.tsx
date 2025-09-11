@@ -7,7 +7,6 @@ import VolunteersEdition from './pages/editionPage/VolunteersEdition'
 import StaffManagementPage from './pages/PersonalPage'
 import ServicesEdition from './pages/editionPage/ServicesEdition'
 import FAQEdition from './pages/editionPage/FAQ/FAQEdition'
-import BudgetPage from './pages/BudgetPage'
 import ManualPage from './pages/ManualPage'
 import AssociatesPage from './pages/AssociatesPage'
 import VolunteersPage from './pages/VolunteersPage'
@@ -23,7 +22,6 @@ function App() {
     <VolunteersEdition />
     <FAQEdition />
     <StaffManagementPage />
-    <BudgetPage/>
     <ManualPage/>
     <AssociatesPage/>
     <VolunteersPage/>

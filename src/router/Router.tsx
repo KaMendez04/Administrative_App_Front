@@ -1,4 +1,4 @@
-// src/router/router.tsx
+
 import {
   Router,
   RootRoute,
@@ -28,13 +28,13 @@ import ManualPage from '../pages/ManualPage'
 import ChangePasswordPage from '../pages/ChangePasswordPage'
 import BudgetSubnav from '../pages/Budget/Navbar/BudgetSubnav'
 import Initial from '../pages/Budget/Initial'
-import Projection from '../pages/Budget/Projection'
-import Categories from '../pages/Budget/Categories'
+import Projection from '../pages/Budget/PIncome'
 import Expenses from '../pages/Budget/Expenses'
 import Income from '../pages/Budget/Income'
 import Extraordinary from '../pages/Budget/Extraordinary'
 import Reports from '../pages/Budget/Reports'
-import Budget from '../pages/Budget/Budget'
+import PIncome from '../pages/Budget/PIncome'
+import PExpenses from '../pages/Budget/PExpenses'
 
 
 
@@ -179,22 +179,17 @@ const budgetHomeRoute = new Route({
   component: Initial,
 })
 
-const budgetRoute = new Route({
+
+const budgetProjectionIncomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
-  path: "/budget", 
-  component: Budget,
+  path: "/pincome",
+  component: PIncome
 })
 
-const budgetProjectionRoute = new Route({
+const budgetProjectionExpensesRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
-  path: "/projection",
-  component: Projection
-})
-
-const budgetCategoriesRoute = new Route({
-  getParentRoute: () => budgetLayoutRoute,
-  path: "/categories",
-  component: Categories
+  path: "/pexpense",
+  component: PExpenses
 })
 
 const budgetExpensesRoute = new Route({
@@ -258,9 +253,8 @@ const routeTree = rootRoute.addChildren([
       eventsEdition,
       budgetLayoutRoute,
       budgetHomeRoute,
-      budgetRoute,
-      budgetProjectionRoute,
-      budgetCategoriesRoute,
+      budgetProjectionIncomeRoute,
+      budgetProjectionExpensesRoute,
       budgetExpensesRoute,
       budgetIncomeRoute,
       budgetExtraRoute,
