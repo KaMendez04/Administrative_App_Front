@@ -28,7 +28,6 @@ import ManualPage from '../pages/ManualPage'
 import ChangePasswordPage from '../pages/ChangePasswordPage'
 import BudgetSubnav from '../pages/Budget/Navbar/BudgetSubnav'
 import Initial from '../pages/Budget/Initial'
-import Projection from '../pages/Budget/PIncome'
 import Expenses from '../pages/Budget/Expenses'
 import Income from '../pages/Budget/Income'
 import Extraordinary from '../pages/Budget/Extraordinary'
@@ -209,6 +208,7 @@ const budgetExtraRoute = new Route({
   path: "/extra",
   component: Extraordinary
 })
+
 
 const budgetReportsRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,

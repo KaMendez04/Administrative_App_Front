@@ -1,5 +1,5 @@
-import type { ApiList, CreateDepartmentDTO, CreateIncomeProjectionSubTypeDTO, CreateIncomeProjectionTypeDTO, Department, IncomeProjectionCreateDTO, IncomeProjectionSubType, IncomeProjectionType } from "../../models/Budget/incomeProjectionType";
-import apiConfig from "../apiConfig";
+import type { ApiList, CreateDepartmentDTO, CreateIncomeProjectionSubTypeDTO, CreateIncomeProjectionTypeDTO, Department, IncomeProjectionCreateDTO, IncomeProjectionSubType, IncomeProjectionType } from "../models/Budget/incomeProjectionType";
+import apiConfig from "./apiConfig";
 
 
 // Departamentos
