@@ -4,14 +4,14 @@ import apiConfig from "../apiConfig";
 
 // Departamentos
 export async function listDepartments(): Promise<ApiList<Department>> {
-  const { data } = await apiConfig.get<ApiList<Department>>("/departments");
+  const { data } = await apiConfig.get<ApiList<Department>>("/department");
   return data;
 }
 
 export async function createDepartment(
   payload: CreateDepartmentDTO
 ): Promise<Department> {
-  const { data } = await apiConfig.post<Department>("/departments", payload);
+  const { data } = await apiConfig.post<Department>("/department", payload);
   return data;
 }
 

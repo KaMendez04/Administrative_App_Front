@@ -1,4 +1,3 @@
-// src/pages/IncomeProjectionPage.tsx
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import IncomeProjectionForm from "../../components/Budget/Projection/PIncomeForm";
@@ -28,8 +27,7 @@ export default function IncomeProjectionPage() {
           {/* Formulario principal */}
           <IncomeProjectionForm
             onSuccess={() => {
-              // Aquí puedes disparar un toast si usas `sonner`
-              // toast.success("Proyección registrada");
+
             }}
           />
         </div>

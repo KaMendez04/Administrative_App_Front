@@ -1,4 +1,3 @@
-
 export interface Department {
   id: number;
   name: string;
@@ -15,8 +14,6 @@ export interface IncomeProjectionSubType {
   name: string;
   incomeProjectionTypeId: number;
 }
-
-
 
 export interface IncomeProjectionCreateDTO {
   departmentId: number;

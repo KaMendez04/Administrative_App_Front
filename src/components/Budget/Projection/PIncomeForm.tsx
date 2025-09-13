@@ -1,4 +1,3 @@
-// src/components/projection/IncomeProjectionForm.tsx
 import { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { useDepartments, useIncomeProjectionSubTypes, useIncomeProjectionTypes } from "../../../hooks/Budget/useIncomeProjectionCatalog";
@@ -24,15 +23,15 @@ export default function IncomeProjectionForm({ onSuccess, disabled }: Props) {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Catalog (hooks sin React Query)
+
   const dept = useDepartments();
   const types = useIncomeProjectionTypes(typeof departmentId === "number" ? departmentId : undefined);
   const subTypes = useIncomeProjectionSubTypes(typeof typeId === "number" ? typeId : undefined);
 
-  // Money helpers
+
   const { handleInput } = useProjectionMoneyInput();
 
-  // Mutation (sin React Query)
+
   const createProjection = useCreateIncomeProjection();
 
   // Options
