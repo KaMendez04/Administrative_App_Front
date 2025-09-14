@@ -1,34 +1,36 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 /**
- * Formatea a colones (₡) con separadores de miles.
- * Ej: "1000" -> "1.000"
- */
+ * Formatea a colones (₡) con separadores de miles.
+ * Ej: "1000" -> "1.000"
+ */
 export function formatCR(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 15); // solo dígitos, máx 15
-  return digits
-    ? Number(digits).toLocaleString("es-CR", { maximumFractionDigits: 0 })
-    : "";
+  const digits = value.replace(/\D/g, "").slice(0, 15); // solo dígitos, máx 15
+  return digits
+    ? Number(digits).toLocaleString("es-CR", { maximumFractionDigits: 0 })
+    : "";
 }
 
 /**
- * Parsea un string formateado a número.
- * Ej: "1.000" -> 1000
- */
+ * Parsea un string formateado a número.
+ * Ej: "1.000" -> 1000
+ */
 export function parseCR(formatted: string): number {
-  const digits = formatted.replace(/\D/g, "");
-  return digits ? Number(digits) : 0;
+  const digits = formatted.replace(/\D/g, "");
+  return digits ? Number(digits) : 0;
 }
-
 
 export function useMoneyInput(p0: string) {
-  const handleInput = useCallback(
-    (e: React.FormEvent<HTMLInputElement>) => {
-      const target = e.currentTarget;
-      target.value = formatCR(target.value);
-    },
-    []
-  );
+  const [value, setValue] = useState(p0);
 
-  return { handleInput, formatCR, parseCR };
+  const handleInput = useCallback(
+    (e: React.FormEvent<HTMLInputElement>) => {
+      const target = e.currentTarget;
+      const formatted = formatCR(target.value);
+      setValue(formatted);
+    },
+    []
+  );
+
+  return { value, setValue, handleInput, formatCR, parseCR };
 }
