@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { useDepartments, useIncomeSubTypes, useIncomeTypes } from "../../../hooks/Budget/income/useIncomeCatalog";
-import { parseCR, useMoneyInput } from "../../../hooks/Budget/income/useMoneyInput";
 import { useCreateIncomeEntry } from "../../../hooks/Budget/income/useIncomeMutation";
 import type { CreateIncomeDTO } from "../../../models/Budget/IncomeType";
+import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
 
 type Props = {
   onSuccess?: (createdId: number) => void;

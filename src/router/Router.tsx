@@ -33,7 +33,7 @@ import Income from '../pages/Budget/Income'
 import Extraordinary from '../pages/Budget/Extraordinary'
 import Reports from '../pages/Budget/Reports'
 import PIncome from '../pages/Budget/PIncome'
-import PExpenses from '../pages/Budget/PExpenses'
+import PExpenses from '../pages/Budget/PSpend'
 
 
 

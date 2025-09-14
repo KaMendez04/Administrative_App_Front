@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-
 export const idSchema = z.number().int().positive();
 
 export const name75Schema = z
@@ -70,8 +69,7 @@ export const projectionSchema = z.object({
   departmentId: idSchema,
   incomeProjectionTypeId: idSchema,
   incomeProjectionSubTypeId: idSchema,
-  amount: amountSchema,     // recuerda parsear el input de la UI a number
-  detail: detail255Schema,
+  amount: amountSchema,     
   fiscalYearId: idSchema.optional(),
 });
 export type ProjectionSchema = z.infer<typeof projectionSchema>;
