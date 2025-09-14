@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import PIncomeForm from "../../components/Budget/ProjectionIncome/PIncomeForm";
-import PCatalogModal from "../../components/Budget/ProjectionIncome/PIncomeCatalogModal";
+import PSpendForm from "../../components/Budget/ProjectionSpend/PSpendForm";
+import PSpendCatalogModal from "../../components/Budget/ProjectionSpend/PSpendCatalogModal";
 
 
 
-export default function PIncomePage() {
+export default function PSpendPage() {
   const [openCatalog, setOpenCatalog] = useState(false);
 
   return (
@@ -14,7 +14,7 @@ export default function PIncomePage() {
         <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
           {/* Título */}
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-          Proyección de Ingresos
+          Proyección de Egresos
           </h1>
 
           {/* Botón + arriba a la derecha (abre modal catálogo) */}
@@ -27,7 +27,7 @@ export default function PIncomePage() {
           </button>
 
           {/* Formulario principal */}
-          <PIncomeForm
+          <PSpendForm
             onSuccess={() => {
 
             }}
@@ -36,7 +36,7 @@ export default function PIncomePage() {
       </div>
 
       {/* Modal: agregar Departamento / Tipo / SubTipo */}
-      <PCatalogModal
+      <PSpendCatalogModal
         open={openCatalog}
         onClose={() => setOpenCatalog(false)}
       />
