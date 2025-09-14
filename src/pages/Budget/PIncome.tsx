@@ -1,9 +1,12 @@
+
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import IncomeProjectionForm from "../../components/Budget/Projection/PIncomeForm";
-import ProjectionCatalogModal from "../../components/Budget/Projection/PCatalogModal";
+import PIncomeForm from "../../components/Budget/ProjectionIncome/PIncomeForm";
+import PCatalogModal from "../../components/Budget/ProjectionIncome/PCatalogModal";
 
-export default function IncomeProjectionPage() {
+
+
+export default function IncomePage() {
   const [openCatalog, setOpenCatalog] = useState(false);
 
   return (
@@ -12,7 +15,7 @@ export default function IncomeProjectionPage() {
         <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
           {/* Título */}
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            Proyección de Ingresos
+          Proyección de Ingresos
           </h1>
 
           {/* Botón + arriba a la derecha (abre modal catálogo) */}
@@ -25,7 +28,7 @@ export default function IncomeProjectionPage() {
           </button>
 
           {/* Formulario principal */}
-          <IncomeProjectionForm
+          <PIncomeForm
             onSuccess={() => {
 
             }}
@@ -34,7 +37,7 @@ export default function IncomeProjectionPage() {
       </div>
 
       {/* Modal: agregar Departamento / Tipo / SubTipo */}
-      <ProjectionCatalogModal
+      <PCatalogModal
         open={openCatalog}
         onClose={() => setOpenCatalog(false)}
       />
