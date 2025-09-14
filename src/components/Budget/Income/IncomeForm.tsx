@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
-import { useDepartments, useIncomeSubTypes, useIncomeTypes } from "../../hooks/Budget/income/useIncomeCatalog";
-import { parseCR, useMoneyInput } from "../../hooks/Budget/income/useMoneyInput";
-import { useCreateIncomeEntry } from "../../hooks/Budget/income/useIncomeMutation";
-import type { CreateIncomeDTO } from "../../models/Budget/IncomeType";
+import { useDepartments, useIncomeSubTypes, useIncomeTypes } from "../../../hooks/Budget/income/useIncomeCatalog";
+import { parseCR, useMoneyInput } from "../../../hooks/Budget/income/useMoneyInput";
+import { useCreateIncomeEntry } from "../../../hooks/Budget/income/useIncomeMutation";
+import type { CreateIncomeDTO } from "../../../models/Budget/IncomeType";
 
 type Props = {
   onSuccess?: (createdId: number) => void;
@@ -19,7 +19,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
   const amountStr: string = ((money as any).value ?? "") as string;  // <- nunca undefined
   const amount = parseCR(amountStr || "") ?? 0;                      // <- parseo seguro
 
-  const [detail, setDetail] = useState("");
+  const [, setDetail] = useState("");
   const [date, setDate] = useState<string>(() => {
     const d = new Date();
     const yyyy = d.getFullYear();

@@ -1,68 +1,80 @@
-import type { ApiList, CreateDepartmentDTO, CreateIncomeProjectionSubTypeDTO, CreateIncomeProjectionTypeDTO, Department, IncomeProjectionCreateDTO, IncomeProjectionSubType, IncomeProjectionType } from "../../models/Budget/incomeProjectionType";
+
+import type { ApiList, CreateDepartmentDTO, CreateIncomeDTO, CreateIncomeSubTypeDTO, CreateIncomeTypeDTO, Department, Income, IncomeSubType, IncomeType } from "../../models/Budget/incomeProjectionType";
 import apiConfig from "../apiConfig";
 
 
-// Departamentos
 export async function listDepartments(): Promise<ApiList<Department>> {
-  const { data } = await apiConfig.get<ApiList<Department>>("/department");
-  return data;
+  const { data } = await apiConfig.get<Department[]>("/department");
+ 
+  return { data };
 }
 
-export async function createDepartment(
-  payload: CreateDepartmentDTO
-): Promise<Department> {
+export async function createDepartment(payload: CreateDepartmentDTO): Promise<Department> {
   const { data } = await apiConfig.post<Department>("/department", payload);
   return data;
 }
 
-// IncomeProjectionType
-export async function listIncomeProjectionTypes(
-  departmentId?: number
-): Promise<ApiList<IncomeProjectionType>> {
-  const { data } = await apiConfig.get<ApiList<IncomeProjectionType>>(
-    "/income-projection-types",
-    { params: departmentId ? { departmentId } : undefined }
-  );
-  return data;
+
+export async function listIncomeTypes(departmentId?: number): Promise<ApiList<IncomeType>> {
+  const { data } = await apiConfig.get<any[]>("/p-income-type");
+  // Map a nuestro modelo plano
+  let items: IncomeType[] = (data ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    departmentId: t?.department?.id,
+  }));
+  if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
+  return { data: items };
 }
 
-export async function createIncomeProjectionType(
-  payload: CreateIncomeProjectionTypeDTO
-): Promise<IncomeProjectionType> {
-  const { data } = await apiConfig.post<IncomeProjectionType>(
-    "/income-projection-types",
-    payload
-  );
-  return data;
+export async function createIncomeType(payload: CreateIncomeTypeDTO): Promise<IncomeType> {
+  const { data } = await apiConfig.post<any>("/p-income-type", payload);
+  return {
+    id: data.id,
+    name: data.name,
+    departmentId: data?.department?.id ?? payload.departmentId,
+  };
 }
 
-// IncomeProjectionSubType
-export async function listIncomeProjectionSubTypes(
-  incomeProjectionTypeId?: number
-): Promise<ApiList<IncomeProjectionSubType>> {
-  const { data } = await apiConfig.get<ApiList<IncomeProjectionSubType>>(
-    "/income-projection-subtypes",
-    { params: incomeProjectionTypeId ? { incomeProjectionTypeId } : undefined }
-  );
-  return data;
+
+export async function listIncomeSubTypes(incomeTypeId: number): Promise<ApiList<IncomeSubType>> {
+  const { data } = await apiConfig.get<any[]>("/p-income-sub-type", {
+    params: { incomeTypeId },
+  });
+  const items: IncomeSubType[] = (data ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+    incomeTypeId: s?.incomeType?.id ?? incomeTypeId,
+  }));
+  return { data: items };
 }
 
-export async function createIncomeProjectionSubType(
-  payload: CreateIncomeProjectionSubTypeDTO
-): Promise<IncomeProjectionSubType> {
-  const { data } = await apiConfig.post<IncomeProjectionSubType>(
-    "/income-projection-subtypes",
-    payload
-  );
-  return data;
+export async function createIncomeSubType(payload: CreateIncomeSubTypeDTO): Promise<IncomeSubType> {
+  const { data } = await apiConfig.post<any>("/p-income-sub-type", payload);
+  return {
+    id: data.id,
+    name: data.name,
+    incomeTypeId: data?.incomeType?.id ?? payload.incomeTypeId,
+  };
 }
 
-// Projections
-export async function createIncomeProjection(
-  payload: IncomeProjectionCreateDTO
-): Promise<IncomeProjectionCreateDTO & { id: number }> {
-  const { data } = await apiConfig.post<
-    IncomeProjectionCreateDTO & { id: number }
-  >("/income-projections", payload);
-  return data;
+
+export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
+  const body = {
+    incomeSubTypeId: payload.incomeSubTypeId,
+ 
+    amount: Number(payload.amount).toFixed(2)
+  };
+
+  const { data } = await apiConfig.post<any>("/p-income", body);
+
+  return {
+    id: data.id,
+    amount: data.amount,
+    incomeSubType: {
+      id: data?.incomeSubType?.id ?? payload.incomeSubTypeId,
+      name: data?.incomeSubType?.name ?? "",
+      incomeTypeId: data?.incomeSubType?.incomeType?.id,
+    },
+  };
 }

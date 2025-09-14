@@ -3,13 +3,12 @@ import { X, Plus } from "lucide-react";
 import {
   useDepartments,
   useIncomeTypes,
-  useIncomeSubTypes,
-} from "../../hooks/Budget/income/useIncomeCatalog";
+} from "../../../hooks/Budget/income/useIncomeCatalog";
 import {
   useCreateDepartment,
   useCreateIncomeType,
   useCreateIncomeSubType,
-} from "../../hooks/Budget/income/useIncomeMutation";
+} from "../../../hooks/Budget/income/useIncomeMutation";
 
 type Props = {
   open: boolean;
@@ -40,7 +39,6 @@ export default function CatalogModal({
   // queries
   const dept = useDepartments();
   const types = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
-  const subTypes = useIncomeSubTypes(typeof typeId === "number" ? typeId : undefined);
 
   const departmentOptions = useMemo(
     () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
@@ -49,10 +47,6 @@ export default function CatalogModal({
   const typeOptions = useMemo(
     () => (types.data ?? []).map((t) => ({ label: t.name, value: t.id })),
     [types.data]
-  );
-  const subTypeOptions = useMemo(
-    () => (subTypes.data ?? []).map((s) => ({ label: s.name, value: s.id })),
-    [subTypes.data]
   );
 
   // defaults / autoselección

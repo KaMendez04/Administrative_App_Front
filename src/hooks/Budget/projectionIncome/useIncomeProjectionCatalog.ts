@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import type { Department, IncomeProjectionSubType, IncomeProjectionType, } from "../../models/Budget/incomeProjectionType";
-import { listDepartments, listIncomeProjectionSubTypes, listIncomeProjectionTypes } from "../../services/incomeProjectionService";
+import type { Department, IncomeSubType, IncomeType } from "../../../models/Budget/incomeProjectionType";
+import { listDepartments, listIncomeSubTypes, listIncomeTypes } from "../../../services/Budget/projectionIncomeService";
+
+
 
 
 // Departamentos
@@ -20,16 +22,16 @@ export function useDepartments() {
   return { data, loading, error };
 }
 
-// IncomeProjectionTypes (dependen de departamento)
-export function useIncomeProjectionTypes(departmentId?: number) {
-  const [data, setData] = useState<IncomeProjectionType[]>([]);
+// IncomeTypes (dependen de departamento)
+export function useIncomeTypes(departmentId?: number) {
+  const [data, setData] = useState<IncomeType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!departmentId) return;
     setLoading(true);
-    listIncomeProjectionTypes(departmentId)
+    listIncomeTypes(departmentId)
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -38,20 +40,20 @@ export function useIncomeProjectionTypes(departmentId?: number) {
   return { data, loading, error };
 }
 
-// IncomeProjectionSubTypes (dependen de type)
-export function useIncomeProjectionSubTypes(incomeProjectionTypeId?: number) {
-  const [data, setData] = useState<IncomeProjectionSubType[]>([]);
+// IncomeSubTypes (dependen de type)
+export function useIncomeSubTypes(incomeTypeId?: number) {
+  const [data, setData] = useState<IncomeSubType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!incomeProjectionTypeId) return;
+    if (!incomeTypeId) return;
     setLoading(true);
-    listIncomeProjectionSubTypes(incomeProjectionTypeId)
+    listIncomeSubTypes(incomeTypeId)
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [incomeProjectionTypeId]);
+  }, [incomeTypeId]);
 
   return { data, loading, error };
 }

@@ -3,41 +3,44 @@ export interface Department {
   name: string;
 }
 
-export interface IncomeProjectionType {
+export interface IncomeType {
   id: number;
   name: string;
   departmentId: number;
 }
 
-export interface IncomeProjectionSubType {
+export interface IncomeSubType {
   id: number;
   name: string;
-  incomeProjectionTypeId: number;
+  incomeTypeId: number;
 }
 
-export interface IncomeProjectionCreateDTO {
-  departmentId: number;
-  incomeProjectionTypeId: number;
-  incomeProjectionSubTypeId: number;
-  amount: number;           // en colones, validado > 0
-  detail?: string;          // opcional, máx 255
-  fiscalYearId?: number;    // opcional, si lo maneja el back
+export interface Income {
+  id: number;
+  amount: string; 
+ 
+  incomeSubType: IncomeSubType;
 }
 
-export interface CreateDepartmentDTO {
+export type CreateDepartmentDTO = {
   name: string;
-}
+};
 
-export interface CreateIncomeProjectionTypeDTO {
+export type CreateIncomeTypeDTO = {
   name: string;
   departmentId: number;
-}
+};
 
-export interface CreateIncomeProjectionSubTypeDTO {
+export type CreateIncomeSubTypeDTO = {
   name: string;
-  incomeProjectionTypeId: number;
-}
+  incomeTypeId: number;
+};
 
+
+export type CreateIncomeDTO = {
+  incomeSubTypeId: number;
+  amount: number;
+};
 
 export type Option = { label: string; value: number | string };
 

@@ -1,8 +1,8 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import IncomeForm from "../../components/Budget/IncomeForm";
-import CatalogModal from "../../components/Budget/CatalogModal";
+import IncomeForm from "../../components/Budget/Income/IncomeForm";
+import CatalogModal from "../../components/Budget/Income/CatalogModal";
 
 
 export default function IncomePage() {
