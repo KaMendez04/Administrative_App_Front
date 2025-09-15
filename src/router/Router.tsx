@@ -34,6 +34,7 @@ import Extraordinary from '../pages/Budget/Extraordinary'
 import Reports from '../pages/Budget/Reports'
 import PIncome from '../pages/Budget/PIncome'
 import PExpenses from '../pages/Budget/PSpend'
+import SpendPage from '../pages/Budget/SpendPage'
 
 
 
@@ -194,7 +195,7 @@ const budgetProjectionExpensesRoute = new Route({
 const budgetExpensesRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/expenses",
-  component: Expenses
+  component: SpendPage, // ← esta es la que queremos
 })
 
 const budgetIncomeRoute = new Route({
