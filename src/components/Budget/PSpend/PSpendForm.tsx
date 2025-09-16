@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
-import { useDepartments, useSpendSubTypes, useSpendTypes } from "../../../hooks/Budget/pSpend/usePSpendCatalog";
+import { useDepartments, usePSpendSubTypes, usePSpendTypes } from "../../../hooks/Budget/pSpend/usePSpendCatalog";
 import { useCreatePSpendEntry } from "../../../hooks/Budget/pSpend/usePSpendMutation";
 import type { CreatePSpendDTO } from "../../../models/Budget/PSpendType";
 import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
@@ -19,21 +19,12 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const dept = useDepartments();
-  const types = useSpendTypes(typeof departmentId === "number" ? departmentId : undefined);
-  const subTypes = useSpendSubTypes(typeof typeId === "number" ? typeId : undefined);
+  const types = usePSpendTypes(typeof departmentId === "number" ? departmentId : undefined);
+  const subTypes = usePSpendSubTypes(typeof typeId === "number" ? typeId : undefined);
 
-  const departmentOptions = useMemo(
-    () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
-    [dept.data]
-  );
-  const typeOptions = useMemo(
-    () => (types.data ?? []).map((t) => ({ label: t.name, value: t.id })),
-    [types.data]
-  );
-  const subTypeOptions = useMemo(
-    () => (subTypes.data ?? []).map((s) => ({ label: s.name, value: s.id })),
-    [subTypes.data]
-  );
+  const departmentOptions = useMemo(() => (dept.data ?? []).map(d => ({ label: d.name, value: d.id })), [dept.data]);
+  const typeOptions = useMemo(() => (types.data ?? []).map(t => ({ label: t.name, value: t.id })), [types.data]);
+  const subTypeOptions = useMemo(() => (subTypes.data ?? []).map(s => ({ label: s.name, value: s.id })), [subTypes.data]);
 
   useEffect(() => {
     if (departmentId === "" && (dept.data?.length ?? 0) > 0) setDepartmentId(dept.data[0].id);
@@ -49,27 +40,27 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       setSubTypeId(subTypes.data[0].id);
   }, [typeId, subTypes.data, subTypeId]);
 
-  const createPSpend = useCreatePSpendEntry();
+  const create = useCreatePSpendEntry();
 
   async function onSubmit() {
     setErrors({});
-    if (!departmentId) return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
-    if (!typeId) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
-    if (!subTypeId) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
-    if (!amountStr || amount <= 0) return setErrors((e) => ({ ...e, amount: "Monto requerido" }));
+    if (!departmentId) return setErrors(e => ({ ...e, departmentId: "Selecciona un departamento" }));
+    if (!typeId) return setErrors(e => ({ ...e, typeId: "Selecciona un tipo" }));
+    if (!subTypeId) return setErrors(e => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
+    if (!amountStr || amount <= 0) return setErrors(e => ({ ...e, amount: "Monto requerido" }));
 
     const payload: CreatePSpendDTO = {
-      spendSubTypeId: Number(subTypeId),
+      pSpendSubTypeId: Number(subTypeId),
       amount,
-      // fiscalYearId: X // <- si tu back lo exige, pásalo aquí
+      // fiscalYearId: X
     };
 
     try {
-      const res = await createPSpend.mutate(payload);
+      const res = await create.mutate(payload);
       if ("setValue" in money && typeof (money as any).setValue === "function") (money as any).setValue("");
       onSuccess?.(res.id);
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar la proyección" }));
+      setErrors(e => ({ ...e, api: err?.message ?? "No se pudo registrar la proyección" }));
     }
   }
 
@@ -78,15 +69,10 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       {/* Departamento */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Departamento</label>
-        <select
-          className="rounded-xl border border-gray-200 px-3 py-2"
-          value={departmentId}
-          onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : "")}
-        >
+        <select className="rounded-xl border border-gray-200 px-3 py-2" value={departmentId}
+          onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : "")}>
           <option value="">Seleccione…</option>
-          {departmentOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
+          {departmentOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
         {errors.departmentId && <p className="text-xs text-red-600">{errors.departmentId}</p>}
       </div>
@@ -94,16 +80,10 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       {/* Tipo */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Tipo</label>
-        <select
-          className="rounded-xl border border-gray-200 px-3 py-2"
-          value={typeId}
-          onChange={(e) => setTypeId(e.target.value ? Number(e.target.value) : "")}
-          disabled={!departmentId}
-        >
+        <select className="rounded-xl border border-gray-200 px-3 py-2" value={typeId}
+          onChange={(e) => setTypeId(e.target.value ? Number(e.target.value) : "")} disabled={!departmentId}>
           <option value="">Seleccione…</option>
-          {typeOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
+          {typeOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
         {errors.typeId && <p className="text-xs text-red-600">{errors.typeId}</p>}
       </div>
@@ -111,16 +91,10 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       {/* Subtipo */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Subtipo</label>
-        <select
-          className="rounded-xl border border-gray-200 px-3 py-2"
-          value={subTypeId}
-          onChange={(e) => setSubTypeId(e.target.value ? Number(e.target.value) : "")}
-          disabled={!typeId}
-        >
+        <select className="rounded-xl border border-gray-200 px-3 py-2" value={subTypeId}
+          onChange={(e) => setSubTypeId(e.target.value ? Number(e.target.value) : "")} disabled={!typeId}>
           <option value="">Seleccione…</option>
-          {subTypeOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
+          {subTypeOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
@@ -128,12 +102,8 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       {/* Monto */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Monto</label>
-        <input
-          className="rounded-xl border border-gray-200 px-3 py-2"
-          placeholder="₡0,00"
-          value={amountStr}
-          onChange={(e) => (money as any).handleInput?.(e)}
-        />
+        <input className="rounded-xl border border-gray-200 px-3 py-2" placeholder="₡0,00"
+          value={amountStr} onChange={(e) => (money as any).handleInput?.(e)} />
         {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       </div>
 

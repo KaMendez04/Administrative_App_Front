@@ -1,9 +1,9 @@
 import type {
   ApiList,
   Department,
-  SpendType,
-  SpendSubType,
   PSpend,
+  PSpendSubType,
+  PSpendType,
   CreatePSpendDTO,
 } from "../../models/Budget/PSpendType";
 import apiConfig from "../apiConfig";
@@ -14,10 +14,10 @@ export async function listDepartments(): Promise<ApiList<Department>> {
   return { data };
 }
 
-/** ============= Spend Types (catálogo compartido) ============= */
-export async function listSpendTypes(departmentId?: number): Promise<ApiList<SpendType>> {
-  const { data } = await apiConfig.get<any[]>("/spend-type");
-  let items: SpendType[] = (data ?? []).map((t) => ({
+/** ============= P-Types ============= */
+export async function listPSpendTypes(departmentId?: number): Promise<ApiList<PSpendType>> {
+  const { data } = await apiConfig.get<any[]>("/p-spend-type");
+  let items: PSpendType[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
     departmentId: t?.department?.id,
@@ -26,33 +26,51 @@ export async function listSpendTypes(departmentId?: number): Promise<ApiList<Spe
   return { data: items };
 }
 
-/** ============= Spend SubTypes (catálogo compartido) ============= */
-export async function listSpendSubTypes(spendTypeId: number): Promise<ApiList<SpendSubType>> {
-  const { data } = await apiConfig.get<any[]>("/spend-sub-type", { params: { spendTypeId } });
-  const items: SpendSubType[] = (data ?? []).map((s) => ({
+export async function createPSpendType(payload: { name: string; departmentId: number }): Promise<PSpendType> {
+  const { data } = await apiConfig.post<any>("/p-spend-type", payload);
+  return {
+    id: data.id,
+    name: data.name,
+    departmentId: data?.department?.id ?? payload.departmentId,
+  };
+}
+
+/** ============= P-SubTypes ============= */
+export async function listPSpendSubTypes(pSpendTypeId: number): Promise<ApiList<PSpendSubType>> {
+  const { data } = await apiConfig.get<any[]>("/p-spend-sub-type", { params: { pSpendTypeId } });
+  const items: PSpendSubType[] = (data ?? []).map((s) => ({
     id: s.id,
     name: s.name,
-    spendTypeId: s?.spendType?.id ?? spendTypeId,
+    pSpendTypeId: s?.pSpendType?.id ?? pSpendTypeId,
   }));
   return { data: items };
 }
 
-/** ============= Proyección de Egresos (/p-spend) ============= */
+export async function createPSpendSubType(payload: { name: string; pSpendTypeId: number }): Promise<PSpendSubType> {
+  const { data } = await apiConfig.post<any>("/p-spend-sub-type", payload);
+  return {
+    id: data.id,
+    name: data.name,
+    pSpendTypeId: data?.pSpendType?.id ?? payload.pSpendTypeId,
+  };
+}
+
+/** ============= Proyección (/p-spend) ============= */
 export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
-  const body: any = {
-    spendSubTypeId: payload.spendSubTypeId,
+  const body = {
+    pSpendSubTypeId: payload.pSpendSubTypeId,
     amount: Number(payload.amount).toFixed(2),
-    // fiscalYearId: payload.fiscalYearId, // <- descomenta si tu back lo requiere
+    // fiscalYearId: payload.fiscalYearId,
   };
   const { data } = await apiConfig.post<any>("/p-spend", body);
 
   return {
     id: data.id,
     amount: data.amount,
-    spendSubType: {
-      id: data?.spendSubType?.id ?? payload.spendSubTypeId,
-      name: data?.spendSubType?.name ?? "",
-      spendTypeId: data?.spendSubType?.spendType?.id,
+    pSpendSubType: {
+      id: data?.pSpendSubType?.id ?? payload.pSpendSubTypeId,
+      name: data?.pSpendSubType?.name ?? "",
+      pSpendTypeId: data?.pSpendSubType?.pSpendType?.id,
     },
   };
 }

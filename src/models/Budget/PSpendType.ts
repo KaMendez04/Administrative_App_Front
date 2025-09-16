@@ -3,28 +3,28 @@ export interface Department {
   name: string;
 }
 
-export interface SpendType {
+export interface PSpendType {
   id: number;
   name: string;
   departmentId: number;
 }
 
-export interface SpendSubType {
+export interface PSpendSubType {
   id: number;
   name: string;
-  spendTypeId: number;
+  pSpendTypeId: number;
 }
 
-export interface PSpend { // Proyección de egreso (no incluye date)
+export interface PSpend {
   id: number;
-  amount: string;          // el back suele devolver string
-  spendSubType: SpendSubType;
+  amount: string; // el back suele devolver string
+  pSpendSubType: PSpendSubType;
 }
 
 export type CreatePSpendDTO = {
-  spendSubTypeId: number;
-  amount: number;          // se serializa a string con 2 decimales
-  // fiscalYearId?: number; // <- si tu back lo exige, lo puedes incluir
+  pSpendSubTypeId: number;
+  amount: number; // se serializa a string con 2 decimales en el service
+  // fiscalYearId?: number; // agrega si tu back lo pide
 };
 
 export type ApiList<T> = { data: T[]; total?: number };

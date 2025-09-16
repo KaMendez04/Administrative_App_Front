@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import type { Department, SpendType, SpendSubType } from "../../../models/Budget/PSpendType";
+import type { Department, PSpendType, PSpendSubType } from "../../../models/Budget/PSpendType";
 import {
   listDepartments,
-  listSpendTypes,
-  listSpendSubTypes,
+  listPSpendTypes,
+  listPSpendSubTypes,
 } from "../../../services/Budget/projectionSpendService";
 
 export function useDepartments() {
@@ -22,15 +22,15 @@ export function useDepartments() {
   return { data, loading, error };
 }
 
-export function useSpendTypes(departmentId?: number) {
-  const [data, setData] = useState<SpendType[]>([]);
+export function usePSpendTypes(departmentId?: number) {
+  const [data, setData] = useState<PSpendType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!departmentId) return;
     setLoading(true);
-    listSpendTypes(departmentId)
+    listPSpendTypes(departmentId)
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -39,19 +39,19 @@ export function useSpendTypes(departmentId?: number) {
   return { data, loading, error };
 }
 
-export function useSpendSubTypes(spendTypeId?: number) {
-  const [data, setData] = useState<SpendSubType[]>([]);
+export function usePSpendSubTypes(pSpendTypeId?: number) {
+  const [data, setData] = useState<PSpendSubType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!spendTypeId) return;
+    if (!pSpendTypeId) return;
     setLoading(true);
-    listSpendSubTypes(spendTypeId)
+    listPSpendSubTypes(pSpendTypeId)
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [spendTypeId]);
+  }, [pSpendTypeId]);
 
   return { data, loading, error };
 }
