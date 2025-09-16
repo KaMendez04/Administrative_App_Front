@@ -28,7 +28,6 @@ import ManualPage from '../pages/ManualPage'
 import ChangePasswordPage from '../pages/ChangePasswordPage'
 import BudgetSubnav from '../pages/Budget/Navbar/BudgetSubnav'
 import Initial from '../pages/Budget/Initial'
-import Expenses from '../pages/Budget/Expenses'
 import Income from '../pages/Budget/Income'
 import Extraordinary from '../pages/Budget/Extraordinary'
 import Reports from '../pages/Budget/Reports'
@@ -188,7 +187,7 @@ const budgetProjectionIncomeRoute = new Route({
 
 const budgetProjectionExpensesRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
-  path: "/pexpense",
+  path: "/PExpense",
   component: PExpenses
 })
 
