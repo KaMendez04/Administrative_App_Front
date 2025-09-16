@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
-import { useDepartments, useIncomeSubTypes, useIncomeTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
-import type { CreateIncomeDTO } from "../../../models/Budget/incomeProjectionType";
-import { useCreateIncomeEntry } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
+import { useDepartments, usePIncomeSubTypes, usePIncomeTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
+import type { CreatePIncomeDTO } from "../../../models/Budget/incomeProjectionType";
+import { useCreatePIncomeEntry } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
 
 type Props = {
   onSuccess?: (createdId: number) => void;
@@ -22,8 +22,8 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const dept = useDepartments();
-  const types = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
-  const subTypes = useIncomeSubTypes(typeof typeId === "number" ? typeId : undefined);
+  const types = usePIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
+  const subTypes = usePIncomeSubTypes(typeof typeId === "number" ? typeId : undefined);
 
   const departmentOptions = useMemo(
     () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
@@ -56,7 +56,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
     }
   }, [typeId, subTypes.data, subTypeId]);
 
-  const createIncome = useCreateIncomeEntry();
+  const createIncome = useCreatePIncomeEntry();
 
   async function onSubmit() {
     setErrors({});
@@ -66,8 +66,8 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
     if (!subTypeId) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
     if (!amountStr || amount <= 0) return setErrors((e) => ({ ...e, amount: "Monto requerido" }));
 
-    const payload: CreateIncomeDTO = {
-      incomeSubTypeId: Number(subTypeId),
+    const payload: CreatePIncomeDTO = {
+      pIncomeSubTypeId: Number(subTypeId),
       amount, // el service lo serializa a string con 2 decimales
     };
 
@@ -160,7 +160,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Plus className="h-4 w-4" />
-        Registrar gasto
+        Registrar proyección de ingreso
       </button>
 
       {errors.api && <p className="text-xs text-red-600">{errors.api}</p>}

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { X, Plus } from "lucide-react";
-import { useDepartments, useIncomeTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
+import { useDepartments, usePIncomeTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
 import { useCreateDepartment, useCreateIncomeSubType, useCreateIncomeType } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
+import type { PIncomeType } from "../../../models/Budget/incomeProjectionType";
 
 
 type Props = {
@@ -32,14 +33,14 @@ export default function CatalogModal({
 
   // queries
   const dept = useDepartments();
-  const types = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
+  const types = usePIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
 
   const departmentOptions = useMemo(
     () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
     [dept.data]
   );
   const typeOptions = useMemo(
-    () => (types.data ?? []).map((t) => ({ label: t.name, value: t.id })),
+    () => (types.data ?? []).map((t: PIncomeType) => ({ label: t.name, value: t.id })),
     [types.data]
   );
 
@@ -111,7 +112,7 @@ export default function CatalogModal({
     // ⚠️ Importante: aquí NO va amount ni date. Solo { name, incomeTypeId }
     await mCreateSub.mutate({
       name: newSubType.trim(),
-      incomeTypeId: Number(typeId),
+      pIncomeTypeId: Number(typeId),
     });
     setNewSubType("");
     // subTypes.refetch?.()
