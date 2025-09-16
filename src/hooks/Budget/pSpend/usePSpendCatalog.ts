@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import type { Department, SpendSubType, SpendType } from "../../../models/Budget/spendProjectionType";
-import { listDepartments, listSpendSubTypes, listSpendTypes } from "../../../services/Budget/projectionSpendService";
+import type { Department, SpendType, SpendSubType } from "../../../models/Budget/PSpendType";
+import {
+  listDepartments,
+  listSpendTypes,
+  listSpendSubTypes,
+} from "../../../services/Budget/projectionSpendService";
 
-
-// Departamentos
 export function useDepartments() {
   const [data, setData] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,6 @@ export function useDepartments() {
   return { data, loading, error };
 }
 
-// IncomeTypes (dependen de departamento)
 export function useSpendTypes(departmentId?: number) {
   const [data, setData] = useState<SpendType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,7 +39,6 @@ export function useSpendTypes(departmentId?: number) {
   return { data, loading, error };
 }
 
-// IncomeSubTypes (dependen de type)
 export function useSpendSubTypes(spendTypeId?: number) {
   const [data, setData] = useState<SpendSubType[]>([]);
   const [loading, setLoading] = useState(false);
