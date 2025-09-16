@@ -23,11 +23,11 @@ export default function InitialPage() {
   // Calcular totales para las tablas
   const incomeTotalReal = incomeRows.reduce((sum, row) => sum + row.spent, 0);
   const incomeTotalProjected = incomeRows.reduce((sum, row) => sum + row.projected, 0);
-  const incomeTotalDiff = incomeTotalProjected - incomeTotalReal;
+  const incomeTotalDiff =  incomeTotalReal - incomeTotalProjected;
 
   const spendTotalReal = spendRows.reduce((sum, row) => sum + row.spent, 0);
   const spendTotalProjected = spendRows.reduce((sum, row) => sum + row.projected, 0);
-  const spendTotalDiff = spendTotalProjected - spendTotalReal;
+  const spendTotalDiff =  spendTotalReal - spendTotalProjected;
 
   return (
     <div className="min-h-screen bg-[#F7F8F5]">

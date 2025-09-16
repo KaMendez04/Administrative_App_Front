@@ -1,5 +1,6 @@
 import { TrendingDown, TrendingUp, BarChart3 } from "lucide-react";
 import type { Row } from "../../models/Budget/initialType";
+import { div } from "framer-motion/client";
 
 
 const crc = (n: number) =>
@@ -51,10 +52,10 @@ export function DiffBadge({ value, context }: { value: number; context: 'income'
   
   if (context === 'income') {
     // Para ingresos: queremos que los reales sean >= proyección
-    isGood = value <= 0; // value = projected - real, entonces si value <= 0 significa real >= projected
+    isGood = value >= 0; // value = projected - real, entonces si value <= 0 significa real >= projected
   } else {
     // Para egresos: queremos que los reales sean <= proyección
-    isGood = value >= 0; // value = projected - real, entonces si value >= 0 significa real <= projected
+    isGood = value <= 0; // value = projected - real, entonces si value >= 0 significa real <= projected
   }
   
   return (
@@ -113,7 +114,7 @@ export function DataTable({
                 <td className="px-5 py-3">{crc(r.projected)}</td>
                 <td className="px-5 py-3">
                   {/* La diferencia por fila puede venir del back; si la necesitas por fila, añade el campo en Row */}
-                  <DiffBadge value={r.projected - r.spent} context={context} />
+                  <DiffBadge value={r.spent - r.projected} context={context} />
                 </td>
               </tr>
             ))}
