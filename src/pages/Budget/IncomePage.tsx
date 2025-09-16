@@ -1,9 +1,7 @@
-
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import IncomeForm from "../../components/Budget/Income/IncomeForm";
 import CatalogModal from "../../components/Budget/Income/CatalogModal";
-
 
 export default function IncomePage() {
   const [openCatalog, setOpenCatalog] = useState(false);
@@ -14,10 +12,10 @@ export default function IncomePage() {
         <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
           {/* Título */}
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-          Ingresos
+            Ingresos
           </h1>
 
-          {/* Botón + arriba a la derecha (abre modal catálogo) */}
+          {/* Botón + (abre catálogo) */}
           <button
             onClick={() => setOpenCatalog(true)}
             className="absolute top-6 right-6 rounded-full bg-[#708C3E] p-3 text-white shadow hover:bg-[#5e732f]"
@@ -29,13 +27,13 @@ export default function IncomePage() {
           {/* Formulario principal */}
           <IncomeForm
             onSuccess={() => {
-
+              // aquí podrías mostrar un toast / refrescar listas, etc.
             }}
           />
         </div>
       </div>
 
-      {/* Modal: agregar Departamento / Tipo / SubTipo */}
+      {/* Modal catálogo: Departamento / Tipo / Subtipo */}
       <CatalogModal
         open={openCatalog}
         onClose={() => setOpenCatalog(false)}

@@ -25,18 +25,15 @@ export default function CatalogModal({
   defaultIncomeTypeId,
   onAccept,
 }: Props) {
-  // selección actual
   const [departmentId, setDepartmentId] = useState<number | "">("");
   const [typeId, setTypeId] = useState<number | "">("");
 
-  // inputs de creación
   const [newDepartment, setNewDepartment] = useState("");
   const [newType, setNewType] = useState("");
   const [newSubType, setNewSubType] = useState("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // queries
   const dept = useDepartments();
   const types = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
 
@@ -49,7 +46,6 @@ export default function CatalogModal({
     [types.data]
   );
 
-  // defaults / autoselección
   useEffect(() => {
     if (defaultDepartmentId) setDepartmentId(defaultDepartmentId);
   }, [defaultDepartmentId]);
@@ -69,12 +65,10 @@ export default function CatalogModal({
     }
   }, [departmentId, types.data, typeId]);
 
-  // mutations
   const mCreateDept = useCreateDepartment();
   const mCreateType = useCreateIncomeType();
   const mCreateSub = useCreateIncomeSubType();
 
-  // handlers creación
   async function handleCreateDepartment() {
     setErrors((e) => ({ ...e, dept: "" }));
     if (!newDepartment.trim()) {
@@ -83,7 +77,6 @@ export default function CatalogModal({
     }
     await mCreateDept.mutate({ name: newDepartment.trim() });
     setNewDepartment("");
-    // Si tus hooks de catálogo exponen refetch, puedes llamar dept.refetch?.()
   }
 
   async function handleCreateType() {
@@ -101,7 +94,6 @@ export default function CatalogModal({
       departmentId: Number(departmentId),
     });
     setNewType("");
-    // types.refetch?.()
   }
 
   async function handleCreateSubType() {
@@ -114,13 +106,11 @@ export default function CatalogModal({
       setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
       return;
     }
-    // ⚠️ Importante: aquí NO va amount ni date. Solo { name, incomeTypeId }
     await mCreateSub.mutate({
       name: newSubType.trim(),
       incomeTypeId: Number(typeId),
     });
     setNewSubType("");
-    // subTypes.refetch?.()
   }
 
   if (!open) return null;
@@ -129,7 +119,7 @@ export default function CatalogModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
       <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100">
         <div className="flex items-center justify-between border-b p-4 md:p-5">
-          <h2 className="text-lg font-semibold text-gray-900">Catálogo de Ingresos</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Catálogo de Egresos</h2>
           <button
             onClick={onClose}
             className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
@@ -180,7 +170,7 @@ export default function CatalogModal({
 
           {/* Tipo */}
           <section className="grid gap-2">
-            <label className="text-sm font-medium text-gray-800">Tipo de ingreso</label>
+            <label className="text-sm font-medium text-gray-800">Tipo de egreso</label>
             <div className="flex gap-2">
               <select
                 className="flex-1 rounded-xl border border-gray-200 px-3 py-2"
@@ -219,30 +209,29 @@ export default function CatalogModal({
           </section>
 
           {/* Subtipo */}
-<section className="grid gap-2">
-  <label className="text-sm font-medium text-gray-800">Subtipo</label>
-  <div className="flex gap-2">
-    <input
-      className="flex-1 rounded-xl border border-gray-200 px-3 py-2"
-      placeholder="Nuevo subtipo"
-      value={newSubType}
-      onChange={(e) => setNewSubType(e.target.value)}
-      disabled={!typeId}
-    />
-    <button
-      type="button"
-      onClick={handleCreateSubType}
-      disabled={mCreateSub.loading || !newSubType.trim() || !typeId}
-      className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
-      title="Crear subtipo"
-    >
-      <Plus className="h-4 w-4" />
-      Agregar
-    </button>
-  </div>
-  {errors.subType && <p className="text-xs text-red-600">{errors.subType}</p>}
-</section>
-
+          <section className="grid gap-2">
+            <label className="text-sm font-medium text-gray-800">Subtipo</label>
+            <div className="flex gap-2">
+              <input
+                className="flex-1 rounded-xl border border-gray-200 px-3 py-2"
+                placeholder="Nuevo subtipo"
+                value={newSubType}
+                onChange={(e) => setNewSubType(e.target.value)}
+                disabled={!typeId}
+              />
+              <button
+                type="button"
+                onClick={handleCreateSubType}
+                disabled={mCreateSub.loading || !newSubType.trim() || !typeId}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
+                title="Crear subtipo"
+              >
+                <Plus className="h-4 w-4" />
+                Agregar
+              </button>
+            </div>
+            {errors.subType && <p className="text-xs text-red-600">{errors.subType}</p>}
+          </section>
         </div>
 
         <div className="flex items-center justify-end gap-3 border-t p-4 md:p-5">

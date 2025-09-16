@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
-import { useDepartments, useIncomeSubTypes, useIncomeTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
-import { useCreateIncomeEntry } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
-import type { CreateIncomeDTO } from "../../../models/Budget/incomeProjectionType";
 import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
-
+import { useDepartments, useIncomeSubTypes, useIncomeTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
+import type { CreateIncomeDTO } from "../../../models/Budget/incomeProjectionType";
+import { useCreateIncomeEntry } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
 
 type Props = {
   onSuccess?: (createdId: number) => void;
@@ -17,9 +16,8 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
   const [subTypeId, setSubTypeId] = useState<number | "">("");
 
   const money = useMoneyInput("");
-  const amountStr: string = ((money as any).value ?? "") as string;  // <- nunca undefined
-  const amount = parseCR(amountStr || "") ?? 0;                      // <- parseo seguro
-
+  const amountStr: string = ((money as any).value ?? "") as string;  
+  const amount = parseCR(amountStr || "") ?? 0;                      
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -80,7 +78,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       }
       onSuccess?.(res.id);
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el ingreso" }));
+      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el gasto" }));
     }
   }
 
@@ -136,20 +134,17 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
 
-
       {/* Monto */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Monto</label>
         <input
           className="rounded-xl border border-gray-200 px-3 py-2"
           placeholder="₡0,00"
-          value={amountStr}                                  // <- nunca undefined
-          onChange={(e) => (money as any).handleInput?.(e)}  // <- usa tu handleInput
+          value={amountStr}
+          onChange={(e) => (money as any).handleInput?.(e)}
         />
         {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       </div>
-
-   
 
       {/* Botón */}
       <button
@@ -165,7 +160,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Plus className="h-4 w-4" />
-        Registrar ingreso
+        Registrar gasto
       </button>
 
       {errors.api && <p className="text-xs text-red-600">{errors.api}</p>}
