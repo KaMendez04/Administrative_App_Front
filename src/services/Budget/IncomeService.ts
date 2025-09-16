@@ -9,13 +9,8 @@ import type {
   IncomeSubType,
   IncomeType,
 } from "../../models/Budget/IncomeType";
-
-// 👇 Usa la MISMA ruta que en IncomeService:
 import apiConfig from "../apiConfig"; 
-// Si en tu repo real IncomeService usa "../../apiConfig", cambia esta línea a:
-// import apiConfig from "../../apiConfig";
 
-/** ============= Departamentos ============= */
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");
   return { data };
@@ -26,7 +21,6 @@ export async function createDepartment(payload: CreateDepartmentDTO): Promise<De
   return data;
 }
 
-/** ============= Income Types ============= */
 export async function listIncomeTypes(departmentId?: number): Promise<ApiList<IncomeType>> {
   const { data } = await apiConfig.get<any[]>("/income-type");
   // Map a modelo plano { id, name, departmentId }
@@ -48,7 +42,7 @@ export async function createIncomeType(payload: CreateIncomeTypeDTO): Promise<In
   };
 }
 
-/** ============= Income SubTypes ============= */
+
 export async function listIncomeSubTypes(incomeTypeId: number): Promise<ApiList<IncomeSubType>> {
   const { data } = await apiConfig.get<any[]>("/income-sub-type", {
     params: { incomeTypeId },
@@ -70,11 +64,11 @@ export async function createIncomeSubType(payload: CreateIncomeSubTypeDTO): Prom
   };
 }
 
-/** ============= Movimientos reales (Ingresos) ============= */
 export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
   const body = {
     incomeSubTypeId: payload.incomeSubTypeId,
     amount: Number(payload.amount).toFixed(2), // igual que en ingresos
+    date: payload.date,                         // 'YYYY-MM-DD'
   };
 
   const { data } = await apiConfig.post<any>("/income", body);
@@ -83,6 +77,7 @@ export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
   return {
     id: data.id,
     amount: data.amount,
+    date: data.date,
     incomeSubType: {
       id: data?.incomeSubType?.id ?? payload.incomeSubTypeId,
       name: data?.incomeSubType?.name ?? "",

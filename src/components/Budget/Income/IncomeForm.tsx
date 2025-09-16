@@ -19,6 +19,14 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
   const amountStr: string = ((money as any).value ?? "") as string;
   const amount = parseCR(amountStr || "") ?? 0;
 
+  const [date, setDate] = useState<string>(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  });
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const dept = useDepartments();
@@ -65,10 +73,12 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
     if (!typeId) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
     if (!subTypeId) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
     if (!amountStr || amount <= 0) return setErrors((e) => ({ ...e, amount: "Monto requerido" }));
+    if (!date) return setErrors((e) => ({ ...e, date: "Fecha requerida" }));
 
     const payload: CreateIncomeDTO = {
       incomeSubTypeId: Number(subTypeId),
       amount,
+      date,
     };
 
     try {
@@ -134,6 +144,26 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
 
+      {/* Fecha */}
+<div className="flex flex-col gap-1">
+  <label className="text-sm text-gray-700">Fecha</label>
+  <input
+    type="date"
+    className="rounded-xl border border-gray-200 px-3 py-2"
+    value={date}
+    onChange={(e) => setDate(e.target.value)}
+    max={(() => {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    })()} // calcula la fecha local sin desfase
+  />
+  {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
+</div>
+
+
       {/* Monto */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Monto</label>
@@ -143,6 +173,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
           value={amountStr}
           onChange={(e) => (money as any).handleInput?.(e)}
         />
+        {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       </div>
 
       {/* Botón */}
@@ -154,7 +185,8 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
           !typeId ||
           !subTypeId ||
           !amountStr ||
-          amount <= 0
+          amount <= 0 ||
+          !date
         }
         className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
@@ -162,7 +194,6 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         Registrar Ingreso
       </button>
 
-      {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       {errors.api && <p className="text-xs text-red-600">{errors.api}</p>}
     </div>
   );
