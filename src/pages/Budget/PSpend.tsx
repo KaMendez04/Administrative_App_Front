@@ -12,10 +12,6 @@ export default function PExpenses() {
     <div className="min-h-screen bg-[#F7F8F5] pt-20 md:pt-24 relative z-0">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
         <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
-          {/* Título */}
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            Proyección de Egresos
-          </h1>
 
           {/* Botón catálogo */}
           <button

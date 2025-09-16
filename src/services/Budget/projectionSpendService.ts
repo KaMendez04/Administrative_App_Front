@@ -49,7 +49,7 @@ export async function listPSpendSubTypes(pSpendTypeId: number): Promise<ApiList<
   const items: PSpendSubType[] = (data ?? []).map((s) => ({
     id: s.id,
     name: s.name,
-    pSpendTypeId: s?.pSpendType?.id ?? s?.spendType?.id ?? pSpendTypeId,
+    pSpendTypeId: s?.pSpendType?.id ?? s?? pSpendTypeId,
   }));
   return { data: items };
 }
@@ -67,7 +67,6 @@ export async function createPSpendSubType(payload: { name: string; pSpendTypeId:
     name: data.name,
     pSpendTypeId: data?.pSpendSubType?.pSpendType?.id
       ?? data?.pSpendType?.id
-      ?? data?.spendType?.id
       ?? payload.pSpendTypeId,
   };
 }
@@ -75,7 +74,6 @@ export async function createPSpendSubType(payload: { name: string; pSpendTypeId:
 export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
   const body = {
     pSpendSubTypeId: payload.pSpendSubTypeId,
-    spendSubTypeId: payload.pSpendSubTypeId,
     amount: Number(payload.amount).toFixed(2),
   };
   const { data } = await apiConfig.post<any>("/p-spend", body);
@@ -86,15 +84,12 @@ export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
     pSpendSubType: {
       id:
         data?.pSpendSubType?.id ??
-        data?.spendSubType?.id ??
         payload.pSpendSubTypeId,
       name:
         data?.pSpendSubType?.name ??
-        data?.spendSubType?.name ??
         "",
       pSpendTypeId:
-        data?.pSpendSubType?.pSpendType?.id ??
-        data?.spendSubType?.spendType?.id,
+        data?.pSpendSubType?.pSpendType?.id 
     },
   };
 }
