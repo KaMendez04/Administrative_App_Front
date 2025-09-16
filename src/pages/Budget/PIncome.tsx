@@ -13,9 +13,6 @@ export default function PIncomePage() {
       <div className="mx-auto max-w-6xl p-4 md:p-8">
         <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
           {/* Título */}
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-          Proyección de Ingresos
-          </h1>
 
           {/* Botón + arriba a la derecha (abre modal catálogo) */}
           <button

@@ -23,22 +23,21 @@ export default function InitialPage() {
   // Calcular totales para las tablas
   const incomeTotalReal = incomeRows.reduce((sum, row) => sum + row.spent, 0);
   const incomeTotalProjected = incomeRows.reduce((sum, row) => sum + row.projected, 0);
-  const incomeTotalDiff = incomeTotalProjected - incomeTotalReal;
+  const incomeTotalDiff =  incomeTotalReal - incomeTotalProjected;
 
   const spendTotalReal = spendRows.reduce((sum, row) => sum + row.spent, 0);
   const spendTotalProjected = spendRows.reduce((sum, row) => sum + row.projected, 0);
-  const spendTotalDiff = spendTotalProjected - spendTotalReal;
+  const spendTotalDiff =  spendTotalReal - spendTotalProjected;
 
   return (
     <div className="min-h-screen bg-[#F7F8F5]">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
         <div className="rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Inicio</h1>
 
           {/* ====== Cards métricas ====== */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <StatCard
-              title="Total Gastado"
+              title="Total de egresos"
               value={cards.totalGastado}
               color="red"
               icon="down"

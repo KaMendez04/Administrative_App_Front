@@ -1,23 +1,22 @@
-
-import type { ApiList, CreateDepartmentDTO, CreateSpendDTO, CreateSpendSubTypeDTO, CreateSpendTypeDTO, Department, Spend, SpendSubType, SpendType } from "../../models/Budget/spendProjectionType";
+import type {
+  ApiList,
+  Department,
+  SpendType,
+  SpendSubType,
+  PSpend,
+  CreatePSpendDTO,
+} from "../../models/Budget/PSpendType";
 import apiConfig from "../apiConfig";
 
-
+/** ============= Departamentos ============= */
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");
- 
   return { data };
 }
 
-export async function createDepartment(payload: CreateDepartmentDTO): Promise<Department> {
-  const { data } = await apiConfig.post<Department>("/department", payload);
-  return data;
-}
-
-
+/** ============= Spend Types (catálogo compartido) ============= */
 export async function listSpendTypes(departmentId?: number): Promise<ApiList<SpendType>> {
-  const { data } = await apiConfig.get<any[]>("/p-spend-type");
-  // Map a nuestro modelo plano
+  const { data } = await apiConfig.get<any[]>("/spend-type");
   let items: SpendType[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
@@ -27,20 +26,9 @@ export async function listSpendTypes(departmentId?: number): Promise<ApiList<Spe
   return { data: items };
 }
 
-export async function createSpendType(payload: CreateSpendTypeDTO): Promise<SpendType> {
-  const { data } = await apiConfig.post<any>("/p-spend-type", payload);
-  return {
-    id: data.id,
-    name: data.name,
-    departmentId: data?.department?.id ?? payload.departmentId,
-  };
-}
-
-
+/** ============= Spend SubTypes (catálogo compartido) ============= */
 export async function listSpendSubTypes(spendTypeId: number): Promise<ApiList<SpendSubType>> {
-  const { data } = await apiConfig.get<any[]>("/p-spend-sub-type", {
-    params: { spendTypeId },
-  });
+  const { data } = await apiConfig.get<any[]>("/spend-sub-type", { params: { spendTypeId } });
   const items: SpendSubType[] = (data ?? []).map((s) => ({
     id: s.id,
     name: s.name,
@@ -49,23 +37,13 @@ export async function listSpendSubTypes(spendTypeId: number): Promise<ApiList<Sp
   return { data: items };
 }
 
-export async function createSpendSubType(payload: CreateSpendSubTypeDTO): Promise<SpendSubType> {
-  const { data } = await apiConfig.post<any>("/p-spend-sub-type", payload);
-  return {
-    id: data.id,
-    name: data.name,
-    spendTypeId: data?.spendType?.id ?? payload.spendTypeId,
-  };
-}
-
-
-export async function createSpend(payload: CreateSpendDTO): Promise<Spend> {
-  const body = {
+/** ============= Proyección de Egresos (/p-spend) ============= */
+export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
+  const body: any = {
     spendSubTypeId: payload.spendSubTypeId,
- 
-    amount: Number(payload.amount).toFixed(2)
+    amount: Number(payload.amount).toFixed(2),
+    // fiscalYearId: payload.fiscalYearId, // <- descomenta si tu back lo requiere
   };
-
   const { data } = await apiConfig.post<any>("/p-spend", body);
 
   return {
