@@ -165,7 +165,7 @@ export default function SpendForm({ onSuccess, disabled }: Props) {
         className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Plus className="h-4 w-4" />
-        Registrar gasto
+        Registrar proyección de gasto
       </button>
 
       {errors.api && <p className="text-xs text-red-600">{errors.api}</p>}

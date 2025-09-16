@@ -3,42 +3,42 @@ export interface Department {
   name: string;
 }
 
-export interface IncomeType {
+export interface PIncomeType {
   id: number;
   name: string;
   departmentId: number;
 }
 
-export interface IncomeSubType {
+export interface PIncomeSubType {
   id: number;
   name: string;
-  incomeTypeId: number;
+  pIncomeTypeId: number;
 }
 
-export interface Income {
+export interface PIncome {
   id: number;
   amount: string; 
  
-  incomeSubType: IncomeSubType;
+  pIncomeSubType: PIncomeSubType;
 }
 
 export type CreateDepartmentDTO = {
   name: string;
 };
 
-export type CreateIncomeTypeDTO = {
+export type CreatePIncomeTypeDTO = {
   name: string;
   departmentId: number;
 };
 
-export type CreateIncomeSubTypeDTO = {
+export type CreatePIncomeSubTypeDTO = {
   name: string;
-  incomeTypeId: number;
+  pIncomeTypeId: number;
 };
 
 
-export type CreateIncomeDTO = {
-  incomeSubTypeId: number;
+export type CreatePIncomeDTO = {
+  pIncomeSubTypeId: number;
   amount: number;
 };
 

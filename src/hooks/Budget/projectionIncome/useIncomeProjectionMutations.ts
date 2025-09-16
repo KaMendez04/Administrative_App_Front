@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { CreateDepartmentDTO, CreateIncomeDTO, CreateIncomeSubTypeDTO, CreateIncomeTypeDTO, Department, Income, IncomeSubType, IncomeType } from "../../../models/Budget/incomeProjectionType";
-import { createDepartment, createIncome, createIncomeSubType, createIncomeType } from "../../../services/Budget/projectionIncomeService";
+import type { CreateDepartmentDTO, CreatePIncomeDTO, CreatePIncomeSubTypeDTO, CreatePIncomeTypeDTO, Department, PIncome, PIncomeSubType, PIncomeType } from "../../../models/Budget/incomeProjectionType";
+import { createDepartment, createPIncome, createPIncomeSubType, createPIncomeType } from "../../../services/Budget/projectionIncomeService";
 
 
 function useMutationFn<TPayload, TResult>(fn: (payload: TPayload) => Promise<TResult>) {
@@ -31,15 +31,15 @@ export function useCreateDepartment() {
 
 // Crear Tipo de Ingreso
 export function useCreateIncomeType() {
-  return useMutationFn<CreateIncomeTypeDTO, IncomeType>(createIncomeType);
+  return useMutationFn<CreatePIncomeTypeDTO, PIncomeType>(createPIncomeType);
 }
 
 // Crear Subtipo de Ingreso
 export function useCreateIncomeSubType() {
-  return useMutationFn<CreateIncomeSubTypeDTO, IncomeSubType>(createIncomeSubType);
+  return useMutationFn<CreatePIncomeSubTypeDTO, PIncomeSubType>(createPIncomeSubType);
 }
 
 // Registrar movimiento de ingreso real (/income)
-export function useCreateIncomeEntry() {
-  return useMutationFn<CreateIncomeDTO, Income>(createIncome);
+export function useCreatePIncomeEntry() {
+  return useMutationFn<CreatePIncomeDTO, PIncome>(createPIncome);
 }

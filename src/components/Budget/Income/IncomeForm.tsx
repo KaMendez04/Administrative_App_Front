@@ -16,10 +16,9 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
   const [subTypeId, setSubTypeId] = useState<number | "">("");
 
   const money = useMoneyInput("");
-  const amountStr: string = ((money as any).value ?? "") as string;  // <- nunca undefined
-  const amount = parseCR(amountStr || "") ?? 0;                      // <- parseo seguro
+  const amountStr: string = ((money as any).value ?? "") as string;
+  const amount = parseCR(amountStr || "") ?? 0;
 
-  const [, setDetail] = useState("");
   const [date, setDate] = useState<string>(() => {
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -78,8 +77,8 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
 
     const payload: CreateIncomeDTO = {
       incomeSubTypeId: Number(subTypeId),
-      amount, // el service lo serializa a string con 2 decimales
-      date,   // 'YYYY-MM-DD'
+      amount,
+      date,
     };
 
     try {
@@ -87,10 +86,9 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       if ("setValue" in money && typeof (money as any).setValue === "function") {
         (money as any).setValue("");
       }
-      setDetail("");
       onSuccess?.(res.id);
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el ingreso" }));
+      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el egreso" }));
     }
   }
 
@@ -147,16 +145,24 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       </div>
 
       {/* Fecha */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm text-gray-700">Fecha</label>
-        <input
-          type="date"
-          className="rounded-xl border border-gray-200 px-3 py-2"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-        {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
-      </div>
+<div className="flex flex-col gap-1">
+  <label className="text-sm text-gray-700">Fecha</label>
+  <input
+    type="date"
+    className="rounded-xl border border-gray-200 px-3 py-2"
+    value={date}
+    onChange={(e) => setDate(e.target.value)}
+    max={(() => {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    })()} // calcula la fecha local sin desfase
+  />
+  {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
+</div>
+
 
       {/* Monto */}
       <div className="flex flex-col gap-1">
@@ -164,13 +170,11 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         <input
           className="rounded-xl border border-gray-200 px-3 py-2"
           placeholder="₡0,00"
-          value={amountStr}                                  // <- nunca undefined
-          onChange={(e) => (money as any).handleInput?.(e)}  // <- usa tu handleInput
+          value={amountStr}
+          onChange={(e) => (money as any).handleInput?.(e)}
         />
         {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       </div>
-
-   
 
       {/* Botón */}
       <button
@@ -187,7 +191,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Plus className="h-4 w-4" />
-        Registrar ingreso
+        Registrar Ingreso
       </button>
 
       {errors.api && <p className="text-xs text-red-600">{errors.api}</p>}

@@ -9,12 +9,10 @@ import type {
   IncomeSubType,
   IncomeType,
 } from "../../models/Budget/IncomeType";
-import apiConfig from "../apiConfig";
-
+import apiConfig from "../apiConfig"; 
 
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");
- 
   return { data };
 }
 
@@ -23,10 +21,9 @@ export async function createDepartment(payload: CreateDepartmentDTO): Promise<De
   return data;
 }
 
-
 export async function listIncomeTypes(departmentId?: number): Promise<ApiList<IncomeType>> {
   const { data } = await apiConfig.get<any[]>("/income-type");
-  // Map a nuestro modelo plano
+  // Map a modelo plano { id, name, departmentId }
   let items: IncomeType[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
@@ -67,17 +64,16 @@ export async function createIncomeSubType(payload: CreateIncomeSubTypeDTO): Prom
   };
 }
 
-
 export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
   const body = {
     incomeSubTypeId: payload.incomeSubTypeId,
- 
-    amount: Number(payload.amount).toFixed(2),
-    date: payload.date, // 'YYYY-MM-DD'
+    amount: Number(payload.amount).toFixed(2), // igual que en ingresos
+    date: payload.date,                         // 'YYYY-MM-DD'
   };
 
   const { data } = await apiConfig.post<any>("/income", body);
 
+  // Devolvemos con la misma forma que IncomeService
   return {
     id: data.id,
     amount: data.amount,

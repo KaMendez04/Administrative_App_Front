@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Department, IncomeSubType, IncomeType } from "../../../models/Budget/incomeProjectionType";
-import { listDepartments, listIncomeSubTypes, listIncomeTypes } from "../../../services/Budget/projectionIncomeService";
-
-
+import type { Department, PIncomeSubType, PIncomeType } from "../../../models/Budget/incomeProjectionType";
+import { listDepartments, listPIncomeSubTypes, listPIncomeTypes } from "../../../services/Budget/projectionIncomeService";
 
 
 // Departamentos
@@ -23,15 +21,15 @@ export function useDepartments() {
 }
 
 // IncomeTypes (dependen de departamento)
-export function useIncomeTypes(departmentId?: number) {
-  const [data, setData] = useState<IncomeType[]>([]);
+export function usePIncomeTypes(departmentId?: number) {
+  const [data, setData] = useState<PIncomeType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!departmentId) return;
     setLoading(true);
-    listIncomeTypes(departmentId)
+    listPIncomeTypes(departmentId)
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -41,19 +39,19 @@ export function useIncomeTypes(departmentId?: number) {
 }
 
 // IncomeSubTypes (dependen de type)
-export function useIncomeSubTypes(incomeTypeId?: number) {
-  const [data, setData] = useState<IncomeSubType[]>([]);
+export function usePIncomeSubTypes(pIncomeTypeId?: number) {
+  const [data, setData] = useState<PIncomeSubType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!incomeTypeId) return;
+    if (!pIncomeTypeId) return;
     setLoading(true);
-    listIncomeSubTypes(incomeTypeId)
+    listPIncomeSubTypes(pIncomeTypeId)
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [incomeTypeId]);
+  }, [pIncomeTypeId]);
 
   return { data, loading, error };
 }

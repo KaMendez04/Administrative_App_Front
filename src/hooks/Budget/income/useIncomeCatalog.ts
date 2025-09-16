@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import type { Department, IncomeSubType, IncomeType } from "../../../models/Budget/IncomeType";
 import { listDepartments, listIncomeSubTypes, listIncomeTypes } from "../../../services/Budget/IncomeService";
 
-
-
 // Departamentos
 export function useDepartments() {
   const [data, setData] = useState<Department[]>([]);

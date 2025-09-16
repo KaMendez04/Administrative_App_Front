@@ -18,7 +18,7 @@ export interface IncomeSubType {
 export interface Income {
   id: number;
   amount: string; 
-  date: string;   
+  date: string;   // YYYY-MM-DD
   incomeSubType: IncomeSubType;
 }
 
@@ -36,11 +36,10 @@ export type CreateIncomeSubTypeDTO = {
   incomeTypeId: number;
 };
 
-
 export type CreateIncomeDTO = {
   incomeSubTypeId: number;
-  amount: number;
-  date: string;
+  amount: number; // lo serializamos en el service si hace falta
+  date: string;   // 'YYYY-MM-DD'
 };
 
 export type Option = { label: string; value: number | string };
