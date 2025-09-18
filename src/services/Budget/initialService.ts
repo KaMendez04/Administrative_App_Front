@@ -1,22 +1,23 @@
 import { mapIncomeRows, mapSpendRows, type ApiIncomeByDept, type ApiSpendByDept, type CardStats, type Row } from "../../models/Budget/initialType";
 import apiConfig from "../apiConfig";
 
-
 const HOME_SUMMARY_URL = "/home/summary";        // Para las cards
 const HOME_INCOMES_URL = "/home/incomes";        // Para tabla de ingresos
-const HOME_SPENDS_URL = "/home/spends";          // Para tabla de egresos (cuando esté implementado)
-
+const HOME_SPENDS_URL = "/home/spends";          // Para tabla de egresos
 
 export async function fetchIncomeByDepartment(): Promise<Row[]> {
-  const { data } = await apiConfig.get<ApiIncomeByDept[]>(`${HOME_INCOMES_URL}?groupBy=department`);
+  const { data } = await apiConfig.get<ApiIncomeByDept[]>(
+    `${HOME_INCOMES_URL}?groupBy=department`
+  );
   return mapIncomeRows(data);
 }
 
-
 export async function fetchSpendByDepartment(): Promise<Row[]> {
-  return [];
+  const { data } = await apiConfig.get<ApiSpendByDept[]>(
+    `${HOME_SPENDS_URL}?groupBy=department`
+  );
+  return mapSpendRows(data);
 }
-
 
 export async function fetchCardStats(): Promise<CardStats> {
   const { data } = await apiConfig.get<{
@@ -27,8 +28,7 @@ export async function fetchCardStats(): Promise<CardStats> {
     projectedSpends: number;
     projectedBalance: number;
   }>(HOME_SUMMARY_URL);
-  
-  // Mapear la respuesta del backend a la estructura esperada por el frontend
+
   return {
     totalGastado: data.spends,
     totalIngresos: data.incomes,
@@ -36,7 +36,6 @@ export async function fetchCardStats(): Promise<CardStats> {
   };
 }
 
-// Export agrupado (opcional)
 export const initialService = {
   fetchIncomeByDepartment,
   fetchSpendByDepartment,
