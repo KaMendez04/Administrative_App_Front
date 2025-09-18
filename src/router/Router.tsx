@@ -34,8 +34,18 @@ import Reports from '../pages/Budget/Reports'
 import PIncome from '../pages/Budget/PIncome'
 import PExpenses from '../pages/Budget/PSpend'
 import SpendPage from '../pages/Budget/SpendPage'
+import { getCurrentUser } from '../services/auth'
+import { redirect } from '@tanstack/react-router'
 
-
+function requireRole(allowed: "ADMIN" | "JUNTA") {
+    const role = (getCurrentUser()?.role?.name?? "").toUpperCase()
+    if (!allowed.includes(role as any)) {
+      throw redirect({
+        to: "/unauthorized",
+        search: { from: location.pathname },
+      })
+    }
+}
 
 // Root vacío (NO layout). Desde aquí colgamos:
 // - appLayout (con Home)
@@ -64,6 +74,7 @@ const principalRoute = new Route({
 const editionLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: '/edition',
+  beforeLoad: () => requireRole("ADMIN"),
   component: () => <Outlet />,
 })
 
@@ -182,30 +193,35 @@ const budgetHomeRoute = new Route({
 const budgetProjectionIncomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/pincome",
+  beforeLoad: () => requireRole("ADMIN"),
   component: PIncome
 })
 
 const budgetProjectionExpensesRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/PExpense",
+  beforeLoad: () => requireRole("ADMIN"),
   component: PExpenses
 })
 
 const budgetExpensesRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/expenses",
+  beforeLoad: () => requireRole("ADMIN"),
   component: SpendPage, // ← esta es la que queremos
 })
 
 const budgetIncomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/income",
+  beforeLoad: () => requireRole("ADMIN"),
   component: Income
 })
 
 const budgetExtraRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/extra",
+  beforeLoad: () => requireRole("ADMIN"),
   component: Extraordinary
 })
 
@@ -213,7 +229,7 @@ const budgetExtraRoute = new Route({
 const budgetReportsRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/reports",
-  component:  Reports
+  component: Reports
 })
 
 // Fallback: si alguna ruta no existe, redirige a "/Principal"

@@ -1,19 +1,24 @@
 import { Link, useRouterState } from "@tanstack/react-router"
 import { motion } from "framer-motion"
+import type { NavItem, RoleCode } from "../../../types/roles"
+import { getCurrentUser } from "../../../services/auth"
 
-const items = [
-  { to: "/budget", label: "Inicio", exact: true },
-  { to: "/budget/pincome", label: "Proyección Ingresos" },
-  { to: "/budget/pexpense", label: "Proyección Egresos" },
-  { to: "/budget/income", label: "Ingresos" },
-  { to: "/budget/expenses", label: "Egresos" },
-  { to: "/budget/extra", label: "Extraordinario" },
-  { to: "/budget/reports", label: "Reportes" },
+const items: NavItem[] = [
+  { to: "/budget", label: "Inicio", exact: true, allowedRoles: ["ADMIN", "JUNTA"] },
+  { to: "/budget/pincome", label: "Proyección Ingresos", allowedRoles: ["ADMIN"] },
+  { to: "/budget/pexpense", label: "Proyección Egresos", allowedRoles: ["ADMIN"] },
+  { to: "/budget/income", label: "Ingresos", allowedRoles: ["ADMIN"] },
+  { to: "/budget/expenses", label: "Egresos", allowedRoles: ["ADMIN"] },
+  { to: "/budget/extra", label: "Extraordinario", allowedRoles: ["ADMIN"] },
+  { to: "/budget/reports", label: "Reportes", allowedRoles: ["ADMIN", "JUNTA"] },
 ]
 
 export default function BudgetSubnav() {
   const { location } = useRouterState()
   const pathname = location.pathname
+
+  const role = (getCurrentUser()?.role?.name ?? "").toUpperCase() as RoleCode
+  const visibleItems = items.filter(item => item.allowedRoles.includes(role))
 
   const isActive = (path: string, exact?: boolean) =>
     exact ? pathname === path : pathname.startsWith(path)
@@ -23,7 +28,7 @@ export default function BudgetSubnav() {
       <nav className="mx-auto max-w-7xl px-4 py-4 flex flex-col items-center">
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg shadow-slate-900/5 p-2">
           <ul className="relative flex flex-wrap justify-center gap-1">
-            {items.map((item) => {
+            {visibleItems.map((item) => {
               const active = isActive(item.to, item.exact)
               return (
                 <li key={item.to} className="relative">
