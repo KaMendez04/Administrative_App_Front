@@ -46,29 +46,19 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
     [subTypes.data]
   );
 
+  // ✅ cascada sin autoselección
   useEffect(() => {
-    if (departmentId === "" && (dept.data?.length ?? 0) > 0) {
-      setDepartmentId(dept.data[0].id);
-    }
-  }, [dept.data, departmentId]);
-
+    setTypeId("");
+    setSubTypeId("");
+  }, [departmentId]);
   useEffect(() => {
-    if (typeof departmentId === "number" && typeId === "" && (types.data?.length ?? 0) > 0) {
-      setTypeId(types.data[0].id);
-    }
-  }, [departmentId, types.data, typeId]);
-
-  useEffect(() => {
-    if (typeof typeId === "number" && subTypeId === "" && (subTypes.data?.length ?? 0) > 0) {
-      setSubTypeId(subTypes.data[0].id);
-    }
-  }, [typeId, subTypes.data, subTypeId]);
+    setSubTypeId("");
+  }, [typeId]);
 
   const createIncome = useCreateIncomeEntry();
 
   async function onSubmit() {
     setErrors({});
-
     if (!departmentId) return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
     if (!typeId) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
     if (!subTypeId) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
@@ -98,9 +88,10 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Departamento</label>
         <select
-          className="rounded-xl border border-gray-200 px-3 py-2"
+          className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
           value={departmentId}
           onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : "")}
+          disabled={disabled}
         >
           <option value="">Seleccione…</option>
           {departmentOptions.map((opt) => (
@@ -114,12 +105,12 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Tipo</label>
         <select
-          className="rounded-xl border border-gray-200 px-3 py-2"
+          className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100 disabled:cursor-not-allowed"
           value={typeId}
           onChange={(e) => setTypeId(e.target.value ? Number(e.target.value) : "")}
-          disabled={!departmentId}
+          disabled={!departmentId || disabled}
         >
-          <option value="">Seleccione…</option>
+          <option value="">{!departmentId ? "Seleccione un departamento…" : "Seleccione…"}</option>
           {typeOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
@@ -131,12 +122,12 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Subtipo</label>
         <select
-          className="rounded-xl border border-gray-200 px-3 py-2"
+          className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100 disabled:cursor-not-allowed"
           value={subTypeId}
           onChange={(e) => setSubTypeId(e.target.value ? Number(e.target.value) : "")}
-          disabled={!typeId}
+          disabled={!typeId || disabled}
         >
-          <option value="">Seleccione…</option>
+          <option value="">{!typeId ? "Seleccione un tipo…" : "Seleccione…"}</option>
           {subTypeOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
@@ -145,33 +136,34 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       </div>
 
       {/* Fecha */}
-<div className="flex flex-col gap-1">
-  <label className="text-sm text-gray-700">Fecha</label>
-  <input
-    type="date"
-    className="rounded-xl border border-gray-200 px-3 py-2"
-    value={date}
-    onChange={(e) => setDate(e.target.value)}
-    max={(() => {
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${yyyy}-${mm}-${dd}`;
-    })()} // calcula la fecha local sin desfase
-  />
-  {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
-</div>
-
+      <div className="flex flex-col gap-1">
+        <label className="text-sm text-gray-700">Fecha</label>
+        <input
+          type="date"
+          className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          max={(() => {
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const dd = String(d.getDate()).padStart(2, "0");
+            return `${yyyy}-${mm}-${dd}`;
+          })()}
+          disabled={disabled}
+        />
+        {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
+      </div>
 
       {/* Monto */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Monto</label>
         <input
-          className="rounded-xl border border-gray-200 px-3 py-2"
+          className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
           placeholder="₡0,00"
           value={amountStr}
           onChange={(e) => (money as any).handleInput?.(e)}
+          disabled={disabled}
         />
         {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       </div>
@@ -179,15 +171,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       {/* Botón */}
       <button
         onClick={onSubmit}
-        disabled={
-          disabled ||
-          !departmentId ||
-          !typeId ||
-          !subTypeId ||
-          !amountStr ||
-          amount <= 0 ||
-          !date
-        }
+        disabled={disabled || !departmentId || !typeId || !subTypeId || !amountStr || amount <= 0 || !date}
         className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Plus className="h-4 w-4" />
