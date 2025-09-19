@@ -34,7 +34,7 @@ export default function Reports() {
             </Link>
 
             <Link
-              to="/budget/reports/pincome"
+              to="/budget/reports/ProjectionIncome"
               className={
                 isActive("/budget/reports/pincome")
                   ? "px-3 py-2 rounded-lg bg-[#A3853D] text-white shadow-sm"
@@ -45,7 +45,7 @@ export default function Reports() {
             </Link>
 
             <Link
-              to="/budget/reports/pspend"
+              to="/budget/reports/ProjectionSpends"
               className={
                 isActive("/budget/reports/pspend")
                   ? "px-3 py-2 rounded-lg bg-[#A3853D] text-white shadow-sm"

@@ -42,6 +42,7 @@ import SpendReportPage from '../pages/Budget/Reports/SpendReportPage'
 import PSpends from '../pages/Budget/Reports/PSpends'
 import PIncomeProjectionsPage from '../pages/Budget/Reports/PIncome'
 
+
 function requireRole(allowed: "ADMIN" | "JUNTA") {
     const role = (getCurrentUser()?.role?.name?? "").toUpperCase()
     if (!allowed.includes(role as any)) {
@@ -255,6 +256,18 @@ const budgetReportsSpendRoute = new Route({
   component: SpendReportPage,
 })
 
+const budgetReportsPSpendRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: 'pspend', // -> /budget/reports/spend
+  component: PSpends,
+})
+
+const budgetReportsPIncomeRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: 'pincome', // -> /budget/reports/spend
+  component: PIncome,
+})
+
 const budgetReportPIncomeRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
   path: 'ProjectionIncome', // -> /budget/reports/projection
@@ -316,7 +329,9 @@ const routeTree = rootRoute.addChildren([
       budgetReportsIncomeRoute,  // /budget/reports/income
       budgetReportsSpendRoute,   // /budget/reports/spend
       budgetReportsPSpendsRoute, 
-      budgetReportPIncomeRoute
+      budgetReportPIncomeRoute,
+      budgetReportsPSpendRoute,
+      budgetReportsPIncomeRoute
     ]),
 
     staffManagement,
