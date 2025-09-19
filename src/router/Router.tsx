@@ -1,4 +1,3 @@
-
 import {
   Router,
   RootRoute,
@@ -9,6 +8,7 @@ import {
   useNavigate,
 } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import RootLayout from './RootLayout'
 
 import Home from './Home'
 import PrincipalEdition from '../pages/editionPage/PrincipalEdition'
@@ -36,13 +36,9 @@ import PExpenses from '../pages/Budget/PSpend'
 import SpendPage from '../pages/Budget/SpendPage'
 import IncomeReportPage from '../pages/Budget/Reports/IncomeReportPage'
 
-
-
-// Root vacío (NO layout). Desde aquí colgamos:
-// - appLayout (con Home)
-// - rutas sin layout (login, forgot-password, reset-password)
+// Root con React Query Provider (layout raíz)
 const rootRoute = new RootRoute({
-  component: () => <Outlet />,
+  component: RootLayout,
 })
 
 // Layout general con Navbar + Sidebar
@@ -148,7 +144,6 @@ const manualPage = new Route({
   component: ManualPage,
 })
 
-
 const forgotPasswordRoute = new Route({
   getParentRoute: () => rootRoute, // <- también sin layout
   path: '/forgot-password',
@@ -180,7 +175,6 @@ const budgetHomeRoute = new Route({
   component: Initial,
 })
 
-
 const budgetProjectionIncomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/pincome",
@@ -210,7 +204,6 @@ const budgetExtraRoute = new Route({
   path: "/extra",
   component: Extraordinary
 })
-
 
 const budgetReportsRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,

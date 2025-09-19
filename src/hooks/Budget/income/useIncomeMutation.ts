@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type {
   CreateDepartmentDTO,
   CreateIncomeDTO,
@@ -15,44 +14,63 @@ import {
   createIncomeSubType,
   createIncomeType,
 } from "../../../services/Budget/IncomeService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-function useMutationFn<TPayload, TResult>(fn: (payload: TPayload) => Promise<TResult>) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function mutate(payload: TPayload): Promise<TResult> {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fn(payload);
-      return res;
-    } catch (err: any) {
-      setError(err?.message ?? "Error de red");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return { mutate, loading, error };
+// Mantiene el contrato: { mutate, loading, error }
+function wrapMutation<TPayload, TResult>(
+  mutation: ReturnType<typeof useMutation<TResult, unknown, TPayload, unknown>>,
+) {
+  return {
+    mutate: (payload: TPayload) => mutation.mutateAsync(payload),
+    loading: mutation.isPending,
+    error: (mutation.error as any)?.message ?? null,
+  };
 }
 
 // Crear Departamento
 export function useCreateDepartment() {
-  return useMutationFn<CreateDepartmentDTO, Department>(createDepartment);
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (payload: CreateDepartmentDTO) => createDepartment(payload),
+    onSuccess: () => {
+      // refresca lista global de departamentos
+      qc.invalidateQueries({ queryKey: ["departments"] });
+    },
+  });
+  return wrapMutation<CreateDepartmentDTO, Department>(m);
 }
 
 // Crear Tipo de Ingreso
 export function useCreateIncomeType() {
-  return useMutationFn<CreateIncomeTypeDTO, IncomeType>(createIncomeType);
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (payload: CreateIncomeTypeDTO) => createIncomeType(payload),
+    onSuccess: (_created, payload) => {
+      // refresca tipos del departamento afectado
+      qc.invalidateQueries({ queryKey: ["incomeTypes", payload.departmentId ?? "none"] });
+    },
+  });
+  return wrapMutation<CreateIncomeTypeDTO, IncomeType>(m);
 }
 
 // Crear Subtipo de Ingreso
 export function useCreateIncomeSubType() {
-  return useMutationFn<CreateIncomeSubTypeDTO, IncomeSubType>(createIncomeSubType);
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (payload: CreateIncomeSubTypeDTO) => createIncomeSubType(payload),
+    onSuccess: (_created, payload) => {
+      // refresca subtipos del tipo afectado
+      // (asumiendo que CreateIncomeSubTypeDTO tiene incomeTypeId)
+      qc.invalidateQueries({ queryKey: ["incomeSubTypes", (payload as any).incomeTypeId ?? "none"] });
+    },
+  });
+  return wrapMutation<CreateIncomeSubTypeDTO, IncomeSubType>(m);
 }
 
-// Registrar movimiento de ingreso real (/income)
+// Registrar ingreso real (/income)
 export function useCreateIncomeEntry() {
-  return useMutationFn<CreateIncomeDTO, Income>(createIncome);
+  const m = useMutation({
+    mutationFn: (payload: CreateIncomeDTO) => createIncome(payload),
+  });
+  return wrapMutation<CreateIncomeDTO, Income>(m);
 }

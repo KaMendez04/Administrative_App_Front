@@ -1,56 +1,55 @@
-import { useEffect, useState } from "react";
 import type { Department, IncomeSubType, IncomeType } from "../../../models/Budget/IncomeType";
 import { listDepartments, listIncomeSubTypes, listIncomeTypes } from "../../../services/Budget/IncomeService";
+import { useQuery } from "@tanstack/react-query";
+
+// Mantiene el contrato: { data, loading, error }
+function adaptQuery<T>(q: { data?: T; isPending: boolean; error: unknown }) {
+  return {
+    data: q.data as T | undefined,
+    loading: q.isPending,
+    error: (q.error as any)?.message ?? null,
+  };
+}
 
 // Departamentos
 export function useDepartments() {
-  const [data, setData] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setLoading(true);
-    listDepartments()
-      .then((res) => setData(res.data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { data, loading, error };
+  const q = useQuery({
+    queryKey: ["departments"],
+    queryFn: async () => {
+      const res = await listDepartments();
+      return res.data as Department[];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+  return adaptQuery<Department[]>(q);
 }
 
 // IncomeTypes (dependen de departamento)
 export function useIncomeTypes(departmentId?: number) {
-  const [data, setData] = useState<IncomeType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!departmentId) return;
-    setLoading(true);
-    listIncomeTypes(departmentId)
-      .then((res) => setData(res.data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [departmentId]);
-
-  return { data, loading, error };
+  const q = useQuery({
+    queryKey: ["incomeTypes", departmentId ?? "none"],
+    queryFn: async () => {
+      if (!departmentId) return [] as IncomeType[];
+      const res = await listIncomeTypes(departmentId);
+      return res.data as IncomeType[];
+    },
+    enabled: !!departmentId,
+    staleTime: 5 * 60 * 1000,
+  });
+  return adaptQuery<IncomeType[]>(q);
 }
 
 // IncomeSubTypes (dependen de type)
 export function useIncomeSubTypes(incomeTypeId?: number) {
-  const [data, setData] = useState<IncomeSubType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!incomeTypeId) return;
-    setLoading(true);
-    listIncomeSubTypes(incomeTypeId)
-      .then((res) => setData(res.data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [incomeTypeId]);
-
-  return { data, loading, error };
+  const q = useQuery({
+    queryKey: ["incomeSubTypes", incomeTypeId ?? "none"],
+    queryFn: async () => {
+      if (!incomeTypeId) return [] as IncomeSubType[];
+      const res = await listIncomeSubTypes(incomeTypeId);
+      return res.data as IncomeSubType[];
+    },
+    enabled: !!incomeTypeId,
+    staleTime: 5 * 60 * 1000,
+  });
+  return adaptQuery<IncomeSubType[]>(q);
 }

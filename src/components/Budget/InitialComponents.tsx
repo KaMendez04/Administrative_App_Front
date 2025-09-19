@@ -1,6 +1,5 @@
 import { TrendingDown, TrendingUp, BarChart3 } from "lucide-react";
 import type { Row } from "../../models/Budget/initialType";
-import { div } from "framer-motion/client";
 
 
 const crc = (n: number) =>
