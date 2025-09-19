@@ -32,7 +32,7 @@ export default function Reports() {
               Egresos
             </Link>
              <Link
-              to="/budget/reports/income" //cambiar por proyeccion de ingresos cuando esté listo
+              to="/budget/reports/ProjectionIncome" //cambiar por proyeccion de ingresos cuando esté listo
               className={
                 isIncome
                   ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
@@ -43,7 +43,7 @@ export default function Reports() {
             </Link>
 
              <Link
-              to="/budget/reports/income"
+              to="/budget/reports/ProjectionSpends" //cambiar por proyeccion de egresos cuando esté listo
               className={
                 isIncome
                   ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
