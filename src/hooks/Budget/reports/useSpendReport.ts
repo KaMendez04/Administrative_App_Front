@@ -68,11 +68,19 @@ export function useSpendReport(filters: SpendReportNameFilters | null) {
         amount: numify(r.amount ?? r.total),
       }));
 
-      // 4) Normalizar/crear summary (fallbacks si viene vacío)
+      // helpers arriba del hook
+      function deptLabel(x: any): string {
+        // acepta string, objeto {name}, {department:{name}}, {departmentName}, {dept}, {name}
+        if (typeof x === "string") return x;
+        if (x?.department) return textify(x.department);      // si viene objeto, toma .name adentro
+        return textify(x.departmentName ?? x.dept ?? x.name ?? x);
+      }
+
+     // dentro de queryFn, donde armamos baseTotals:
       const baseTotals = {
         total: numify(totals?.total),
         byDepartment: (totals?.byDepartment ?? []).map((x: any) => ({
-          department: textify(x.department ?? x.name ?? x.dept),
+          department: deptLabel(x) || deptLabel(x?.department),
           total: numify(x.total),
         })),
         byType: (totals?.byType ?? []).map((x: any) => ({
@@ -84,14 +92,15 @@ export function useSpendReport(filters: SpendReportNameFilters | null) {
           total: numify(x.total),
         })),
       };
-
       // Derivados desde las filas si faltan
       const sumFromRows = normRows.reduce((acc: number, r: { amount: any; }) => acc + numify(r.amount), 0);
       const finalTotals = {
         total: baseTotals.total > 0 ? baseTotals.total : sumFromRows,
-        byDepartment: baseTotals.byDepartment.length ? baseTotals.byDepartment : groupBySum(normRows, "department"),
+        byDepartment: baseTotals.byDepartment.length
+          ? baseTotals.byDepartment
+          : groupBySum(normRows, "department"),
         byType: baseTotals.byType.length ? baseTotals.byType : groupBySum(normRows, "spendType"),
-        bySubType: baseTotals.bySubType, // opcional: podrías derivar por subtipo si lo necesitas
+        bySubType: baseTotals.bySubType,
       };
 
       return { rows: normRows, totals: finalTotals };

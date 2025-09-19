@@ -2,60 +2,62 @@ import { Outlet, Link, useRouterState } from "@tanstack/react-router";
 
 export default function Reports() {
   const { location } = useRouterState();
-  const isIncome = location.pathname.startsWith("/budget/reports/income");
+  const pathname = location.pathname;
+
+  const isActive = (path: string) => pathname.startsWith(path);
 
   return (
-    <div className="min-h-screen bg-[#F7F8F5]">
+    <div className="min-h-screen bg-[#FAF9F5]">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
-        <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
-          <nav className="mb-6 flex gap-3">
+        <div className="relative rounded-3xl bg-white shadow-[0_10px_25px_rgba(0,0,0,0.05)] ring-1 ring-gray-100 p-6 md:p-10">
+          <nav className="mb-6 flex flex-wrap gap-3">
             <Link
               to="/budget/reports/income"
               className={
-                isIncome
-                  ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
-                  : "px-3 py-2 rounded-lg hover:bg-green-50 border border-gray-100 text-gray-700"
+                isActive("/budget/reports/income")
+                  ? "px-3 py-2 rounded-lg bg-[#708C3E] text-white shadow-sm"
+                  : "px-3 py-2 rounded-lg hover:bg-[#F0F2EA] border border-gray-200 text-gray-700"
               }
             >
               Ingresos
             </Link>
-            
-            {/* futuros tabs */}
-             <Link
-              to="/budget/reports/spend" //cambiar por egresos cuando esté listo
+
+            <Link
+              to="/budget/reports/spend"
               className={
-                isIncome
-                  ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
-                  : "px-3 py-2 rounded-lg hover:bg-green-50 border border-gray-100 text-gray-700"
+                isActive("/budget/reports/spend")
+                  ? "px-3 py-2 rounded-lg bg-[#708C3E] text-white shadow-sm"
+                  : "px-3 py-2 rounded-lg hover:bg-[#F0F2EA] border border-gray-200 text-gray-700"
               }
             >
               Egresos
             </Link>
-             <Link
-              to="/budget/reports/income" //cambiar por proyeccion de ingresos cuando esté listo
+
+            <Link
+              to="/budget/reports/pincome"
               className={
-                isIncome
-                  ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
-                  : "px-3 py-2 rounded-lg hover:bg-green-50 border border-gray-100 text-gray-700"
+                isActive("/budget/reports/pincome")
+                  ? "px-3 py-2 rounded-lg bg-[#A3853D] text-white shadow-sm"
+                  : "px-3 py-2 rounded-lg hover:bg-[#FAF5E7] border border-gray-200 text-gray-700"
               }
             >
-              Proyeccion de ingresos
+              Proyección de ingresos
             </Link>
 
-             <Link
-              to="/budget/reports/income"
+            <Link
+              to="/budget/reports/pspend"
               className={
-                isIncome
-                  ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
-                  : "px-3 py-2 rounded-lg hover:bg-green-50 border border-gray-100 text-gray-700"
+                isActive("/budget/reports/pspend")
+                  ? "px-3 py-2 rounded-lg bg-[#A3853D] text-white shadow-sm"
+                  : "px-3 py-2 rounded-lg hover:bg-[#FAF5E7] border border-gray-200 text-gray-700"
               }
             >
-              Proyeccion de egresos
+              Proyección de egresos
             </Link>
           </nav>
 
-          {/* Contenedor de subpáginas con el mismo marco blanco */}
-          <div className="border-2 border-gray-100 rounded-xl">
+          {/* Contenedor de subpáginas */}
+          <div className="border-2 border-gray-100 rounded-xl bg-[#FAF9F5]">
             <Outlet />
           </div>
         </div>

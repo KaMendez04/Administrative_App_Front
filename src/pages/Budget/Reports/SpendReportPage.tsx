@@ -117,7 +117,6 @@ export default function SpendReportPage() {
               <thead>
                 <tr className="text-left text-gray-600 border-b">
                   <th className="py-2 pr-4">Departamento</th>
-                  <th className="py-2 pr-4">Egreso</th>
                   <th className="py-2 pr-4">Tipo de egreso</th>
                   <th className="py-2 pr-4">Fecha</th>
                   <th className="py-2 pr-4 text-right">Monto</th>
@@ -127,7 +126,6 @@ export default function SpendReportPage() {
                 {rows.map((r: any, i: number) => (
                   <tr key={i} className="border-b last:border-0">
                     <td className="py-2 pr-4">{r.department}</td>
-                    <td className="py-2 pr-4">{r.spend}</td>
                     <td className="py-2 pr-4">{r.spendType}</td>
                     <td className="py-2 pr-4">{new Date(r.date).toISOString()}</td>
                     <td className="py-2 pr-4 text-right">{crc(r.amount)}</td>
