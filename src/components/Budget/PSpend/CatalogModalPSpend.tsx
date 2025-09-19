@@ -45,7 +45,7 @@ export default function CatalogModalPSpend({
     [types.data]
   );
 
-  // Reset al abrir: no autoselección (queda "Seleccione…")
+  // Reset al abrir
   useEffect(() => {
     if (!open) return;
     setErrors({});
@@ -53,11 +53,8 @@ export default function CatalogModalPSpend({
     setNewType("");
     setNewSubType("");
 
-    if (defaultDepartmentId) setDepartmentId(defaultDepartmentId);
-    else setDepartmentId("");
-
-    if (defaultPSpendTypeId) setTypeId(defaultPSpendTypeId);
-    else setTypeId("");
+    setDepartmentId(defaultDepartmentId ?? "");
+    setTypeId(defaultPSpendTypeId ?? "");
   }, [open, defaultDepartmentId, defaultPSpendTypeId]);
 
   // Cascada
@@ -79,9 +76,10 @@ export default function CatalogModalPSpend({
       return setErrors((e) => ({ ...e, dept: "Escribe el nombre del departamento" }));
     }
     try {
-      const created = await mCreateDept.mutate({ name: newDepartment.trim() });
+      await mCreateDept.mutate({ name: newDepartment.trim() });
       setNewDepartment("");
-      // opcional: autoseleccionar el recién creado:
+      // Si necesitas autoseleccionar el creado:
+      // const created = await mCreateDept.mutateAsync({ name: newDepartment.trim() });
       // setDepartmentId(created.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el departamento" }));
@@ -97,12 +95,13 @@ export default function CatalogModalPSpend({
       return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
     }
     try {
-      const created = await mCreateType.mutate({
+      await mCreateType.mutate({
         name: newType.trim(),
         departmentId: Number(departmentId),
       });
       setNewType("");
-      // opcional: autoseleccionar el recién creado:
+      // Para autoseleccionar:
+      // const created = await mCreateType.mutateAsync({ name: newType.trim(), departmentId: Number(departmentId) });
       // setTypeId(created.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el tipo (proyección)" }));

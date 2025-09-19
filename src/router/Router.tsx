@@ -30,10 +30,11 @@ import BudgetSubnav from '../pages/Budget/Navbar/BudgetSubnav'
 import Initial from '../pages/Budget/Initial'
 import Income from '../pages/Budget/Income'
 import Extraordinary from '../pages/Budget/Extraordinary'
-import Reports from '../pages/Budget/Reports'
+import Reports from '../pages/Budget/Reports/index'
 import PIncome from '../pages/Budget/PIncome'
 import PExpenses from '../pages/Budget/PSpend'
 import SpendPage from '../pages/Budget/SpendPage'
+import IncomeReportPage from '../pages/Budget/Reports/IncomeReportPage'
 
 
 
@@ -172,6 +173,7 @@ const budgetLayoutRoute = new Route({
   ),
 })
 
+
 const budgetHomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/", // index
@@ -216,6 +218,18 @@ const budgetReportsRoute = new Route({
   component:  Reports
 })
 
+const budgetReportsIndexRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: '/',                   // index de /budget/reports
+  component: IncomeReportPage, // render directo del reporte de ingresos
+});
+
+const budgetReportsIncomeRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: 'income', // -> /budget/reports/income
+  component: IncomeReportPage,
+})
+
 // Fallback: si alguna ruta no existe, redirige a "/Principal"
 function RedirectHome() {
   const navigate = useNavigate()
@@ -236,6 +250,8 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   forgotPasswordRoute,
   resetPasswordRoute, // 👈 aquí (root), no dentro de /edition
+
+  
 
   // Rama CON layout (Home)
   appLayoutRoute.addChildren([
@@ -259,7 +275,10 @@ const routeTree = rootRoute.addChildren([
       budgetIncomeRoute,
       budgetExtraRoute,
       budgetReportsRoute,
+      budgetReportsIndexRoute,   // index -> redirect a income
+      budgetReportsIncomeRoute,  // /budget/reports/income
     ]),
+
     staffManagement,
     changePasswordRoute, // 👈 nueva ruta con layout
   ]),
