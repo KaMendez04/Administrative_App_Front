@@ -14,28 +14,21 @@ export async function listDepartments(): Promise<ApiList<Department>> {
   return { data };
 }
 
-/** ============= P-Types ============= */
+/** ============= P-Types (proyección) ============= */
 export async function listPSpendTypes(
   departmentId?: number
 ): Promise<ApiList<PSpendType>> {
   const { data } = await apiConfig.get<any[]>("/p-spend-type", {
-    params: departmentId ? { departmentId, _ts: Date.now() } : { _ts: Date.now() },
-    headers: { "Cache-Control": "no-cache" },
+    params: departmentId ? { departmentId } : undefined,
   });
 
   let items: PSpendType[] = (data ?? []).map((t) => ({
-    id: Number(t.id),
+    id: t.id,
     name: t.name,
-    departmentId: Number(
-      t?.department?.id ?? t?.departmentId ?? departmentId
-    ),
+    departmentId: t?.department?.id ?? t?.departmentId ?? departmentId,
   }));
 
-  if (departmentId != null) {
-    const dep = Number(departmentId);
-    items = items.filter((t) => t.departmentId === dep);
-  }
-
+  if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
   return { data: items };
 }
 
@@ -43,63 +36,54 @@ export async function createPSpendType(payload: {
   name: string;
   departmentId: number;
 }): Promise<PSpendType> {
-  const body = {
-    name: payload.name,
-    departmentId: payload.departmentId,
-  };
-  const { data } = await apiConfig.post<any>("/p-spend-type", body);
+  const { data } = await apiConfig.post<any>("/p-spend-type", payload);
   return {
-    id: Number(data.id),
+    id: data.id,
     name: data.name,
-    departmentId: Number(
-      data?.department?.id ?? data?.departmentId ?? payload.departmentId
-    ),
+    departmentId: data?.department?.id ?? data?.departmentId ?? payload.departmentId,
   };
 }
 
-/** ============= P-SubTypes ============= */
+/** ============= P-SubTypes (proyección) ============= */
 export async function listPSpendSubTypes(
   pSpendTypeId: number
 ): Promise<ApiList<PSpendSubType>> {
+  // El back espera `typeId`
   const { data } = await apiConfig.get<any[]>("/p-spend-sub-type", {
-    params: { pSpendTypeId, spendTypeId: pSpendTypeId, _ts: Date.now() },
-    headers: { "Cache-Control": "no-cache" },
+    params: { typeId: pSpendTypeId },
   });
 
   const items: PSpendSubType[] = (data ?? []).map((s) => ({
-    id: Number(s.id),
+    id: s.id,
     name: s.name,
-    pSpendTypeId: Number(
-      s?.pSpendType?.id ?? s?.spendType?.id ?? pSpendTypeId
-    ),
+    // la relación llega como `type`
+    pSpendTypeId: s?.type?.id ?? pSpendTypeId,
   }));
 
-  return { data: items };
+  // Defensa extra por si el back devolviera más de un tipo
+  const filtered = items.filter((s) => s.pSpendTypeId === pSpendTypeId);
+
+  return { data: filtered };
 }
 
 export async function createPSpendSubType(payload: {
   name: string;
   pSpendTypeId: number;
 }): Promise<PSpendSubType> {
-
-  const body = {
+  // El back recibe `typeId`
+  const { data } = await apiConfig.post<any>("/p-spend-sub-type", {
     name: payload.name,
-    pSpendTypeId: payload.pSpendTypeId,
-    spendTypeId: payload.pSpendTypeId,
-  };
-  const { data } = await apiConfig.post<any>("/p-spend-sub-type", body);
+    typeId: payload.pSpendTypeId,
+  });
+
   return {
-    id: Number(data.id),
+    id: data.id,
     name: data.name,
-    pSpendTypeId: Number(
-      data?.pSpendSubType?.pSpendType?.id ??
-        data?.pSpendType?.id ??
-        payload.pSpendTypeId
-    ),
+    pSpendTypeId: data?.type?.id ?? payload.pSpendTypeId,
   };
 }
 
-/** ============= Crear Proyección ============= */
+/** ============= Crear Proyección de Egreso ============= */
 export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
   const body = {
     pSpendSubTypeId: payload.pSpendSubTypeId,
@@ -108,12 +92,14 @@ export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
   const { data } = await apiConfig.post<any>("/p-spend", body);
 
   return {
-    id: Number(data.id),
+    id: data.id,
     amount: data.amount,
     pSpendSubType: {
-      id: Number(data?.pSpendSubType?.id ?? payload.pSpendSubTypeId),
+      id: data?.pSpendSubType?.id ?? payload.pSpendSubTypeId,
       name: data?.pSpendSubType?.name ?? "",
-      pSpendTypeId: Number(data?.pSpendSubType?.pSpendType?.id),
+      pSpendTypeId:
+        data?.pSpendSubType?.pSpendType?.id ??
+        data?.pSpendSubType?.type?.id,
     },
   };
 }
