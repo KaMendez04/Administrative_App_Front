@@ -79,7 +79,6 @@ export default function CatalogModalPSpend({
       return setErrors((e) => ({ ...e, dept: "Escribe el nombre del departamento" }));
     }
     try {
-      const created = await mCreateDept.mutate({ name: newDepartment.trim() });
       setNewDepartment("");
       // opcional: autoseleccionar el recién creado:
       // setDepartmentId(created.id);
@@ -97,10 +96,6 @@ export default function CatalogModalPSpend({
       return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
     }
     try {
-      const created = await mCreateType.mutate({
-        name: newType.trim(),
-        departmentId: Number(departmentId),
-      });
       setNewType("");
       // opcional: autoseleccionar el recién creado:
       // setTypeId(created.id);
