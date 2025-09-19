@@ -38,6 +38,7 @@ import IncomeReportPage from '../pages/Budget/Reports/IncomeReportPage'
 
 import { getCurrentUser } from '../services/auth'
 import { redirect } from '@tanstack/react-router'
+import SpendReportPage from '../pages/Budget/Reports/SpendReportPage'
 
 function requireRole(allowed: "ADMIN" | "JUNTA") {
     const role = (getCurrentUser()?.role?.name?? "").toUpperCase()
@@ -246,6 +247,12 @@ const budgetReportsIncomeRoute = new Route({
   component: IncomeReportPage,
 })
 
+const budgetReportsSpendRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: 'spend', // -> /budget/reports/spend
+  component: SpendReportPage,
+})
+
 // Fallback: si alguna ruta no existe, redirige a "/Principal"
 function RedirectHome() {
   const navigate = useNavigate()
@@ -293,6 +300,7 @@ const routeTree = rootRoute.addChildren([
       budgetReportsRoute,
       budgetReportsIndexRoute,   // index -> redirect a income
       budgetReportsIncomeRoute,  // /budget/reports/income
+      budgetReportsSpendRoute,   // /budget/reports/spend
     ]),
 
     staffManagement,

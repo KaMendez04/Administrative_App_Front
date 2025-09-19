@@ -1,28 +1,65 @@
-import { Outlet, Link, useRouterState } from '@tanstack/react-router';
+import { Outlet, Link, useRouterState } from "@tanstack/react-router";
 
 export default function Reports() {
   const { location } = useRouterState();
-  const isIncome = location.pathname.startsWith('/budget/reports/income');
+  const isIncome = location.pathname.startsWith("/budget/reports/income");
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Reportes</h1>
+    <div className="min-h-screen bg-[#F7F8F5]">
+      <div className="mx-auto max-w-6xl p-4 md:p-8">
+        <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
+          <nav className="mb-6 flex gap-3">
+            <Link
+              to="/budget/reports/income"
+              className={
+                isIncome
+                  ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
+                  : "px-3 py-2 rounded-lg hover:bg-green-50 border border-gray-100 text-gray-700"
+              }
+            >
+              Ingresos
+            </Link>
+            
+            {/* futuros tabs */}
+             <Link
+              to="/budget/reports/spend" //cambiar por egresos cuando esté listo
+              className={
+                isIncome
+                  ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
+                  : "px-3 py-2 rounded-lg hover:bg-green-50 border border-gray-100 text-gray-700"
+              }
+            >
+              Egresos
+            </Link>
+             <Link
+              to="/budget/reports/income" //cambiar por proyeccion de ingresos cuando esté listo
+              className={
+                isIncome
+                  ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
+                  : "px-3 py-2 rounded-lg hover:bg-green-50 border border-gray-100 text-gray-700"
+              }
+            >
+              Proyeccion de ingresos
+            </Link>
 
-      <nav className="mb-6 flex gap-2">
-        <Link
-          to="/budget/reports/income"
-          className={
-            isIncome
-              ? 'px-3 py-2 rounded-lg bg-[#708C3E] text-white'
-              : 'px-3 py-2 rounded-lg hover:bg-gray-100'
-          }
-        >
-          Ingresos
-        </Link>
-        {/* aquí podrás agregar más tabs */}
-      </nav>
+             <Link
+              to="/budget/reports/income"
+              className={
+                isIncome
+                  ? "px-3 py-2 rounded-lg bg-green-500 text-white shadow-sm"
+                  : "px-3 py-2 rounded-lg hover:bg-green-50 border border-gray-100 text-gray-700"
+              }
+            >
+              Proyeccion de egresos
+            </Link>
+          </nav>
 
-      <Outlet />
+          {/* Contenedor de subpáginas con el mismo marco blanco */}
+          <div className="border-2 border-gray-100 rounded-xl">
+            <Outlet />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
