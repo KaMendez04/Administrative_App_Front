@@ -36,6 +36,23 @@ import PExpenses from '../pages/Budget/PSpend'
 import SpendPage from '../pages/Budget/SpendPage'
 import IncomeReportPage from '../pages/Budget/Reports/IncomeReportPage'
 
+import { getCurrentUser } from '../services/auth'
+import { redirect } from '@tanstack/react-router'
+
+function requireRole(allowed: "ADMIN" | "JUNTA") {
+    const role = (getCurrentUser()?.role?.name?? "").toUpperCase()
+    if (!allowed.includes(role as any)) {
+      throw redirect({
+        to: "/unauthorized",
+        search: { from: location.pathname },
+      })
+    }
+}
+
+// Root vacío (NO layout). Desde aquí colgamos:
+// - appLayout (con Home)
+// - rutas sin layout (login, forgot-password, reset-password)
+
 // Root con React Query Provider (layout raíz)
 const rootRoute = new RootRoute({
   component: RootLayout,
