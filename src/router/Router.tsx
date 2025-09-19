@@ -1,4 +1,3 @@
-
 import {
   Router,
   RootRoute,
@@ -9,6 +8,7 @@ import {
   useNavigate,
 } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import RootLayout from './RootLayout'
 
 import Home from './Home'
 import PrincipalEdition from '../pages/editionPage/PrincipalEdition'
@@ -51,7 +51,7 @@ function requireRole(allowed: "ADMIN" | "JUNTA") {
 // - appLayout (con Home)
 // - rutas sin layout (login, forgot-password, reset-password)
 const rootRoute = new RootRoute({
-  component: () => <Outlet />,
+  component: RootLayout,
 })
 
 // Layout general con Navbar + Sidebar
@@ -158,7 +158,6 @@ const manualPage = new Route({
   component: ManualPage,
 })
 
-
 const forgotPasswordRoute = new Route({
   getParentRoute: () => rootRoute, // <- también sin layout
   path: '/forgot-password',
@@ -188,7 +187,6 @@ const budgetHomeRoute = new Route({
   path: "/", // index
   component: Initial,
 })
-
 
 const budgetProjectionIncomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
@@ -224,7 +222,6 @@ const budgetExtraRoute = new Route({
   beforeLoad: () => requireRole("ADMIN"),
   component: Extraordinary
 })
-
 
 const budgetReportsRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
