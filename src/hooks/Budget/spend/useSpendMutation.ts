@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type {
   CreateDepartmentDTO,
   CreateSpendDTO,
@@ -15,44 +14,62 @@ import {
   createSpendSubType,
   createSpendType,
 } from "../../../services/Budget/SpendService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-function useMutationFn<TPayload, TResult>(fn: (payload: TPayload) => Promise<TResult>) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function mutate(payload: TPayload): Promise<TResult> {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fn(payload);
-      return res;
-    } catch (err: any) {
-      setError(err?.message ?? "Error de red");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return { mutate, loading, error };
+// Mantiene el contrato: { mutate, loading, error }
+function wrapMutation<TPayload, TResult>(
+  mutation: ReturnType<typeof useMutation<TResult, unknown, TPayload, unknown>>,
+) {
+  return {
+    mutate: (payload: TPayload) => mutation.mutateAsync(payload),
+    loading: mutation.isPending,
+    error: (mutation.error as any)?.message ?? null,
+  };
 }
 
 // Crear Departamento
 export function useCreateDepartment() {
-  return useMutationFn<CreateDepartmentDTO, Department>(createDepartment);
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (payload: CreateDepartmentDTO) => createDepartment(payload),
+    onSuccess: () => {
+      // refresca la lista de departamentos
+      qc.invalidateQueries({ queryKey: ["departments"] });
+    },
+  });
+  return wrapMutation<CreateDepartmentDTO, Department>(m);
 }
 
 // Crear Tipo de Egreso
 export function useCreateSpendType() {
-  return useMutationFn<CreateSpendTypeDTO, SpendType>(createSpendType);
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (payload: CreateSpendTypeDTO) => createSpendType(payload),
+    onSuccess: (_created, payload) => {
+      // refresca tipos del departamento afectado
+      qc.invalidateQueries({ queryKey: ["spendTypes", payload.departmentId ?? "none"] });
+    },
+  });
+  return wrapMutation<CreateSpendTypeDTO, SpendType>(m);
 }
 
 // Crear Subtipo de Egreso
 export function useCreateSpendSubType() {
-  return useMutationFn<CreateSpendSubTypeDTO, SpendSubType>(createSpendSubType);
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (payload: CreateSpendSubTypeDTO) => createSpendSubType(payload),
+    onSuccess: (_created, payload) => {
+      // refresca subtipos del tipo afectado
+      qc.invalidateQueries({ queryKey: ["spendSubTypes", payload.spendTypeId ?? "none"] });
+    },
+  });
+  return wrapMutation<CreateSpendSubTypeDTO, SpendSubType>(m);
 }
 
 // Registrar movimiento de egreso real (/spend)
 export function useCreateSpendEntry() {
-  return useMutationFn<CreateSpendDTO, Spend>(createSpend);
+  const m = useMutation({
+    mutationFn: (payload: CreateSpendDTO) => createSpend(payload),
+  });
+  return wrapMutation<CreateSpendDTO, Spend>(m);
 }
