@@ -30,26 +30,13 @@ import BudgetSubnav from '../pages/Budget/Navbar/BudgetSubnav'
 import Initial from '../pages/Budget/Initial'
 import Income from '../pages/Budget/Income'
 import Extraordinary from '../pages/Budget/Extraordinary'
-import Reports from '../pages/Budget/Reports'
+import Reports from '../pages/Budget/Reports/index'
 import PIncome from '../pages/Budget/PIncome'
 import PExpenses from '../pages/Budget/PSpend'
 import SpendPage from '../pages/Budget/SpendPage'
-import { getCurrentUser } from '../services/auth'
-import { redirect } from '@tanstack/react-router'
+import IncomeReportPage from '../pages/Budget/Reports/IncomeReportPage'
 
-function requireRole(allowed: "ADMIN" | "JUNTA") {
-    const role = (getCurrentUser()?.role?.name?? "").toUpperCase()
-    if (!allowed.includes(role as any)) {
-      throw redirect({
-        to: "/unauthorized",
-        search: { from: location.pathname },
-      })
-    }
-}
-
-// Root vacío (NO layout). Desde aquí colgamos:
-// - appLayout (con Home)
-// - rutas sin layout (login, forgot-password, reset-password)
+// Root con React Query Provider (layout raíz)
 const rootRoute = new RootRoute({
   component: RootLayout,
 })
@@ -182,6 +169,7 @@ const budgetLayoutRoute = new Route({
   ),
 })
 
+
 const budgetHomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/", // index
@@ -226,7 +214,19 @@ const budgetExtraRoute = new Route({
 const budgetReportsRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/reports",
-  component: Reports
+  component:  Reports
+})
+
+const budgetReportsIndexRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: '/',                   // index de /budget/reports
+  component: IncomeReportPage, // render directo del reporte de ingresos
+});
+
+const budgetReportsIncomeRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: 'income', // -> /budget/reports/income
+  component: IncomeReportPage,
 })
 
 // Fallback: si alguna ruta no existe, redirige a "/Principal"
@@ -250,6 +250,8 @@ const routeTree = rootRoute.addChildren([
   forgotPasswordRoute,
   resetPasswordRoute, // 👈 aquí (root), no dentro de /edition
 
+  
+
   // Rama CON layout (Home)
   appLayoutRoute.addChildren([
     principalRoute,
@@ -272,7 +274,10 @@ const routeTree = rootRoute.addChildren([
       budgetIncomeRoute,
       budgetExtraRoute,
       budgetReportsRoute,
+      budgetReportsIndexRoute,   // index -> redirect a income
+      budgetReportsIncomeRoute,  // /budget/reports/income
     ]),
+
     staffManagement,
     changePasswordRoute, // 👈 nueva ruta con layout
   ]),
