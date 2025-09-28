@@ -3,6 +3,9 @@ import { postLogin } from "../services/loginService";
 import type { LoginPayload } from "../models/LoginType";
 import { setSession } from "../services/auth";
 import { connectAdminSocket } from "../lib/socket";
+import { showSuccessAlertLogin, showErrorAlertLogin } from "../utils/alerts";
+import { mapLoginError } from "../utils/mapLoginError";
+
 
 export function useLogin() {
   const [email, setEmail] = useState("");
@@ -10,8 +13,6 @@ export function useLogin() {
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // ⛔️ nuevo: estado de rate limit
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [resetAt, setResetAt] = useState<number | null>(null);
 
@@ -50,19 +51,28 @@ export function useLogin() {
       setSession(token, user, remember);
 
       connectAdminSocket(token);
+
+      // Modal de éxito
+      await showSuccessAlertLogin("Contraseña correcta, ingresando al sistema...");
+      window.location.href = "/Home";
+
       // redirección (ajusta si usas Router.navigate)
       window.location.href = "/Home";
-    } catch (err: any) {
+    } catch (err: unknown) {
+      let msg: string;
       // Si viene del interceptor 429 de apiConfig
-      if (err?.isRateLimited) {
+      if ((err as any)?.isRateLimited) {
         setIsRateLimited(true);
-        if (Number.isFinite(err?.msUntilReset)) {
-          setResetAt(Date.now() + Number(err.msUntilReset));
+        const msUntilReset = (err as any)?.msUntilReset;
+        if (Number.isFinite(msUntilReset)) {
+          setResetAt(Date.now() + Number(msUntilReset));
         }
-        setError(err?.message || "Has superado el límite de intentos. Intenta más tarde.");
+        msg = (err as any)?.message || "Has superado el límite de intentos. Intenta más tarde.";
       } else {
-        setError(err?.message || "Error al iniciar sesión");
+        msg = mapLoginError(err);
       }
+
+      showErrorAlertLogin(msg); // Modal bonito
     } finally {
       setLoading(false);
     }
