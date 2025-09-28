@@ -20,7 +20,7 @@ import Swal from 'sweetalert2';
 export const showSuccessAlertLogin = (message: string) => {
   return Swal.fire({
     icon: 'success',
-    title: 'Login successful',
+    title: 'Inicio de sesión exitoso',
     text: message,
     timer: 1500,
     timerProgressBar: true,
@@ -34,7 +34,7 @@ export const showSuccessAlertLogin = (message: string) => {
 export const showErrorAlertLogin = (message: string) => {
   return Swal.fire({
     icon: 'error',
-    title: 'Login failed',
+    title: 'Inicio de sesión fallido',
     text: message,
     confirmButtonColor: '#48a6a7',
     customClass: { confirmButton: 'no-border-button' },
@@ -108,4 +108,68 @@ export const showConfirmAlert = async (title: string, text: string) => {
     background: "#FAF9F5",
   });
   return result.isConfirmed;
+};
+
+// confirmación genérica
+export const showConfirmDeleteAlert = async (title: string, text: string) => {
+  const result = await Swal.fire({
+    title,
+    text,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#708C3E", // verde de tu paleta
+    cancelButtonColor: "#d33",     // rojo suave
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "No, continuar",
+    reverseButtons: true,
+    background: "#FAF9F5",
+  });
+  return result.isConfirmed;
+};
+
+// confirmación genérica
+export const showConfirmOutAlert = async (title: string, text: string) => {
+  const result = await Swal.fire({
+    title,
+    text,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#708C3E", // verde de tu paleta
+    cancelButtonColor: "#d33",     // rojo suave
+    confirmButtonText: "Sí, salir",
+    cancelButtonText: "No, continuar",
+    reverseButtons: true,
+    background: "#FAF9F5",
+  });
+  return result.isConfirmed;
+};
+
+export const showSuccessAlert = (message: string) => {
+  return Swal.fire({
+    icon: 'success',
+    title: 'Guardado con éxito',
+    text: message,
+    timer: 2000,
+    timerProgressBar: true,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    confirmButtonColor: '#708C3E',
+    background: '#FAF9F5',
+  });
+};
+
+export const showSuccessDeleteAlert = (message: string) => {
+  return Swal.fire({
+    icon: 'success',
+    title: 'Eliminado con éxito',
+    text: message,
+    timer: 2000,
+    timerProgressBar: true,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    confirmButtonColor: '#708C3E',
+    background: '#FAF9F5',
+  });
 };

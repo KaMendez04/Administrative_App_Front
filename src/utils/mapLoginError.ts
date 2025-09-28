@@ -14,9 +14,9 @@ export function mapLoginError(err: unknown): string {
     switch (status) {
       case 400:
       case 401:
-        return 'Contraseña incorrecta, inténtelo de nuevo.';
+        return 'Correo o contraseña incorrecta, inténtelo de nuevo.';
       case 404:
-        return 'Contraseña incorrecta, inténtelo de nuevo.';
+        return 'Correo o contraseña incorrecta, inténtelo de nuevo.';
       case 429:
         return 'Demasiados intentos. Intente nuevamente más tarde.';
       case 500:

@@ -1,10 +1,11 @@
 import { useState } from "react"
+import { showSuccessAlert } from "../../../utils/alerts"
+
 
 export default function FAQCreator({ onSubmit }: any) {
   const [question, setQuestion] = useState("")
   const [answer, setAnswer] = useState("")
 
-  // límites
   const MAX_Q = 75
   const MAX_A = 250
 
@@ -13,6 +14,8 @@ export default function FAQCreator({ onSubmit }: any) {
     onSubmit({ question, answer })
     setQuestion("")
     setAnswer("")
+    // Llamar a la alerta de éxito aquí
+    showSuccessAlert('Actualización completada')
   }
 
   return (
@@ -23,7 +26,7 @@ export default function FAQCreator({ onSubmit }: any) {
         className="w-full border border-gray-300 rounded-md px-4 py-2"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        maxLength={MAX_Q}                         /* límite 75 */
+        maxLength={MAX_Q} /* límite 75 */
       />
       <p className="mt-1 text-xs text-gray-500">
         Quedan {Math.max(0, MAX_Q - (question?.length ?? 0))} de {MAX_Q} caracteres
@@ -35,7 +38,7 @@ export default function FAQCreator({ onSubmit }: any) {
         className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none"
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
-        maxLength={MAX_A}                         /* ✅ límite 250 */
+        maxLength={MAX_A} /* límite 250 */
       />
       <p className="mt-1 text-xs text-gray-500">
         Quedan {Math.max(0, MAX_A - (answer?.length ?? 0))} de {MAX_A} caracteres

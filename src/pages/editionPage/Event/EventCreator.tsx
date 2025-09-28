@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { showSuccessAlert } from "../../../utils/alerts" // Importa la función aquí
 import type { EventInput } from "../../../models/editionSection/EventEditionType"
 
 export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput) => void }) {
@@ -14,10 +15,11 @@ export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput
     setDate("")
     setDescription("")
     setIllustration("")
+    // Mostrar alerta con mensaje de éxito
+    showSuccessAlert("Evento guardado con éxito")
   }
 
   return (
-    
     <div className="space-y-4">
       <div>
         <input
@@ -32,14 +34,14 @@ export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput
           Quedan {75 - title.length} de 75 caracteres
         </div>
       </div>
-      
+
       <input
         type="date"
         value={date}
         onChange={(e) => setDate(e.target.value)}
         className="w-full border border-gray-300 rounded-md px-4 py-2"
       />
-      
+
       <div>
         <textarea
           placeholder="Descripción"
@@ -53,7 +55,7 @@ export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput
           Quedan {250 - description.length} de 250 caracteres
         </div>
       </div>
-      
+
       <div>
         <input
           type="text"
@@ -64,7 +66,7 @@ export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput
           maxLength={1000}
         />
       </div>
-      
+
       <div className="flex justify-end">
         <button
           onClick={handleSubmit}
@@ -74,6 +76,5 @@ export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput
         </button>
       </div>
     </div>
-    
   )
 }
