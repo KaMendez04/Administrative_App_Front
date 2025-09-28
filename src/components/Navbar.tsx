@@ -1,7 +1,8 @@
 import { Menu, User } from "lucide-react";
 import React from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { getCurrentUser, clearSession } from "../services/auth"; // 👈 Importa utilidades
+import { getCurrentUser, clearSession } from "../services/auth";
+import { showConfirmOutAlert } from "../utils/alerts"; 
 
 type Props = {
   isSidebarOpen: boolean;
@@ -17,11 +18,9 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
 
   const navigate = useNavigate();
 
-  // 👉 Usuario actual
   const user = getCurrentUser();
   const roleName = user?.role?.name?.toUpperCase();
 
-  // 👇 Texto según rol
   const roleLabel =
     roleName === "ADMIN"
       ? "Administrador"
@@ -32,11 +31,17 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
   const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
-  // 👉 Cerrar sesión: limpia token y navega al login
-  const handleLogout = () => {
-    clearSession(); // 👈 usa tu helper
-    setIsDropdownOpen(false);
-    navigate({ to: "/login" });
+  // Manejador actualizado para logout con confirmación
+  const handleLogout = async () => {
+    const confirmed = await showConfirmOutAlert(
+      "Confirmar cierre de sesión",
+      "¿Está seguro que desea salir?"
+    );
+    if (confirmed) {
+      clearSession();
+      setIsDropdownOpen(false);
+      navigate({ to: "/login" });
+    }
   };
 
   React.useEffect(() => {
@@ -85,7 +90,6 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg border border-gray-200 z-50">
               <div className="py-2">
-                {/* ✅ Ahora redirige a /account/change-password */}
                 <div
                   className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {

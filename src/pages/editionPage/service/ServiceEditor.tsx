@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-
+import { showSuccessAlert, showSuccessDeleteAlert, showConfirmDeleteAlert } from "../../../utils/alerts"
 
 export default function ServicesInformativeEditor({
   items,
@@ -25,15 +25,25 @@ export default function ServicesInformativeEditor({
     }
   }, [selected])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selected) return
-    onUpdate({ id: selected.id, title, cardDescription, modalDescription, image })
+    try {
+      await onUpdate({ id: selected.id, title, cardDescription, modalDescription, image })
+      showSuccessAlert("Actualización completada")
+    } catch (err) {
+      console.error("Error al guardar:", err)
+    }
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selected) return
-    if (window.confirm(`¿Eliminar el servicio "${selected.title}"?`)) {
+    const confirmed = await showConfirmDeleteAlert(
+      'Confirmar eliminación',
+      `¿Está seguro que desea eliminar el servicio "${selected.title}"?`
+    )
+    if (confirmed) {
       onDelete(selected.id)
+      showSuccessDeleteAlert('Eliminación completada')
     }
   }
 

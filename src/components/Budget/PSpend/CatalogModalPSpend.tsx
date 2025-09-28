@@ -20,7 +20,6 @@ export default function CatalogModalPSpend({
   onClose,
   defaultDepartmentId,
   defaultPSpendTypeId,
-  onAccept,
 }: Props) {
   const [departmentId, setDepartmentId] = useState<number | "">("");
   const [typeId, setTypeId] = useState<number | "">("");
@@ -257,16 +256,7 @@ export default function CatalogModalPSpend({
             onClick={onClose}
             className="rounded-xl border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-50"
           >
-            Cancelar
-          </button>
-          <button
-            onClick={() => {
-              onAccept?.();
-              onClose();
-            }}
-            className="rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90"
-          >
-            Listo
+            Salir
           </button>
         </div>
       </div>

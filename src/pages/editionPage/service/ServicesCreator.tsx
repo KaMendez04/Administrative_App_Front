@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { showSuccessAlert } from "../../../utils/alerts"
 
 
 export default function ServicesInformativeCreator({ onSubmit }: any) {
@@ -7,12 +8,19 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
   const [modalDescription, setModalDescription] = useState("")
   const [image, setImage] = useState("")
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim() || !cardDescription.trim() || !modalDescription.trim()) return
-    onSubmit({ title, cardDescription, modalDescription, image })
-    setTitle(""); setCardDescription(""); setModalDescription(""); setImage("")
+    
+    try {
+      await onSubmit({ title, cardDescription, modalDescription, image })
+      setTitle(""); setCardDescription(""); setModalDescription(""); setImage("")
+      
+      // Mostrar alerta de éxito después de limpiar los campos
+      showSuccessAlert("Creación completada");
+    } catch (err) {
+      console.error("Error al guardar:", err);
+    }
   }
-
   return (
     <div className="space-y-4">
       <div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-
+import { showSuccessAlert, showSuccessDeleteAlert, showConfirmDeleteAlert } from "../../../utils/alerts"
 
 export default function EventEditor({
   events,
@@ -31,6 +31,19 @@ export default function EventEditor({
   const handleSave = () => {
     if (!selectedEvent) return
     onUpdate({ id: selectedEvent.id, title, date, description, illustration })
+    showSuccessAlert('Actualización completada')
+  }
+
+  const handleDelete = async () => {
+    if (!selectedEvent) return
+    const confirmed = await showConfirmDeleteAlert(
+      'Confirmar eliminación',
+      `¿Está seguro que desea eliminar el evento "${selectedEvent.title}"?`
+    )
+    if (confirmed) {
+      onDelete(selectedEvent.id)
+      showSuccessDeleteAlert('Eliminación completada')
+    }
   }
 
   return (
@@ -65,14 +78,14 @@ export default function EventEditor({
               Quedan {75 - title.length} de 75 caracteres
             </div>
           </div>
-          
+
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-4 py-2"
           />
-          
+
           <div>
             <textarea
               rows={4}
@@ -85,7 +98,7 @@ export default function EventEditor({
               Quedan {250 - description.length} de 250 caracteres
             </div>
           </div>
-          
+
           <div>
             <input
               type="text"
@@ -96,7 +109,7 @@ export default function EventEditor({
               maxLength={1000}
             />
           </div>
-          
+
           <div className="flex justify-end gap-4">
             <button
               onClick={() => setSelectedEventId(null)}
@@ -111,7 +124,7 @@ export default function EventEditor({
               Guardar
             </button>
             <button
-              onClick={() => onDelete(selectedEvent.id)}
+              onClick={handleDelete}
               className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50"
             >
               Eliminar

@@ -1,6 +1,7 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection"
 import BackButton from "../../components/PagesEdition/BackButton"
 import { useAboutUsEdit } from "../../hooks/EditionSection/AboutUsHook"
+import { showSuccessAlert } from "../../utils/alerts"
 
 export default function AboutUsEdition() {
   const {
@@ -12,9 +13,20 @@ export default function AboutUsEdition() {
     saveAll,
   } = useAboutUsEdit()
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    saveAll()
+    
+    try {
+      await saveAll()
+      
+      // Mostrar alerta de éxito si no hay error
+      if (!error) {
+        showSuccessAlert("Actualización completada");
+      }
+    } catch (err) {
+      // Si hay algún error, no mostrar la alerta de éxito
+      console.error("Error al guardar:", err);
+    }
   }
 
   const canCreate = whoWeAre.trim() && mission.trim() && vision.trim()

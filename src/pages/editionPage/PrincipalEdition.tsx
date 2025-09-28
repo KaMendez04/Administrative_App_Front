@@ -3,6 +3,9 @@ import { useEffect, useMemo, useState } from "react"
 import { usePrincipalEdit } from "../../hooks/EditionSection/PrincipalHook"
 import BackButton from "../../components/PagesEdition/BackButton"
 import { CharCounter } from "../../components/CharCounter"
+import { showSuccessAlert } from "../../utils/alerts"
+
+
 
 // Título por defecto para la creación (no editable)
 const DEFAULT_TITLE = "Asociación Cámara Ganaderos Hojancha"
@@ -23,15 +26,25 @@ function PrincipalEdition() {
 
   const isEditing = useMemo(() => Boolean(data), [data])
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (isEditing) {
-      // Para cumplir con tu tipo actual (PrincipalUpdate), mandamos el title existente + la nueva descripción
-      save({ title: data!.title, description })
-    } else {
-      // Crear el único registro con título por defecto + descripción
-      create({ title: DEFAULT_TITLE, description })
+    try {
+      if (isEditing) {
+        // Para cumplir con tu tipo actual (PrincipalUpdate), mandamos el title existente + la nueva descripción
+        await save({ title: data!.title, description })
+      } else {
+        // Crear el único registro con título por defecto + descripción
+        await create({ title: DEFAULT_TITLE, description })
+      }
+
+      // Mostrar alerta de éxito si no hay error
+      if (!error) {
+        showSuccessAlert("Actualización completada");
+      }
+    } catch (err) {
+      // Si hay algún error, no mostrar la alerta de éxito
+      console.error("Error al guardar:", err);
     }
   }
 
