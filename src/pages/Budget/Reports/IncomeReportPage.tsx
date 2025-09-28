@@ -1,6 +1,3 @@
-// src/pages/Budget/Reports/IncomeReportPage.tsx
-"use client";
-
 import { useMemo, useState } from "react";
 import type { IncomeReportFilters } from "../../../models/Budget/reports/income";
 import { useIncomeReport } from "../../../hooks/Budget/reports/useIncomeReport";

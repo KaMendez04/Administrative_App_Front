@@ -1,28 +1,7 @@
+import type { SpendFiltersResolved, SpendSummary, SpendTableRow } from "../../../models/Budget/reports/spend";
 import api from "../../apiConfig";
 
-export type SpendTableRow = {
-  department: string;
-  spend: string;
-  spendType: string;
-  date: string;  // ISO
-  amount: number;
-};
-
-export type SpendSummary = {
-  total: number;
-  byDepartment: Array<{ department: string; total: number }>;
-  byType: Array<{ type: string; total: number }>;
-  bySubType?: Array<{ subType: string; total: number }>;
-};
-
-export type SpendFiltersResolved = {
-  start?: string;
-  end?: string;
-  departmentId?: number;
-  spendTypeId?: number;
-  spendSubTypeId?: number;
-};
-
+// Obtener tabla + resumen
 export async function fetchSpendFull(filters: SpendFiltersResolved): Promise<{
   filters: SpendFiltersResolved;
   rows: SpendTableRow[];
@@ -34,4 +13,22 @@ export async function fetchSpendFull(filters: SpendFiltersResolved): Promise<{
     rows: SpendTableRow[];
     totals: SpendSummary;
   };
+}
+
+// PDF (visualizar/descargar)
+export async function fetchSpendPDF(filters: SpendFiltersResolved, preview = false): Promise<Blob> {
+  const { data } = await api.get("/report/spend/pdf", {
+    params: { ...filters, preview: preview ? "true" : "false" },
+    responseType: "blob",
+  });
+  return data as Blob;
+}
+
+export function downloadSpendPdf(blob: Blob, filename?: string) {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename ?? `reporte-egresos-${new Date().toISOString().slice(0, 10)}.pdf`;
+  link.click();
+  window.URL.revokeObjectURL(url);
 }

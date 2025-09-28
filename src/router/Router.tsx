@@ -41,6 +41,7 @@ import { redirect } from '@tanstack/react-router'
 import SpendReportPage from '../pages/Budget/Reports/SpendReportPage'
 import PSpends from '../pages/Budget/Reports/PSpends'
 import PIncomeProjectionsPage from '../pages/Budget/Reports/PIncome'
+import ExtraReportPage from '../pages/Budget/Reports/extraReportPage'
 
 
 function requireRole(allowed: "ADMIN" | "JUNTA") {
@@ -280,6 +281,12 @@ const budgetReportsPSpendsRoute = new Route({
   component: PSpends,
 })
 
+const budgetReportsExtraRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: 'Extraordinary', // -> /budget/reports/projection
+  component: ExtraReportPage,
+})
+
 // Fallback: si alguna ruta no existe, redirige a "/Principal"
 function RedirectHome() {
   const navigate = useNavigate()
@@ -331,7 +338,8 @@ const routeTree = rootRoute.addChildren([
       budgetReportsPSpendsRoute, 
       budgetReportPIncomeRoute,
       budgetReportsPSpendRoute,
-      budgetReportsPIncomeRoute
+      budgetReportsPIncomeRoute,
+      budgetReportsExtraRoute,
     ]),
 
     staffManagement,
