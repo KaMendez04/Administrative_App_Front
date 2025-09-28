@@ -1,13 +1,15 @@
 import React from "react";
 import { Calendar, Coins, ArrowRightLeft, Plus, X } from "lucide-react";
 import { useForm } from "@tanstack/react-form";
-
-import { useExtraordinaryList } from "../../../hooks/Budget/extraordinary/useExtraordinaryList";
-import { useDepartmentsE } from "../../../hooks/Budget/extraordinary/useDepartmentsE";
-import { useAssignExtraordinary } from "../../../hooks/Budget/extraordinary/useAssignExtraordinary";
 import { AssignExtraordinarySchema } from "../../../schemas/extraordinarySchema";
+import { useAssignExtraordinary, useDepartmentsE, useExtraordinaryList } from "../../../hooks/Budget/extraordinary/useExtraordinary";
 
-type Props = { className?: string; onAssigned?: (payload: any) => void; defaultOpen?: boolean };
+
+type Props = { 
+  className?: string; 
+  onAssigned?: (payload: any) => void; 
+  defaultOpen?: boolean;
+};
 
 const inputClass =
   "w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 outline-none focus:ring-4 focus:ring-[#708C3E]/20";
@@ -20,8 +22,9 @@ export default function AssignExtraordinaryCard({
 }: Props) {
   const [open, setOpen] = React.useState<boolean>(defaultOpen);
 
-  const { data: extras, loading: loadingExtras, reload: reloadExtras } = useExtraordinaryList();
-  const { data: departments, loading: loadingDepts, reload: reloadDepts } = useDepartmentsE();
+  // Usar los hooks de React Query
+  const { data: extras, loading: loadingExtras } = useExtraordinaryList();
+  const { data: departments, loading: loadingDepts } = useDepartmentsE();
   const { submit: assign, loading: assigning } = useAssignExtraordinary();
 
   const form = useForm({
@@ -36,17 +39,22 @@ export default function AssignExtraordinaryCard({
       const parsed = AssignExtraordinarySchema.safeParse(value);
       if (!parsed.success) return;
 
-      const payload = await assign({
-        extraordinaryId: parsed.data.extraordinaryId,
-        amount: Number(parsed.data.amount.replace(",", ".")),
-        departmentId: parsed.data.departmentId,
-        subTypeName: parsed.data.subTypeName.trim(),
-        date: parsed.data.date || undefined,
-      });
+      try {
+        const payload = await assign({
+          extraordinaryId: parsed.data.extraordinaryId,
+          amount: Number(parsed.data.amount.replace(",", ".")),
+          departmentId: parsed.data.departmentId,
+          subTypeName: parsed.data.subTypeName.trim(),
+          date: parsed.data.date || undefined,
+        });
 
-      Form.reset();
-      await Promise.all([reloadExtras(), reloadDepts()]);
-      onAssigned?.(payload);
+        Form.reset();
+        // ¡No necesitas llamar reload manualmente! 
+        // React Query invalida automáticamente las queries relacionadas
+        onAssigned?.(payload);
+      } catch (error) {
+        console.error('Error assigning extraordinary:', error);
+      }
     },
   });
 
@@ -261,7 +269,7 @@ export default function AssignExtraordinaryCard({
                 <button
                   type="submit"
                   disabled={!canSubmit || isSubmitting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 font-medium text-white shadow hover:brightness-95 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-gray-600 px-4 py-2 font-medium text-white shadow hover:brightness-95 disabled:opacity-60"
                 >
                   <ArrowRightLeft className="h-5 w-5" />
                   {isSubmitting ? "Asignando…" : "Asignar a ingreso"}

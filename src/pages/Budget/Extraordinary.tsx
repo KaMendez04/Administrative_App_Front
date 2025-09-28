@@ -1,39 +1,21 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus, Calendar, Coins, X } from "lucide-react";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
-
-import { useExtraordinary } from "../../hooks/Budget/extraordinary/useExtraordinary";
-import type { Extraordinary } from "../../models/Budget/extraordinary/extraordinaryInterface";
-import { crc } from "../../utils/crcDateUtil";
-import AssignExtraordinaryCard from "./extraordinary/assingnExtraordinary";
-import TransactionsCard from "../../components/Budget/Extraordinary/TransactionsCard";
 import { CreateExtraordinarySchema } from "../../schemas/extraordinarySchema";
+import AssignExtraordinaryCard from "../../components/Budget/Extraordinary/assingnExtraordinary";
+import { useCreateExtraordinaryMutation, useExtraordinaryListQuery } from "../../hooks/Budget/extraordinary/useExtraordinary";
+import ExtraordinayList from "../../components/Budget/Extraordinary/extraordinayList";
 
 const inputClass =
   "w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 outline-none focus:ring-4 focus:ring-[#708C3E]/20";
 
 export default function BudgetExtraordinary() {
-  // lista
-  const [list, setList] = useState<Extraordinary[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // acordeón del form
   const [openForm, setOpenForm] = useState(true);
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await useExtraordinary.list();
-      setList(data);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
+  
+  // React Query hooks
+  const { data: list = [], isLoading: loading } = useExtraordinaryListQuery();
+  const createMutation = useCreateExtraordinaryMutation();
 
   // ===== TanStack Form: Crear extraordinario =====
   const form = useForm({
@@ -43,18 +25,21 @@ export default function BudgetExtraordinary() {
       if (!parsed.success) return;
 
       const { name, amount, date } = parsed.data;
-      await useExtraordinary.create({
-        name: name.trim(),
-        amount: amount.trim(), // string
-        date: date || undefined,
-      });
-
-      Form.reset();
-      load();
+      
+      try {
+        await createMutation.mutateAsync({
+          name: name.trim(),
+          amount: amount.trim(),
+          date: date || undefined,
+        });
+        
+        Form.reset();
+      } catch (error) {
+        console.error('Error creating extraordinary:', error);
+      }
     },
   });
 
-  // Alias en mayúscula para JSX
   const Form = form;
 
   return (
@@ -184,11 +169,11 @@ export default function BudgetExtraordinary() {
                   {({ canSubmit, isSubmitting }) => (
                     <button
                       type="submit"
-                      disabled={!canSubmit || isSubmitting}
+                      disabled={!canSubmit || isSubmitting || createMutation.isPending}
                       className="inline-flex items-center gap-2 rounded-xl bg-gray-600 px-4 py-2 font-medium text-white shadow hover:brightness-95 disabled:opacity-60"
                     >
                       <Plus className="h-5 w-5" />
-                      {isSubmitting ? "Guardando…" : "Registrar Movimiento Extraordinario"}
+                      {isSubmitting || createMutation.isPending ? "Guardando…" : "Registrar Movimiento Extraordinario"}
                     </button>
                   )}
                 </Form.Subscribe>
@@ -198,61 +183,10 @@ export default function BudgetExtraordinary() {
         </div>
 
         {/* LISTA */}
-        <div className="mt-6 rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] ring-1 ring-gray-100">
-          <div className="border-b px-5 md:px-6 py-4">
-            <h2 className="text-base font-semibold text-gray-900">Movimientos registrados</h2>
-          </div>
+        <ExtraordinayList loading={loading} list={list} />
 
-          {loading ? (
-            <div className="p-6 text-center text-gray-500">Cargando…</div>
-          ) : list.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">No hay registros.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                      Movimiento
-                    </th>
-                    <th className="px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                      Fecha
-                    </th>
-                    <th className="px-5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                      Monto
-                    </th>
-                    <th className="px-5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                      Usado
-                    </th>
-                    <th className="px-5 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                      Saldo restante
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 bg-white">
-                  {list.map((x) => {
-                    const amountNum = Number(x.amount);
-                    const usedNum = Number(x.used);
-                    const remaining = Math.max(0, amountNum - usedNum);
-                    return (
-                      <tr key={x.id}>
-                        <td className="px-5 py-2.5 text-sm text-gray-900">{x.name}</td>
-                        <td className="px-5 py-2.5 text-sm text-gray-700">{x.date ?? "—"}</td>
-                        <td className="px-5 py-2.5 text-right text-sm font-medium">{crc(amountNum)}</td>
-                        <td className="px-5 py-2.5 text-right text-sm font-medium">{crc(usedNum)}</td>
-                        <td className="px-5 py-2.5 text-right text-sm font-semibold">{crc(remaining)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Asignación y Transferencias */}
-        <AssignExtraordinaryCard className="mt-6" onAssigned={() => load()} />
-        <TransactionsCard className="mt-6" onDone={() => {}} />
+        {/* Asignación y Transferencias - Sin props necesarios, React Query maneja todo */}
+        <AssignExtraordinaryCard className="mt-6" />
       </div>
     </div>
   );
