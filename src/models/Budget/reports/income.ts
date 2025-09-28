@@ -26,3 +26,15 @@ export type IncomeFullResponse = {
   rows: IncomeRow[];
   totals: IncomeTotals;
 };
+
+export interface IncomeSummary {
+  total: number;
+  byDepartment: {
+    department: string;
+    total: number;
+  }[];
+  byType: {
+    income_type: string;
+    total: number;
+  }[];
+}

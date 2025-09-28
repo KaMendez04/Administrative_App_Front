@@ -1,6 +1,7 @@
-import { resolveDepartmentIdByName, resolveSpendSubTypeIdByName, resolveSpendTypeIdByName } from "../../../services/Budget/reportsSpend/catalogLookupService";
-import { fetchSpendFull } from "../../../services/Budget/reportsSpend/spendReportService";
 import { useQuery } from "@tanstack/react-query";
+import { resolveDepartmentIdByName, resolveSpendSubTypeIdByName, resolveSpendTypeIdByName } from "../../../services/Budget/reportsSpend/catalogLookupService";
+import { useMutation } from "@tanstack/react-query";
+import { fetchSpendPDF, downloadSpendPdf, fetchSpendFull } from "../../../services/Budget/reportsSpend/spendReportService";
 
 export type SpendReportNameFilters = {
   start?: string;
@@ -9,6 +10,37 @@ export type SpendReportNameFilters = {
   spendTypeName?: string;
   spendSubTypeName?: string;
 };
+
+export function useSpendReportPDF() {
+  return useMutation<unknown, Error, SpendReportNameFilters & { preview?: boolean }>({
+    mutationFn: async (filters) => {
+      // Resolver nombres -> IDs para el servicio de PDF
+      const departmentId = await resolveDepartmentIdByName(filters?.departmentName);
+      const spendTypeId = await resolveSpendTypeIdByName(filters?.spendTypeName, departmentId);
+      const spendSubTypeId = await resolveSpendSubTypeIdByName(filters?.spendSubTypeName, spendTypeId);
+
+      const resolved = {
+        start: filters.start || undefined,
+        end: filters.end || undefined,
+        departmentId,
+        spendTypeId,
+        spendSubTypeId,
+      };
+
+      const pdfBlob = await fetchSpendPDF(resolved as any, filters.preview ?? false);
+
+      if (filters.preview) {
+        // Abrir PDF en modal / nueva ventana
+        const url = window.URL.createObjectURL(pdfBlob);
+        window.open(url, "_blank");
+        return; // no descarga
+      }
+
+      // Descargar automáticamente
+      downloadSpendPdf(pdfBlob);
+    },
+  });
+}
 
 // -------- helpers --------
 function textify(v: any): string {
