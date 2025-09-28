@@ -47,7 +47,7 @@ export function EditableRequirements({
           <div className="mt-2 flex items-center justify-between">
             <p className="text-xs text-gray-500">Quedan {leftEdit} de {limits.requirement} caracteres</p>
             <button
-              type="button"                // 👈 importante
+              type="button"                
               onClick={() => onRemove(index)}
               className="text-red-600 flex items-center gap-2"
             >
@@ -59,7 +59,7 @@ export function EditableRequirements({
 
       <div className="flex justify-end gap-3 pt-2">
         <button
-          type="button"                  // 👈 importante
+          type="button"                 
           onClick={onSave}
           disabled={!canSave || saving}
           className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50${
