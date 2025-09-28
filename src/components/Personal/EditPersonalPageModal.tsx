@@ -1,7 +1,8 @@
 import React from "react"
 import type { PersonalPageType } from "../../models/PersonalPageType"
 import { personalApi } from "../../services/personalPageService"
-import { useEditPersonalPageModal } from "../../hooks/Personal/useEditPersonalPageModal";
+import { useEditPersonalPageModal } from "../../hooks/Personal/useEditPersonalPageModal"
+import { showSuccessAlertRegister, showErrorAlertRegister, showConfirmAlert } from "../../utils/alerts";
 
 interface EditPersonalPageModalProps {
   personalPage: PersonalPageType;
@@ -18,7 +19,6 @@ export function EditPersonalPageModal({
   onSaved,
   lookup,
 }: EditPersonalPageModalProps) {
-  // clases de UI (idénticas a tu versión)
   const inputClass =
     "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white";
   const label =
@@ -31,7 +31,7 @@ export function EditPersonalPageModal({
   // TanStack Form + validadores (extraídos al hook)
   const { form, validators } = useEditPersonalPageModal(personalPage)
 
-  // 🔒 Fecha máxima permitida (hoy) en formato YYYY-MM-DD
+  // Fecha máxima permitida (hoy) en formato YYYY-MM-DD
   const todayStr = new Date().toISOString().split("T")[0]
 
   // ===== PASO 2: Normalizador del payload (sin cambiar diseño/lógica) =====
@@ -49,7 +49,7 @@ export function EditPersonalPageModal({
   })
   // =======================================================================
 
-  // Submit (misma lógica, solo integramos normalizePayload)
+  // Submit (misma lógica, solo integramos normalizePayload y alerts)
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     await form.handleSubmit()
@@ -57,28 +57,40 @@ export function EditPersonalPageModal({
     const { id, IdUser, ...rest } = personalPage as any
     let payload: any = { ...rest }
 
-    // 🔄 Normaliza fechas antes de enviar (PASO 2)
+    // Normaliza fechas antes de enviar (PASO 2)
     payload = normalizePayload(personalPage, payload)
 
-    if (isNew) {
-      await personalApi.create(payload)
-    } else {
-      const realId = id ?? IdUser
-      if (!realId) {
-        console.error("No hay id para actualizar")
-        return
+    try {
+      if (isNew) {
+        await personalApi.create(payload)
+        // éxito crear
+        await showSuccessAlertRegister("Registrado correctamente")
+      } else {
+        const realId = id ?? IdUser
+        if (!realId) {
+          console.error("No hay id para actualizar")
+          return
+        }
+        // Mantienes tu regla: no se actualizan los identificadores en edición
+        delete payload.IDE
+        delete payload.name
+        delete payload.lastname1
+        delete payload.lastname2
+
+        await personalApi.update(realId, payload)
+        // éxito actualizar
+        await showSuccessAlertRegister("Cambios guardados correctamente")
       }
-      // Mantienes tu regla: no se actualizan los identificadores en edición
-      delete payload.IDE
-      delete payload.name
-      delete payload.lastname1
-      delete payload.lastname2
 
-      await personalApi.update(realId, payload)
+      onSaved?.()
+      setPersonalPage(null)
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        (isNew ? "No se pudo registrar." : "No se pudieron guardar los cambios.")
+      await showErrorAlertRegister(msg)
     }
-
-    onSaved?.()
-    setPersonalPage(null)
   }
 
   return (
@@ -476,11 +488,20 @@ export function EditPersonalPageModal({
           <div className="flex justify-end gap-3 pt-5 border-t border-[#E6E1D6]">
             <button
               type="button"
-              onClick={() => setPersonalPage(null)}
+              onClick={async () => {
+                const confirm = await showConfirmAlert(
+                  "¿Está seguro?",
+                  "Está a punto de cancelar la acción. Los datos no se guardarán."
+                );
+                if (confirm) {
+                  setPersonalPage(null);
+                }
+              }}
               className="px-4 py-2 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 shadow-sm"
             >
               Cancelar
             </button>
+
             <button
               type="submit"
               className="px-4 py-2 rounded-lg bg-[#708C3E] hover:bg-[#5e7630] text-white font-medium shadow-md"

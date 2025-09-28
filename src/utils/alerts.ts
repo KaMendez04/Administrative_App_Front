@@ -41,6 +41,15 @@ export const showErrorAlertLogin = (message: string) => {
   });
 };
 
+export const showSuccessAlertRegister = (message: string) => {
+  return Swal.fire({
+    icon: 'success',
+    title: 'Registration successful',
+    text: message,
+    timer: 2000,
+    showConfirmButton: false,
+  });
+};
 
 export const showErrorAlertEmpty = (message: string) => {
   return Swal.fire({
@@ -72,4 +81,31 @@ export const showWarningAlert = (message: string) => {
     confirmButtonText: 'Yes, delete it',
     cancelButtonText: 'No, cancel',
   });
+};
+
+export const showErrorAlertRegister = (message: string) => {
+  return Swal.fire({
+    icon: 'error',
+    title: 'Error al registrar',
+    text: message,
+    confirmButtonColor: '#48a6a7',
+    customClass: { confirmButton: 'no-border-button' },
+  });
+};
+
+// 🔔 confirmación genérica
+export const showConfirmAlert = async (title: string, text: string) => {
+  const result = await Swal.fire({
+    title,
+    text,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#708C3E", // verde de tu paleta
+    cancelButtonColor: "#d33",     // rojo suave
+    confirmButtonText: "Sí, cancelar",
+    cancelButtonText: "No, continuar",
+    reverseButtons: true,
+    background: "#FAF9F5",
+  });
+  return result.isConfirmed;
 };
