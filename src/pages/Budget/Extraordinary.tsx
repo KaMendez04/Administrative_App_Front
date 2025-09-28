@@ -72,7 +72,7 @@ export default function BudgetExtraordinary() {
                   onChange: ({ value }) =>
                     z.string().trim().min(3).max(100).safeParse(value).success
                       ? undefined
-                      : "Nombre inválido (3–100)",
+                      : "Texto inválido (3–50)",
                 }}
               >
                 {(field) => (
@@ -82,7 +82,7 @@ export default function BudgetExtraordinary() {
                     </label>
                     <input
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value.slice(0, 100))}
+                      onChange={(e) => field.handleChange(e.target.value.slice(0, 50))}
                       placeholder="Ej. Donación, Rifa benéfica…"
                       className={inputClass}
                     />

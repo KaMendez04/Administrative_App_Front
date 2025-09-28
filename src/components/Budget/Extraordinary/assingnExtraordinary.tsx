@@ -212,7 +212,7 @@ export default function AssignExtraordinaryCard({
               onChange: ({ value }) =>
                 AssignExtraordinarySchema.shape.subTypeName.safeParse(value).success
                   ? undefined
-                  : "Texto demasiado corto",
+                  : "Texto inválido (3–50)",
             }}
           >
             {(field) => (
@@ -222,7 +222,7 @@ export default function AssignExtraordinaryCard({
                 </label>
                 <input
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value.slice(0, 60))}
+                  onChange={(e) => field.handleChange(e.target.value.slice(0, 50))}
                   placeholder="Ej. Donación, Rifa benéfica…"
                   className={inputClass}
                   disabled={loading}
