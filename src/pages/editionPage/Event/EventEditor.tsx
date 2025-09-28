@@ -52,32 +52,51 @@ export default function EventEditor({
 
       {selectedEvent && (
         <div className="space-y-4 border border-gray-300 p-6 rounded-xl">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Título"
-            className="w-full border border-gray-300 rounded-md px-4 py-2"
-          />
+          <div>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Título"
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+              maxLength={75}
+            />
+            <div className="text-sm text-gray-500 mt-1">
+              Quedan {75 - title.length} de 75 caracteres
+            </div>
+          </div>
+          
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-4 py-2"
           />
-          <textarea
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-4 py-2"
-          />
-          <input
-            type="text"
-            value={illustration}
-            onChange={(e) => setIllustration(e.target.value)}
-            placeholder="URL de imagen"
-            className="w-full border border-gray-300 rounded-md px-4 py-2"
-          />
+          
+          <div>
+            <textarea
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+              maxLength={250}
+            />
+            <div className="text-sm text-gray-500 mt-1">
+              Quedan {250 - description.length} de 250 caracteres
+            </div>
+          </div>
+          
+          <div>
+            <input
+              type="text"
+              value={illustration}
+              onChange={(e) => setIllustration(e.target.value)}
+              placeholder="URL de imagen"
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+              maxLength={1000}
+            />
+          </div>
+          
           <div className="flex justify-end gap-4">
             <button
               onClick={() => setSelectedEventId(null)}

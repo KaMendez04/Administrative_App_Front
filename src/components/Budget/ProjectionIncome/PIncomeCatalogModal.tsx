@@ -17,7 +17,6 @@ export default function CatalogModal({
   onClose,
   defaultDepartmentId,
   defaultIncomeTypeId,
-  onAccept,
 }: Props) {
   // selección actual
   const [departmentId, setDepartmentId] = useState<number | "">("");
@@ -43,7 +42,7 @@ export default function CatalogModal({
     [types.data]
   );
 
-  // ✅ inicialización al abrir (sin autoselección)
+  // inicialización al abrir (sin autoselección)
   useEffect(() => {
     if (!open) return;
     setErrors({});
@@ -59,7 +58,7 @@ export default function CatalogModal({
     }
   }, [open, defaultDepartmentId, defaultIncomeTypeId]);
 
-  // ✅ cascada
+  // cascada
   useEffect(() => {
     setTypeId("");
     setNewSubType("");
@@ -262,20 +261,8 @@ export default function CatalogModal({
         </div>
 
         <div className="flex items-center justify-end gap-3 border-t p-4 md:p-5">
-          <button
-            onClick={onClose}
-            className="rounded-xl border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-50"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={() => {
-              onAccept?.();
-              onClose();
-            }}
-            className="rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90"
-          >
-            Listo
+          <button onClick={onClose} className="rounded-xl border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-50">
+            Salir
           </button>
         </div>
       </div>

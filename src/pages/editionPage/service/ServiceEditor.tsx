@@ -52,35 +52,59 @@ export default function ServicesInformativeEditor({
         <div className="space-y-4 border border-gray-300 p-6 rounded-xl">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-4">
-              <input
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-                value={title}
-                onChange={e=>setTitle(e.target.value)}
-                placeholder="Título"
-              />
-              <textarea
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-                rows={3}
-                value={cardDescription}
-                onChange={e=>setCardDescription(e.target.value)}
-                placeholder="Descripción de la tarjeta"
-              />
-              <textarea
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-                rows={5}
-                value={modalDescription}
-                onChange={e=>setModalDescription(e.target.value)}
-                placeholder="Descripción del modal"
-              />
+              <div>
+                <input
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                  value={title}
+                  onChange={e=>setTitle(e.target.value)}
+                  placeholder="Título"
+                  maxLength={75}
+                />
+                <div className="text-sm text-gray-500 mt-1">
+                  Quedan {75 - title.length} de 75 caracteres
+                </div>
+              </div>
+              
+              <div>
+                <textarea
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                  rows={3}
+                  value={cardDescription}
+                  onChange={e=>setCardDescription(e.target.value)}
+                  placeholder="Descripción de la tarjeta"
+                  maxLength={250}
+                />
+                <div className="text-sm text-gray-500 mt-1">
+                  Quedan {250 - cardDescription.length} de 250 caracteres
+                </div>
+              </div>
+              
+              <div>
+                <textarea
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                  rows={5}
+                  value={modalDescription}
+                  onChange={e=>setModalDescription(e.target.value)}
+                  placeholder="Descripción del modal"
+                  maxLength={250}
+                />
+                <div className="text-sm text-gray-500 mt-1">
+                  Quedan {250 - modalDescription.length} de 250 caracteres
+                </div>
+              </div>
             </div>
 
             <div className="space-y-3">
-              <input
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-                value={image}
-                onChange={e=>setImage(e.target.value)}
-                placeholder="URL de imagen"
-              />
+              <div>
+                <input
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                  value={image}
+                  onChange={e=>setImage(e.target.value)}
+                  placeholder="URL de imagen"
+                  maxLength={1000}
+                />
+              </div>
+              
               {image && (
                 <img
                   src={image}

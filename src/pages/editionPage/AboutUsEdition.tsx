@@ -19,6 +19,12 @@ export default function AboutUsEdition() {
 
   const canCreate = whoWeAre.trim() && mission.trim() && vision.trim()
 
+  // Máximo y contadores (estrictamente necesario para la validación visual)
+  const MAX = 250
+  const leftWho   = Math.max(0, MAX - (whoWeAre?.length ?? 0))
+  const leftMission = Math.max(0, MAX - (mission?.length ?? 0))
+  const leftVision  = Math.max(0, MAX - (vision?.length ?? 0))
+
   return (
     <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
@@ -48,9 +54,13 @@ export default function AboutUsEdition() {
                   rows={4}
                   value={whoWeAre}
                   onChange={(e) => setWhoWeAre(e.target.value)}
+                  maxLength={MAX}                            
                   className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
                   placeholder="Describe quiénes son…"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Quedan {leftWho} de {MAX} caracteres
+                </p>
               </div>
 
               {/* Misión */}
@@ -63,9 +73,13 @@ export default function AboutUsEdition() {
                   rows={4}
                   value={mission}
                   onChange={(e) => setMission(e.target.value)}
+                  maxLength={MAX}                   
                   className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
                   placeholder="Escribe la misión…"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Quedan {leftMission} de {MAX} caracteres
+                </p>
               </div>
 
               {/* Visión */}
@@ -78,9 +92,13 @@ export default function AboutUsEdition() {
                   rows={4}
                   value={vision}
                   onChange={(e) => setVision(e.target.value)}
+                  maxLength={MAX}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
                   placeholder="Escribe la visión…"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Quedan {leftVision} de {MAX} caracteres
+                </p>
               </div>
 
               <div className="flex justify-end gap-4">
@@ -89,7 +107,7 @@ export default function AboutUsEdition() {
                   disabled={saving || (!isEditing && !canCreate)}
                   className="px-4 py-2 rounded-md border border-green-600 text-green-600 hover:bg-green-50 font-semibold disabled:opacity-60"
                 >
-                  {saving ? (isEditing ? "Guardando…" : "Creando…") : (isEditing ? "Guardar" : "Crear")}
+                  {saving ? (isEditing ? "Guardando…" : "Creando…") : (isEditing ? "Guardar" : "Guardar")}
                 </button>
               </div>
 

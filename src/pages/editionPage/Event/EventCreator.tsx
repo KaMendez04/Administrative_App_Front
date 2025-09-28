@@ -1,6 +1,5 @@
 import { useState } from "react"
 import type { EventInput } from "../../../models/editionSection/EventEditionType"
-import { CharCounter } from "../../../components/CharCounter"
 
 export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput) => void }) {
   const [title, setTitle] = useState("")
@@ -20,33 +19,52 @@ export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput
   return (
     
     <div className="space-y-4">
-      <input
-        type="text"
-        placeholder="Título del evento"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="w-full border border-gray-300 rounded-md px-4 py-2"
-      />
+      <div>
+        <input
+          type="text"
+          placeholder="Título del evento"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full border border-gray-300 rounded-md px-4 py-2"
+          maxLength={75}
+        />
+        <div className="text-sm text-gray-500 mt-1">
+          Quedan {75 - title.length} de 75 caracteres
+        </div>
+      </div>
+      
       <input
         type="date"
         value={date}
         onChange={(e) => setDate(e.target.value)}
         className="w-full border border-gray-300 rounded-md px-4 py-2"
       />
-      <textarea
-        placeholder="Descripción"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        rows={4}
-        className="w-full border border-gray-300 rounded-md px-4 py-2"
-      />
-      <input
-        type="text"
-        placeholder="URL de la ilustración"
-        value={illustration}
-        onChange={(e) => setIllustration(e.target.value)}
-        className="w-full border border-gray-300 rounded-md px-4 py-2"
-      />
+      
+      <div>
+        <textarea
+          placeholder="Descripción"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={4}
+          className="w-full border border-gray-300 rounded-md px-4 py-2"
+          maxLength={250}
+        />
+        <div className="text-sm text-gray-500 mt-1">
+          Quedan {250 - description.length} de 250 caracteres
+        </div>
+      </div>
+      
+      <div>
+        <input
+          type="text"
+          placeholder="URL de la ilustración"
+          value={illustration}
+          onChange={(e) => setIllustration(e.target.value)}
+          className="w-full border border-gray-300 rounded-md px-4 py-2"
+          maxLength={1000}
+        />
+      </div>
+      
       <div className="flex justify-end">
         <button
           onClick={handleSubmit}
