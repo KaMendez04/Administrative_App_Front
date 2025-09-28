@@ -86,20 +86,23 @@ export async function createPSpendSubType(payload: {
 /** ============= Crear Proyección de Egreso ============= */
 export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
   const body = {
-    pSpendSubTypeId: payload.pSpendSubTypeId,
-    amount: Number(payload.amount).toFixed(2),
+    // 👇 nombre que espera el backend
+    subTypeId: payload.pSpendSubTypeId,
+    // 👇 envía número (evita toFixed que lo convierte a string)
+    amount: Number(payload.amount),
   };
+
   const { data } = await apiConfig.post<any>("/p-spend", body);
 
   return {
     id: data.id,
     amount: data.amount,
+    // el backend responde con `subType`, no `pSpendSubType`
     pSpendSubType: {
-      id: data?.pSpendSubType?.id ?? payload.pSpendSubTypeId,
-      name: data?.pSpendSubType?.name ?? "",
-      pSpendTypeId:
-        data?.pSpendSubType?.pSpendType?.id ??
-        data?.pSpendSubType?.type?.id,
+      id: data?.subType?.id ?? payload.pSpendSubTypeId,
+      name: data?.subType?.name ?? "",
+      pSpendTypeId: data?.subType?.type?.id,
     },
   };
+
 }
