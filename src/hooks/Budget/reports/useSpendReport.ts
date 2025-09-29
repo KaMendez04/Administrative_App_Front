@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { resolveDepartmentIdByName, resolveSpendSubTypeIdByName, resolveSpendTypeIdByName } from "../../../services/Budget/reportsSpend/catalogLookupService";
 import { useMutation } from "@tanstack/react-query";
 import { fetchSpendPDF, downloadSpendPdf, fetchSpendFull } from "../../../services/Budget/reportsSpend/spendReportService";
+import type { SpendSummary, SpendTableRow } from "../../../models/Budget/reports/spend";
 
 export type SpendReportNameFilters = {
   start?: string;
@@ -73,7 +74,7 @@ function groupBySum(rows: any[], key: "department" | "spendType") {
 // -------------------------
 
 export function useSpendReport(filters: SpendReportNameFilters | null) {
-  return useQuery({
+  return useQuery<{ rows: SpendTableRow[]; totals: SpendSummary }>({
     queryKey: ["report", "spend", "full", filters],
     enabled: !!filters,
     queryFn: async () => {
@@ -92,10 +93,10 @@ export function useSpendReport(filters: SpendReportNameFilters | null) {
       });
 
       // 3) Normalizar filas
-      const normRows = (rows ?? []).map((r: any) => ({
+      const normRows: SpendTableRow[] = (rows ?? []).map((r: any) => ({
         department: textify(r.department),
-        spend: textify(r.spend ?? r.concept ?? r.detail ?? r.description),
         spendType: textify(r.spendType ?? r.type),
+        spendSubType: textify(r.spendSubType ?? r.subType ?? r.subtype ?? r.spend_subtype ?? r.subTypeName),
         date: isoDate(r.date ?? r.createdAt ?? r.dateTime),
         amount: numify(r.amount ?? r.total),
       }));
@@ -126,12 +127,20 @@ export function useSpendReport(filters: SpendReportNameFilters | null) {
       };
       // Derivados desde las filas si faltan
       const sumFromRows = normRows.reduce((acc: number, r: { amount: any; }) => acc + numify(r.amount), 0);
-      const finalTotals = {
+      const finalTotals: SpendSummary = {
         total: baseTotals.total > 0 ? baseTotals.total : sumFromRows,
-        byDepartment: baseTotals.byDepartment.length
+        byDepartment: (baseTotals.byDepartment.length
           ? baseTotals.byDepartment
-          : groupBySum(normRows, "department"),
-        byType: baseTotals.byType.length ? baseTotals.byType : groupBySum(normRows, "spendType"),
+          : (groupBySum(normRows, "department") as Array<{ department: string; total: number }>)) as Array<{
+          department: string;
+          total: number;
+        }>,
+        byType: (baseTotals.byType.length
+          ? baseTotals.byType
+          : (groupBySum(normRows, "spendType") as Array<{ type: string; total: number }>)) as Array<{
+          type: string;
+          total: number;
+        }>,
         bySubType: baseTotals.bySubType,
       };
 
