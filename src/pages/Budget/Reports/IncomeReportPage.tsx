@@ -1,256 +1,198 @@
-import { useMemo, useState } from "react";
-import type { IncomeReportFilters } from "../../../models/Budget/reports/income";
-import { useIncomeReport } from "../../../hooks/Budget/reports/useIncomeReport";
-import IncomeTable from "../../../components/Budget/Reports/IncomeTable";
-
-const todayISO = new Date().toISOString().slice(0, 10);
+import { useState } from "react";
+import { useIncomeReport, useIncomeReportPDF } from "../../../hooks/Budget/reports/useIncomeReport";
 
 const crc = (n: number) =>
   new Intl.NumberFormat("es-CR", {
     style: "currency",
     currency: "CRC",
-    maximumFractionDigits: 0,
-  }).format(Number.isFinite(n) ? n : 0);
+    minimumFractionDigits: 2,
+  }).format(n);
+
 
 export default function IncomeReportPage() {
-  const [filters, setFilters] = useState<IncomeReportFilters>({
-    start: todayISO,
-    end: todayISO,
-    departmentId: "",
-    incomeTypeId: "",
-    incomeSubTypeId: "",
-  });
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [query, setQuery] = useState("");
+  const [submitted, setSubmitted] = useState<any>({});
 
-  // Normaliza tipos para el hook (IDs como number u undefined)
-  const cleanFilters = useMemo<IncomeReportFilters>(
-    () => ({
-      ...filters,
-      departmentId:
-        filters.departmentId === "" ? undefined : Number(filters.departmentId),
-      incomeTypeId:
-        filters.incomeTypeId === "" ? undefined : Number(filters.incomeTypeId),
-      incomeSubTypeId:
-        filters.incomeSubTypeId === ""
-          ? undefined
-          : Number(filters.incomeSubTypeId),
-    }),
-    [filters]
-  );
+  const { data, isFetching, isLoading } = useIncomeReport(submitted);
+  const { mutateAsync: generateIncomePDF, isPending: isPdfGenerating } = useIncomeReportPDF();
 
-  const { data, isLoading, refetch, isFetching } = useIncomeReport(cleanFilters);
+  const rows = data?.rows ?? [];
+  const totals: any = data?.totals ?? {};
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  // Asegura filas como arreglo tipado
-  const rows: any[] = Array.isArray(data?.rows) ? (data!.rows as any[]) : [];
+  const apply = () =>
+    setSubmitted({
+      start: start || undefined,
+      end: end || undefined,
+      departmentName: query || undefined,
+      incomeTypeName: undefined,
+      incomeSubTypeName: undefined,
+    });
 
-  // Totales robustos (usa backend si viene; si no, deriva de filas)
-  const totals = useMemo(() => {
-    const backend: any = data?.totals ?? {};
+  const clearFilters = () => {
+    setStart("");
+    setEnd("");
+    setQuery("");
+    setSubmitted({});
+  };
 
-    // 1) Total desde filas (fallback)
-    const totalFromRows = rows.reduce(
-      (acc, r) => acc + Number(r?.amount ?? 0),
-      0
-    );
+  const handlePreviewPDF = async () => {
+    if (!submitted) return alert("Primero aplica los filtros antes de ver el PDF");
+    await generateIncomePDF({ ...(submitted ?? {}), preview: true } as any);
+  };
 
-    // 2) Fallbacks agrupados
-    const deptMap = new Map<string, number>();
-    const typeMap = new Map<string, number>();
-
-    for (const r of rows) {
-      const dept =
-        (typeof r?.department === "string"
-          ? r.department
-          : r?.department?.name) || "—";
-      const typ =
-        (typeof r?.incomeType === "string"
-          ? r.incomeType
-          : r?.incomeType?.name) || "—";
-      const amt = Number(r?.amount ?? 0);
-
-      deptMap.set(dept, (deptMap.get(dept) ?? 0) + amt);
-      typeMap.set(typ, (typeMap.get(typ) ?? 0) + amt);
+  const handleDownloadPDF = async () => {
+    if (!submitted) return alert("Primero aplica los filtros antes de descargar el PDF");
+    setIsDownloading(true);
+    try {
+      await generateIncomePDF({ ...(submitted ?? {}), preview: false } as any);
+    } finally {
+      setTimeout(() => setIsDownloading(false), 1200);
     }
-
-    const byDepartmentFallback = Array.from(
-      deptMap,
-      ([department, total]) => ({ department, total })
-    );
-    const byTypeFallback = Array.from(typeMap, ([type, total]) => ({
-      type,
-      total,
-    }));
-
-    // 3) Usa summary del back si está presente
-    const byDepartmentBackend: any[] = Array.isArray(backend?.byDepartment)
-      ? backend.byDepartment
-      : [];
-    const byTypeBackend: any[] = Array.isArray(backend?.byType)
-      ? backend.byType
-      : [];
-
-    const byDepartment = byDepartmentBackend.length
-      ? byDepartmentBackend.map((x) => ({
-          department:
-            (typeof x?.department === "string"
-              ? x.department
-              : x?.department?.name) ||
-            x?.departmentName ||
-            x?.dept ||
-            (typeof x?.name === "string" ? x.name : x?.name?.name) ||
-            "—",
-          total: Number(x?.total ?? 0),
-        }))
-      : byDepartmentFallback;
-
-    const byType = byTypeBackend.length
-      ? byTypeBackend.map((x) => ({
-          type:
-            (typeof x?.type === "string" ? x.type : x?.type?.name) ||
-            (typeof x?.name === "string" ? x.name : x?.name?.name) ||
-            "—",
-          total: Number(x?.total ?? 0),
-        }))
-      : byTypeFallback;
-
-    const total =
-      Number(backend?.total) > 0 ? Number(backend.total) : totalFromRows;
-
-    return { total, byDepartment, byType };
-  }, [data?.rows, data?.totals, rows]);
+  };
 
   return (
-    <div className="min-h-screen bg-[#F7F8F5]">
+    <div className="min-h-screen ">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
-        <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
-          <h1 className="text-2xl font-bold mb-6">Reportes — Ingresos</h1>
-
-          {/* Filtros (mismo layout/estilo que Egresos) */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Desde</label>
-              <input
-                type="date"
-                className="w-full rounded-xl border border-gray-200 p-2"
-                value={filters.start ?? ""}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, start: e.target.value }))
-                }
-              />
+        <div className="">
+          {/* Tarjetas Totales - Colores Vivos */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm">
+              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Total Ingresos</div>
+              <div className="mt-2 text-3xl font-bold text-[#5B732E]">{crc(totals?.total ?? 0)}</div>
             </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Hasta</label>
-              <input
-                type="date"
-                className="w-full rounded-xl border border-gray-200 p-2"
-                value={filters.end ?? ""}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, end: e.target.value }))
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Departamento (id)
-              </label>
-              <input
-                type="number"
-                placeholder="Opcional"
-                className="w-full rounded-xl border border-gray-200 p-2"
-                value={(filters.departmentId as any) ?? ""}
-                onChange={(e) =>
-                  setFilters((f) => ({
-                    ...f,
-                    departmentId: (e.target.value as any) ?? "",
-                  }))
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Tipo ingreso (id)
-              </label>
-              <input
-                type="number"
-                placeholder="Opcional"
-                className="w-full rounded-xl border border-gray-200 p-2"
-                value={(filters.incomeTypeId as any) ?? ""}
-                onChange={(e) =>
-                  setFilters((f) => ({
-                    ...f,
-                    incomeTypeId: (e.target.value as any) ?? "",
-                  }))
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Subtipo ingreso (id)
-              </label>
-              <input
-                type="number"
-                placeholder="Opcional"
-                className="w-full rounded-xl border border-gray-200 p-2"
-                value={(filters.incomeSubTypeId as any) ?? ""}
-                onChange={(e) =>
-                  setFilters((f) => ({
-                    ...f,
-                    incomeSubTypeId: (e.target.value as any) ?? "",
-                  }))
-                }
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 mt-4">
-            <button
-              onClick={() => refetch()}
-              className="rounded-xl bg-[#708C3E] text-white px-5 py-3 shadow hover:opacity-90 transition disabled:opacity-60"
-              disabled={isFetching}
-            >
-              {isFetching ? "Actualizando…" : "Aplicar filtros"}
-            </button>
-            <span className="text-sm text-gray-500">
-              {(cleanFilters.start as string) || "…"} →{" "}
-              {(cleanFilters.end as string) || "…"}
-            </span>
-          </div>
-
-          {/* Totales (mismo estilo que Egresos) */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-gray-100 p-4">
-              <div className="text-sm text-gray-500">Total ingresos</div>
-              <div className="text-2xl font-semibold">{crc(totals.total ?? 0)}</div>
-            </div>
-
-            <div className="rounded-2xl border border-gray-100 p-4">
-              <div className="text-sm text-gray-500">Por departamento</div>
-              <ul className="text-sm mt-2 space-y-1">
-                {(totals.byDepartment ?? []).map((r: any, i: number) => (
+            <div className="rounded-2xl bg-[#EAEFE0] p-5 shadow-sm">
+              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Departamentos</div>
+              <ul className="mt-3 text-sm text-[#33361D] space-y-1.5">
+                {(totals?.byDepartment ?? []).map((r: any, i: number) => (
                   <li key={i} className="flex justify-between">
-                    <span>{r.department || "—"}</span>
-                    <span className="font-medium">{crc(Number(r.total ?? 0))}</span>
+                    <span className="font-medium">{r.department}</span>
+                    <span className="font-bold text-[#5B732E]">{crc(r.total)}</span>
                   </li>
                 ))}
               </ul>
             </div>
-
-            <div className="rounded-2xl border border-gray-100 p-4">
-              <div className="text-sm text-gray-500">Por tipo</div>
-              <ul className="text-sm mt-2 space-y-1">
-                {(totals.byType ?? []).map((r: any, i: number) => (
+            <div className="rounded-2xl bg-[#FEF6E0] p-5 shadow-sm">
+              <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">Tipos de Ingreso</div>
+              <ul className="mt-3 text-sm text-[#33361D] space-y-1.5">
+                {(totals?.byType ?? []).map((r: any, i: number) => (
                   <li key={i} className="flex justify-between">
-                    <span>{r.type || "—"}</span>
-                    <span className="font-medium">{crc(Number(r.total ?? 0))}</span>
+                    <span className="font-medium">{r.type}</span>
+                    <span className="font-bold text-[#C19A3D]">{crc(r.total)}</span>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
 
-          {/* Tabla */}
-          <div className="mt-10 border-2 border-gray-100 rounded-xl overflow-hidden bg-white shadow-sm">
-            <IncomeTable rows={rows} loading={isLoading} />
+          {/* Filtros */}
+          <div className="mt-6 rounded-2xl bg-[#F8F9F3] p-5 shadow-sm">
+            <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
+
+            <div className="mb-4">
+              <input
+                placeholder="Buscar por departamento, tipo o subtipo…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] placeholder:text-gray-400 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de inicio</label>
+                <input
+                  type="date"
+                  value={start}
+                  onChange={(e) => setStart(e.target.value)}
+                  className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de fin</label>
+                <input
+                  type="date"
+                  value={end}
+                  onChange={(e) => setEnd(e.target.value)}
+                  className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-col md:flex-row gap-3">
+              <button
+                type="button"
+                onClick={clearFilters}
+                disabled={isFetching}
+                className="rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold px-6 py-3 hover:bg-[#EAEFE0] transition disabled:opacity-60"
+              >
+                Limpiar
+              </button>
+              <button
+                onClick={apply}
+                disabled={isFetching}
+                className="rounded-xl bg-[#5B732E] text-white font-semibold px-6 py-3 hover:bg-[#556B2F] transition disabled:opacity-60 shadow-sm"
+              >
+                {isFetching ? "Cargando..." : "Aplicar filtros"}
+              </button>
+
+              <div className="ml-auto flex gap-3">
+                <button
+                  onClick={handlePreviewPDF}
+                  disabled={isPdfGenerating}
+                  className="px-5 py-3 rounded-xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold hover:bg-[#FEF6E0] transition"
+                >
+                  Ver PDF
+                </button>
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={isDownloading || isPdfGenerating}
+                  className="px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm"
+                >
+                  {isDownloading || isPdfGenerating ? "Descargando…" : "Descargar PDF"}
+                </button>
+              </div>
+            </div>
           </div>
+
+          {/* Tabla sin líneas */}
+          <div className="mt-6 rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
+            <div className="bg-[#EAEFE0] px-4 py-3">
+              <div className="grid grid-cols-5 gap-4 text-sm font-bold text-[#33361D]">
+                <div>Departamento</div>
+                <div>Tipo</div>
+                <div>Subtipo</div>
+                <div>Fecha</div>
+                <div className="text-right">Monto</div>
+              </div>
+            </div>
+            <div className="bg-white">
+              {rows.map((r: any, i: number) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-5 gap-4 px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition"
+                >
+                  <div className="font-medium">{r.department}</div>
+                  <div className="font-medium">{r.incomeType}</div>
+                  <div className="font-medium">{r.incomeSubType}</div>
+                  <div className="font-medium">
+                    {r?.date ? new Date(r.date).toLocaleDateString("es-CR") : "—"}
+                  </div>
+                  <div className="text-right font-bold text-[#5B732E]">
+                    {crc(r.amount)}
+                  </div>
+                </div>
+              ))}
+              {rows.length === 0 && !isFetching && (
+                <div className="py-8 text-center text-gray-400 font-medium">
+                  Sin resultados
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
