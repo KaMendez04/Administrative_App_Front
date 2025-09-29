@@ -72,7 +72,7 @@ export default function ExtraReportPage(){
 
             <div className="mb-4">
               <input
-                placeholder="Buscar por nombre…"
+                placeholder="Buscar por nomdbre…"
                 value={name}
                 onChange={(e)=>setName(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 p-3"

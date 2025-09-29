@@ -1,7 +1,7 @@
 export type SpendTableRow = {
     department: string;
-    spend: string;
     spendType: string;
+    spendSubType: string;
     date: string;  // ISO
     amount: number;
   };
