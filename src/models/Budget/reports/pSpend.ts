@@ -5,23 +5,23 @@ export type FiltersBase = {
   departmentId?: number;
 };
 
-export type IncomeFilters = FiltersBase & {
-  incomeTypeId?: number;
-  incomeSubTypeId?: number;
+export type SpendFilters = FiltersBase & {
+  spendTypeId?: number;
+  spendSubTypeId?: number;
 };
 
-export type RowIncome = {
-  incomeSubTypeId: number;
+export type RowSpend = {
+  spendSubTypeId: number;
   name: string;
   real: number;
   projected: number;
-  /** Diferencia = PROYECTADO - REAL (como venías usando en comparativo) */
+  /** Diferencia = PROYECTADO - REAL (alineado al reporte actual) */
   difference: number;
 };
 
-export type ReportIncome = {
-  filters: IncomeFilters;
-  rows: RowIncome[];
+export type ReportSpend = {
+  filters: SpendFilters;
+  rows: RowSpend[];
   totals: {
     real: number;
     projected: number;
@@ -35,14 +35,14 @@ export type Department = {
   name: string;
 };
 
-export type IncomeType = {
+export type SpendType = {
   id: number;
   name: string;
   departmentId?: number;
 };
 
-export type IncomeSubType = {
+export type SpendSubType = {
   id: number;
   name: string;
-  incomeTypeId?: number;
+  spendTypeId?: number;
 };
