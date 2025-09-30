@@ -1,41 +1,46 @@
+// src/pages/Budget/Initial.tsx
 import { useInitial } from "../../hooks/Budget/useInitial";
+import { useFiscalYear } from "../../hooks/Budget/useFiscalYear";
 import { DataTable, StatCard } from "../../components/Budget/InitialComponents";
+import FiscalYearSelector from "../../components/common/FiscalYearSelector";
 
 export default function InitialPage() {
+  const { current } = useFiscalYear();
   const { loading, error, cards, incomeRows, spendRows } = useInitial();
 
-  if (loading) {
+  if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
         Cargando información...
       </div>
     );
-  }
-
-  if (error) {
+  if (error)
     return (
       <div className="min-h-screen flex items-center justify-center text-red-600">
         Error al cargar los datos.
       </div>
     );
-  }
 
-  // Calcular totales para las tablas
-  const incomeTotalReal = incomeRows.reduce((sum, row) => sum + row.spent, 0);
-  const incomeTotalProjected = incomeRows.reduce((sum, row) => sum + row.projected, 0);
-  const incomeTotalDiff =  incomeTotalReal - incomeTotalProjected;
+  const incomeTotalReal = incomeRows.reduce((s, r) => s + r.spent, 0);
+  const incomeTotalProjected = incomeRows.reduce((s, r) => s + r.projected, 0);
+  const incomeTotalDiff = incomeTotalReal - incomeTotalProjected;
 
-  const spendTotalReal = spendRows.reduce((sum, row) => sum + row.spent, 0);
-  const spendTotalProjected = spendRows.reduce((sum, row) => sum + row.projected, 0);
-  const spendTotalDiff =  spendTotalReal - spendTotalProjected;
+  const spendTotalReal = spendRows.reduce((s, r) => s + r.spent, 0);
+  const spendTotalProjected = spendRows.reduce((s, r) => s + r.projected, 0);
+  const spendTotalDiff = spendTotalReal - spendTotalProjected;
 
   return (
-    <div className="min-h-screen bg-[#F7F8F5]">
+    <div key={current?.id ?? "nofy"} className="min-h-screen bg-[#F7F8F5]">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
         <div className="rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
+          
+          {/* 🔽 Selector de Año Fiscal en la cabecera */}
+          <div className="flex justify-end mb-6">
+            <FiscalYearSelector />
+          </div>
 
           {/* ====== Cards métricas ====== */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <StatCard
               title="Total de egresos"
               value={cards.totalGastado}

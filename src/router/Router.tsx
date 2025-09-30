@@ -306,7 +306,7 @@ const routeTree = rootRoute.addChildren([
   // Ramas SIN layout
   loginRoute,
   forgotPasswordRoute,
-  resetPasswordRoute, // 👈 aquí (root), no dentro de /edition
+  resetPasswordRoute, 
 
   
 
