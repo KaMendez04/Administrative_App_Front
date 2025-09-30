@@ -1,4 +1,5 @@
 import { LucideIcon } from "../common/lucideIcon";
+import { showConfirmAlert, showSuccessAlert } from "../../utils/alerts";
 
 export function EditableBenefits({
   items, index, setIndex, limits,
@@ -20,6 +21,20 @@ export function EditableBenefits({
 
   const tl = limits.benefitTitle - (b.title?.length ?? 0);
   const dl = limits.benefitDesc  - (b.desc?.length ?? 0);
+
+  const handleSaveClick = async () => {
+    if (!canSave || saving) return;
+    await showSuccessAlert("Confirmar guardado");
+    onSave();
+  };
+
+  const handleCancelClick = async () => {
+    const confirmed = await showConfirmAlert(
+      "Confirmar cancelación",
+      "¿Está seguro que desea cancelar los cambios?"
+    );
+    if (confirmed) onCancel();
+  };
 
   return (
     <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-5">
@@ -67,13 +82,18 @@ export function EditableBenefits({
 
       <div className="flex justify-end gap-3 pt-2">
         <button
-          onClick={onSave}
+          onClick={handleSaveClick}
           disabled={!canSave || saving}
           className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50${!canSave || saving ? "bg-gray-400" : "bg-[#708C3E] hover:bg-green-50"}`}
         >
           {saving ? "Guardando…" : "Guardar"}
         </button>
-        <button onClick={onCancel} className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 font-semibold">Cancelar</button>
+        <button
+          onClick={handleCancelClick}
+          className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 font-semibold"
+        >
+          Cancelar
+        </button>
       </div>
     </div>
   );

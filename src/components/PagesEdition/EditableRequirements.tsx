@@ -1,8 +1,9 @@
 import { MinusCircle } from "lucide-react";
+import { showConfirmAlert, showSuccessAlert, showConfirmDeleteAlert } from "../../utils/alerts";
 
 export function EditableRequirements({
   items, index, setIndex, limits,
-  onChange, onAdd, onRemove,
+  onChange, onRemove,
   onCancel, onSave, canSave, saving,
 }: {
   items: Array<{ text: string; order: number }>;
@@ -17,6 +18,28 @@ export function EditableRequirements({
 
   // usa el valor actual para el contador (evita que quede “pegado”)
   const leftEdit = current ? limits.requirement - (current.text?.length ?? 0) : limits.requirement;
+
+  const handleSaveClick = async () => {
+    if (!canSave || saving) return;
+    await showSuccessAlert("Confirmar guardado");
+    onSave();
+  };
+
+  const handleCancelClick = async () => {
+    const confirmed = await showConfirmAlert(
+      "Confirmar cancelación",
+      "¿Está seguro que desea cancelar los cambios?"
+    );
+    if (confirmed) onCancel();
+  };
+
+  const handleDeleteClick = async () => {
+    const confirmed = await showConfirmDeleteAlert(
+      "Confirmar eliminación",
+      "¿Está seguro que desea eliminar este requisito?"
+    );
+    if (confirmed) onRemove(index);
+  };
 
   return (
     <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-4">
@@ -44,23 +67,23 @@ export function EditableRequirements({
             onChange={(e) => onChange(index, e.target.value)}
             className="w-full border border-gray-300 rounded-md px-4 py-2"
           />
-          <div className="mt-2 flex items-center justify-between">
-            <p className="text-xs text-gray-500">Quedan {leftEdit} de {limits.requirement} caracteres</p>
-            <button
-              type="button"                
-              onClick={() => onRemove(index)}
-              className="text-red-600 flex items-center gap-2"
-            >
-              <MinusCircle className="w-4 h-4" /> Eliminar
-            </button>
-          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Quedan {leftEdit} de {limits.requirement} caracteres
+          </p>
         </div>
       )}
 
       <div className="flex justify-end gap-3 pt-2">
         <button
-          type="button"                 
-          onClick={onSave}
+          type="button"
+          onClick={handleCancelClick}
+          className="px-4 py-2 rounded-md border border-gray-400 text-gray-600 hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          onClick={handleSaveClick}
           disabled={!canSave || saving}
           className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50${
             !canSave || saving ? "bg-gray-400" : "bg-[#708C3E] hover:bg-green-50"
@@ -68,8 +91,12 @@ export function EditableRequirements({
         >
           {saving ? "Guardando…" : "Guardar"}
         </button>
-        <button type="button" onClick={onCancel} className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 font-semibold">
-          Cancelar
+        <button
+          type="button"
+          onClick={handleDeleteClick}
+          className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 flex items-center gap-2 font-semibold"
+        >
+           Eliminar
         </button>
       </div>
     </div>
