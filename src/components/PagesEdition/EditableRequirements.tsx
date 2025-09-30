@@ -1,4 +1,3 @@
-import { MinusCircle } from "lucide-react";
 import { showConfirmAlert, showSuccessAlert, showConfirmDeleteAlert } from "../../utils/alerts";
 
 export function EditableRequirements({
