@@ -8,8 +8,9 @@ import StaffManagementPage from './pages/PersonalPage'
 import ServicesEdition from './pages/editionPage/ServicesEdition'
 import FAQEdition from './pages/editionPage/FAQ/FAQEdition'
 import ManualPage from './pages/ManualPage'
-import AssociatesPage from './pages/AssociatesPage'
 import VolunteersPage from './pages/VolunteersPage'
+import AssociatesApprovedPage from './pages/associates/associatesApprovedPage'
+import AdminRequestsPage from './pages/associates/AssociatesRequestPage'
 
 function App() {
 
@@ -23,8 +24,9 @@ function App() {
     <FAQEdition />
     <StaffManagementPage />
     <ManualPage/>
-    <AssociatesPage/>
     <VolunteersPage/>
+    <AssociatesApprovedPage/>
+    <AdminRequestsPage/>
     </>
   )
 }

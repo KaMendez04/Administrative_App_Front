@@ -48,8 +48,8 @@ export type AdminAssociate = z.infer<typeof AdminAssociateSchema>;
 
 export const AdminListResponseSchema = z.object({
   items: z.array(AdminAssociateSchema),
-  total: z.number(),
-  page: z.number(),
-  pages: z.number(),
+  total: z.coerce.number(), // 👈 Cambiado
+  page: z.coerce.number(),  // 👈 Cambiado
+  pages: z.coerce.number(), // 👈 Cambiado
 });
 export type AdminListResponse = z.infer<typeof AdminListResponseSchema>;

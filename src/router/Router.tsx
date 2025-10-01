@@ -22,7 +22,6 @@ import EventEdition from '../pages/editionPage/EventEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
 import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
-import AssociatesPage from '../pages/AssociatesPage'
 import VolunteersPage from '../pages/VolunteersPage'
 import ManualPage from '../pages/ManualPage'
 import ChangePasswordPage from '../pages/ChangePasswordPage'
@@ -42,6 +41,9 @@ import SpendReportPage from '../pages/Budget/Reports/SpendReportPage'
 import PSpends from '../pages/Budget/Reports/PSpends'
 import PIncomeProjectionsPage from '../pages/Budget/Reports/PIncome'
 import ExtraReportPage from '../pages/Budget/Reports/extraReportPage'
+import AssociatesSubnav from '../pages/Budget/Navbar/AssociatesSubnav'
+import AssociatesApprovedPage from '../pages/associates/associatesApprovedPage'
+import AdminRequestsPage from '../pages/associates/AssociatesRequestPage'
 
 
 function requireRole(allowed: "ADMIN" | "JUNTA") {
@@ -152,7 +154,7 @@ const loginRoute = new Route({
 const associatesPage = new Route({
   getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
   path: '/associates',
-  component: AssociatesPage,
+  component: AssociatesSubnav,
 })
 
 const volunteersPage = new Route({
@@ -287,6 +289,50 @@ const budgetReportsExtraRoute = new Route({
   component: ExtraReportPage,
 })
 
+// Layout para Associates con subnav
+const associatesLayoutRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/associates",
+  component: () => (
+    <>
+      <AssociatesSubnav />
+      <Outlet />
+    </>
+  ),
+})
+
+// Componente que redirige automáticamente a /requests
+function AssociatesIndexRedirect() {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    navigate({ to: '/associates/requests', replace: true });
+  }, [navigate]);
+  
+  return null;
+}
+
+// Ruta index: /associates (redirige a /associates/requests)
+const associatesIndexRoute = new Route({
+  getParentRoute: () => associatesLayoutRoute,
+  path: "/",
+  component: AssociatesIndexRedirect,
+});
+
+// Ruta: /associates/requests
+const associatesRequestsRoute = new Route({
+  getParentRoute: () => associatesLayoutRoute,
+  path: "/requests",
+  component: AdminRequestsPage,
+})
+
+// Ruta: /associates/approved
+const associatesApprovedRoute = new Route({
+  getParentRoute: () => associatesLayoutRoute,
+  path: "/approved",
+  component: AssociatesApprovedPage,
+})
+
 // Fallback: si alguna ruta no existe, redirige a "/Principal"
 function RedirectHome() {
   const navigate = useNavigate()
@@ -340,6 +386,10 @@ const routeTree = rootRoute.addChildren([
       budgetReportsPSpendRoute,
       budgetReportsPIncomeRoute,
       budgetReportsExtraRoute,
+      associatesLayoutRoute,
+      associatesRequestsRoute,
+      associatesApprovedRoute,
+      associatesIndexRoute,
     ]),
 
     staffManagement,
