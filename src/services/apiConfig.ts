@@ -8,6 +8,7 @@ const apiConfig = axios.create({
   timeout: 5000,
 });
 
+
 // Utilidad simple para leer rate limit de headers
 function parseRateLimitFromHeaders(h: any) {
   const remaining = Number(h?.["x-ratelimit-remaining"]);
@@ -27,20 +28,28 @@ function parseRateLimitFromHeaders(h: any) {
   };
 }
 
-// Interceptor de request (igual a tu patrón)
+// Interceptor de request
+// src/services/apiconfig.ts  (tu archivo actual)
 apiConfig.interceptors.request.use(
   (config) => {
     const token = getToken();
     config.headers = config.headers ?? {};
-    if (token && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token) (config.headers as any).Authorization = `Bearer ${token}`;
+    if (!(config.headers as any)['Content-Type']) {
+      (config.headers as any)['Content-Type'] = 'application/json';
     }
-    if (!config.headers["Content-Type"]) {
-      config.headers["Content-Type"] = "application/json";
+
+    const fyId = localStorage.getItem('cg_currentFYId');
+    if (fyId) {
+      (config.headers as any)['X-Fiscal-Year-Id'] = fyId;   // 👈 SIEMPRE
+    } else {
+      delete (config.headers as any)['X-Fiscal-Year-Id'];
     }
+
+    (config.headers as any)['Cache-Control'] = 'no-cache';
     return config;
   },
-  (error) => Promise.reject(error),
+  (err) => Promise.reject(err)
 );
 
 // Interceptor de response: normaliza 429
@@ -58,6 +67,8 @@ apiConfig.interceptors.response.use(
     }
     return Promise.reject(error);
   },
+
+  
 );
 
 export default apiConfig;

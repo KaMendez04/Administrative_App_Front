@@ -6,8 +6,12 @@ import {
   fetchIncomeByDepartment,
   fetchSpendByDepartment,
 } from "../../services/Budget/initialService";
+import { useFiscalYear } from "./useFiscalYear";     
 
 export function useInitial(range?: { startDate?: string; endDate?: string }) {
+  const { current } = useFiscalYear();             
+  const fyId = current?.id ?? 0;                     
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
   const [cards, setCards] = useState<CardStats>({
@@ -19,25 +23,35 @@ export function useInitial(range?: { startDate?: string; endDate?: string }) {
   const [spendRows, setSpendRows] = useState<Row[]>([]);
 
   useEffect(() => {
+    if (!fyId) return; // aún no tenemos FY
+    let cancelled = false;
+
     const load = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const [cardsData, incomeData, spendData] = await Promise.all([
           fetchCardStats(range),
           fetchIncomeByDepartment({ ...range, groupBy: "department" }),
           fetchSpendByDepartment({ ...range, groupBy: "department" }),
         ]);
+
+        if (cancelled) return;
         setCards(cardsData);
         setIncomeRows(incomeData);
         setSpendRows(spendData);
       } catch (err) {
-        setError(err);
+        if (!cancelled) setError(err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [range?.startDate, range?.endDate]);
+    return () => { cancelled = true; };
+    // 👇 cuando cambia el FY, se vuelve a ejecutar
+  }, [fyId, range?.startDate, range?.endDate]);
 
   return { loading, error, cards, incomeRows, spendRows };
 }

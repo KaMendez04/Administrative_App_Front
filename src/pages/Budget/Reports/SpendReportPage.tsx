@@ -1,10 +1,16 @@
 import { useState } from "react"; 
-import { useSpendReport, useSpendReportPDF, type SpendReportNameFilters } from "../../../hooks/Budget/reports/useSpendReport";
+
+import { useSpendReport, useSpendReportPDF, type SpendReportNameFilters } 
+  from "../../../hooks/Budget/reports/useSpendReport"; 
+
 import SpendTable from "../../../components/Budget/Reports/spendTable";
 
-const crc = (n: number) =>
-  new Intl.NumberFormat("es-CR", { style: "currency", currency: "CRC", maximumFractionDigits: 0 })
-    .format(Number.isFinite(n) ? n : 0);
+const crc = (n: number) => 
+  new Intl.NumberFormat("es-CR", { 
+    style: "currency", 
+    currency: "CRC", 
+    maximumFractionDigits: 0 
+  }).format(Number.isFinite(n) ? n : 0);
 
 export default function SpendReportPage() {
   const [start, setStart] = useState("");
@@ -13,8 +19,8 @@ export default function SpendReportPage() {
   const [typeName, setTypeName] = useState("");
   const [subTypeName, setSubTypeName] = useState("");
   const [search, setSearch] = useState("");
-
   const [submitted, setSubmitted] = useState<SpendReportNameFilters | null>({});
+
   const { data, isFetching, isLoading } = useSpendReport(submitted);
   const pdfMutation = useSpendReportPDF();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -63,12 +69,20 @@ export default function SpendReportPage() {
 
         {/* Totales */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
           <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Total Egresos</div>
-            <div className="mt-2 text-3xl font-bold text-[#5B732E]">{crc(totals?.total ?? 0)}</div>
+            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
+              Total Egresos
+            </div>
+            <div className="mt-2 text-3xl font-bold text-[#5B732E]">
+              {crc(totals?.total ?? 0)}
+            </div>
           </div>
+
           <div className="rounded-2xl bg-[#EAEFE0] p-5 shadow-sm">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Por Departamento</div>
+            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
+              Por Departamento
+            </div>
             <ul className="mt-3 text-sm text-[#33361D] space-y-1.5">
               {(totals?.byDepartment ?? []).map((r: any, i: number) => (
                 <li key={i} className="flex justify-between">
@@ -78,8 +92,11 @@ export default function SpendReportPage() {
               ))}
             </ul>
           </div>
+
           <div className="rounded-2xl bg-[#FEF6E0] p-5 shadow-sm">
-            <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">Por Tipo</div>
+            <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">
+              Por Tipo
+            </div>
             <ul className="mt-3 text-sm text-[#33361D] space-y-1.5">
               {(totals?.byType ?? []).map((r: any, i: number) => (
                 <li key={i} className="flex justify-between">
@@ -89,6 +106,7 @@ export default function SpendReportPage() {
               ))}
             </ul>
           </div>
+
         </div>
 
         {/* Filtros */}
@@ -106,8 +124,11 @@ export default function SpendReportPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
             <div>
-              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de inicio</label>
+              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
+                Fecha de inicio
+              </label>
               <input
                 type="date"
                 value={start}
@@ -115,8 +136,11 @@ export default function SpendReportPage() {
                 className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de fin</label>
+              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
+                Fecha de fin
+              </label>
               <input
                 type="date"
                 value={end}
@@ -124,9 +148,11 @@ export default function SpendReportPage() {
                 className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
               />
             </div>
+
           </div>
 
           <div className="mt-5 flex flex-col md:flex-row gap-3">
+
             <button
               type="button"
               onClick={clearFilters}
@@ -135,6 +161,7 @@ export default function SpendReportPage() {
             >
               Limpiar
             </button>
+
             <button
               onClick={apply}
               disabled={isFetching}
@@ -144,6 +171,7 @@ export default function SpendReportPage() {
             </button>
 
             <div className="ml-auto flex gap-3">
+
               <button
                 onClick={handlePreviewPDF}
                 disabled={pdfMutation.isPending}
@@ -151,6 +179,7 @@ export default function SpendReportPage() {
               >
                 Ver PDF
               </button>
+
               <button
                 onClick={handleDownloadPDF}
                 disabled={isDownloading || pdfMutation.isPending}
@@ -158,6 +187,7 @@ export default function SpendReportPage() {
               >
                 {isDownloading || pdfMutation.isPending ? "Descargando…" : "Descargar PDF"}
               </button>
+
             </div>
           </div>
         </div>
