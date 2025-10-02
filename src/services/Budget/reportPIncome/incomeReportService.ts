@@ -1,6 +1,6 @@
-import type { IncomeFilters, IncomeSubType, IncomeType, ReportIncome } from "../../../models/Budget/incomeProjectionType";
-import type { Department } from "../../../models/Budget/IncomeType";
-import apiConfig from "../../apiConfig";
+import type { IncomeFilters, IncomeSubType, IncomeType, ReportIncome } from "../../../modules/budget/projectionIncome/models/incomeProjectionType";
+import type { Department } from "../../../modules/budget/income/models/IncomeType";
+import apiConfig from "../../../apiConfig/apiConfig";
 
 
 export async function listDepartments(): Promise<Department[]> {

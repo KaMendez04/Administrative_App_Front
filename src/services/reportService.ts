@@ -6,7 +6,7 @@ import type {
   IncomeRow,
   IncomeTotals,
 } from "../models/Budget/reports/income";
-import apiConfig from "./apiConfig";
+import apiConfig from "../apiConfig/apiConfig";
 
 export async function getIncomeFull(filters: IncomeReportFilters): Promise<IncomeFullResponse> {
   const { data } = await apiConfig.get("/report/income/full", { params: filters });

@@ -1,4 +1,4 @@
-import apiConfig from "./apiConfig";
+import apiConfig from "../apiConfig/apiConfig";
 import type { LoginPayload, LoginResponse } from "../models/LoginType";
 
 export async function postLogin(payload: LoginPayload): Promise<LoginResponse> {

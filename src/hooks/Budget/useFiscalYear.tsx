@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import apiConfig from '../../services/apiConfig';
+import apiConfig from '../../apiConfig/apiConfig';
 
 
 export type FiscalYear = {

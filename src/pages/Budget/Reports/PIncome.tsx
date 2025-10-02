@@ -11,7 +11,7 @@ import {
   previewIncomeReportPDF,
   downloadIncomeCompareExcel,
 } from "../../../services/Budget/reportPIncome/incomeReportService";
-import { listDepartments } from "../../../services/Budget/projectionIncomeService";
+import { listDepartments } from "../../../modules/budget/projectionIncome/services/projectionIncomeService";
 
 // util: convierte cualquier cosa en array razonable
 type AnyObj = Record<string, unknown>;
@@ -59,7 +59,7 @@ export default function PIncomeProjectionsPage() {
 
   // tipos/subtipos (sí dependen del dept / tipo)
   const { data: incomeTypesData = [] } = useIncomeTypes(departmentId);
-  const { data: incomeSubTypesData = [] } = useIncomeSubTypes(incomeTypeId);
+  useIncomeSubTypes(incomeTypeId);
   const incomeTypes = ensureArray<any>(incomeTypesData);
 
   // reporte

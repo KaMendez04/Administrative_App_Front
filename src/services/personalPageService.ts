@@ -1,5 +1,5 @@
 // src/services/personalPageService.ts
-import apiConfig from "./apiConfig";
+import apiConfig from "../apiConfig/apiConfig";
 import type { PersonalPageType } from "../models/PersonalPageType";
 
 type CreatePayload = Omit<PersonalPageType, "id">;

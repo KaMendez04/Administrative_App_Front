@@ -1,5 +1,5 @@
 import type { ChangePassword } from "../models/ChangePasswordType"
-import apiConfig from "./apiConfig"
+import apiConfig from "../apiConfig/apiConfig"
 
 
 export type ChangePasswordResult = {

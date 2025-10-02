@@ -1,4 +1,4 @@
-import apiConfig from "../apiConfig"
+import apiConfig from "../../apiConfig/apiConfig"
 import type { AboutUsType, AboutUsUpdate } from "../../models/editionSection/AboutUsEditionType"
 
 // Títulos fijos para cada sección (los usaremos como “clave”)

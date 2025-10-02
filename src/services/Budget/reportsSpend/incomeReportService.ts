@@ -1,5 +1,5 @@
 import type { IncomeReportFilters, IncomeSummary, IncomeRow } from "../../../models/Budget/reports/income";
-import api from "../../apiConfig";
+import api from "../../../apiConfig/apiConfig";
 
 // Obtener tabla + resumen
 export async function fetchIncomeFull(filters: IncomeReportFilters): Promise<{

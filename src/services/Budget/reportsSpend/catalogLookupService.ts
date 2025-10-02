@@ -1,4 +1,4 @@
-import api from "../../apiConfig";
+import api from "../../../apiConfig/apiConfig";
 
 export type Dept = { id: number; name: string };
 export type SpendType = { id: number; name: string; department?: Dept | { id: number } };

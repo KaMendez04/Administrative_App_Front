@@ -1,6 +1,6 @@
 import type {
     Department, IncomeType, IncomeSubType,
-  } from "../../../models/Budget/incomeProjectionType";
+  } from "../../../modules/budget/projectionIncome/models/incomeProjectionType";
   
   // Normalizador defensivo (por si llegan objetos {data:[]} u otros)
   function asArray<T>(x: any): T[] {

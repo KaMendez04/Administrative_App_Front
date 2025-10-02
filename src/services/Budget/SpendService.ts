@@ -11,7 +11,7 @@ import type {
 } from "../../models/Budget/SpendType";
 
 // 👇 Usa la MISMA ruta que en IncomeService:
-import apiConfig from "../apiConfig"; 
+import apiConfig from "../../apiConfig/apiConfig"; 
 // Si en tu repo real IncomeService usa "../../apiConfig", cambia esta línea a:
 // import apiConfig from "../../apiConfig";
 

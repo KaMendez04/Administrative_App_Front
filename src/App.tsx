@@ -9,8 +9,8 @@ import ServicesEdition from './pages/editionPage/ServicesEdition'
 import FAQEdition from './pages/editionPage/FAQ/FAQEdition'
 import ManualPage from './pages/ManualPage'
 import VolunteersPage from './pages/VolunteersPage'
-import AssociatesApprovedPage from './pages/associates/associatesApprovedPage'
-import AdminRequestsPage from './pages/associates/AssociatesRequestPage'
+import AssociatesApprovedPage from './modules/associates/pages/AssociatesApprovedPage'
+import AdminRequestsPage from './modules/associates/pages/AssociatesRequestPage'
 
 function App() {
 

@@ -1,4 +1,4 @@
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 
 
 export const fyApi = {

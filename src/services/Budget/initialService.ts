@@ -7,7 +7,7 @@ import {
   type CardStats,
   type Row,
 } from "../../models/Budget/initialType";
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 
 const HOME_SUMMARY_URL = "/home/summary";  // Cards
 const HOME_INCOMES_URL = "/home/incomes";  // Tabla ingresos

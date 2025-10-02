@@ -6,9 +6,9 @@ import type {
   IncomeSubType,
   IncomeType,
   ReportIncome,
-} from "../../../models/Budget/incomeProjectionType";
+} from "../../../modules/budget/projectionIncome/models/incomeProjectionType";
 
-import { listDepartments } from "../../../services/Budget/projectionIncomeService";
+import { listDepartments } from "../../../modules/budget/projectionIncome/services/projectionIncomeService";
 import {
   getIncomeReport,
   listIncomeSubTypes,

@@ -1,4 +1,4 @@
-import apiConfig from "../../../services/apiConfig";
+import apiConfig from "../../../apiConfig/apiConfig";
 import {
   listDepartments as fetchDepartments,
   listSpendTypes as fetchSpendTypes,

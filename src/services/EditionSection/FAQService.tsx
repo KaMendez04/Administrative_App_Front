@@ -1,4 +1,4 @@
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 import type { FAQEdition } from "../../models/editionSection/FAQEditionType";
 
 // GET /faq

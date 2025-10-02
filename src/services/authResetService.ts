@@ -1,5 +1,5 @@
 import type { ResetPasswordType } from "../models/ResetPasswordType"
-import apiConfig from "./apiConfig"
+import apiConfig from "../apiConfig/apiConfig"
 
 export async function resetPassword(resetData: ResetPasswordType) {
   try {
