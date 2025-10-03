@@ -1,20 +1,7 @@
-import type {
-  CreateDepartmentDTO,
-  CreatePIncomeDTO,
-  CreatePIncomeSubTypeDTO,
-  CreatePIncomeTypeDTO,
-  Department,
-  PIncome,
-  PIncomeSubType,
-  PIncomeType,
-} from "../../../models/Budget/incomeProjectionType";
-import {
-  createDepartment,
-  createPIncome,
-  createPIncomeSubType,
-  createPIncomeType,
-} from "../../../services/Budget/projectionIncomeService";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import type { CreateDepartmentDTO, CreatePIncomeDTO, CreatePIncomeSubTypeDTO, CreatePIncomeTypeDTO, Department, PIncome, PIncomeSubType, PIncomeType } from "../../../models/Budget/incomeProjectionType";
+import { createDepartment, createPIncome, createPIncomeSubType, createPIncomeType } from "../../../services/Budget/projectionIncomeService";
 
 /** Pequeño wrapper para conservar tu contrato */
 function wrapMutation<TPayload, TResult>(

@@ -1,127 +1,79 @@
-
-import type { PIncomeFilters, PIncomeSubType, PIncomeType, ReportPIncome } from "../../models/Budget/incomeProjectionType";
-import type { Department } from "../../models/Budget/IncomeType";
+import type { ApiList, CreateDepartmentDTO, CreatePIncomeDTO, CreatePIncomeSubTypeDTO, CreatePIncomeTypeDTO, Department, PIncome, PIncomeSubType, PIncomeType } from "../../models/Budget/incomeProjectionType";
 import apiConfig from "../apiConfig";
-export async function listDepartments(): Promise<Department[]> {
+
+
+export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");
-  return data ?? [];
+ 
+  return { data };
 }
 
-export async function listIncomeTypes(departmentId?: number): Promise<PIncomeType[]> {
-  const { data } = await apiConfig.get<any[]>("/income-type");
-  let items: PIncomeType[] = (data ?? []).map((t: any) => ({
-    id: t.id, name: t.name, departmentId: t?.department?.id,
-  }));
-  if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
-  return items;
-}
-
-export async function listIncomeSubTypes(incomeTypeId?: number): Promise<PIncomeSubType[]> {
-  const { data } = await apiConfig.get<any[]>("/income-sub-type", {
-    params: incomeTypeId ? { incomeTypeId } : undefined,
-  });
-  return (data ?? []).map((s: any) => ({
-    id: s.id, name: s.name, incomeTypeId: s?.incomeType?.id,
-  }));
-}
-export async function getIncomeReport(params: PIncomeFilters): Promise<ReportPIncome> {
-  const { data } = await apiConfig.get<ReportPIncome>("/report-proj/income", { params });
+export async function createDepartment(payload: CreateDepartmentDTO): Promise<Department> {
+  const { data } = await apiConfig.post<Department>("/department", payload);
   return data;
 }
 
-function clean<T extends object>(obj: T): Partial<T> {
-    const out: any = {};
-    Object.entries(obj ?? {}).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && v !== "") out[k] = v;
-    });
-    return out;
-  }
-  
-  function filenameFromCD(cd?: string, def = "reporte.pdf") {
-    if (!cd) return def;
-    const m = /filename\*?=(?:UTF-8''|")?([^;"]+)/i.exec(cd);
-    if (!m) return def;
-    try { return decodeURIComponent(m[1].replace(/"/g, "").trim()); } catch { return def; }
-  }
-  
-  export async function downloadIncomeReportPDF(filters: PIncomeFilters) {
-    const params = clean(filters);
-    const res = await apiConfig.get<Blob>("/report-proj/income/pdf", {
-      params,
-      responseType: "blob",
-    });
-    const blob = res.data;
-    const url = URL.createObjectURL(blob);
-  
-    const cd = (res as any).headers?.["content-disposition"];
-    const filename = filenameFromCD(cd, `reporte-ingresos.pdf-${new Date().toISOString().slice(0, 10)}`);
-  
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-  
-  export async function previewIncomeReportPDF(filters: PIncomeFilters) {
-    const params = clean(filters);
-    const res = await apiConfig.get<Blob>("/report-proj/income/pdf", {
-      params,
-      responseType: "blob",
-    });
-    const blob = res.data;
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
-  }
-  // ===== EXCEL: Comparativo de Ingresos =====
-export async function downloadIncomeCompareExcel(filters: PIncomeFilters) {
-  const params = clean(filters);
-  const res = await apiConfig.get<Blob>("/report-proj/income/excel", {
-    params,
-    responseType: "blob",
-  });
 
-  const cd = (res as any).headers?.["content-disposition"];
-  const filename = filenameFromCD(
-    cd,
-    `reporte-comparativo-ingresos-${new Date().toISOString().slice(0, 10)}.xlsx`
-  );
-
-  const blob = res.data;
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+export async function listPIncomeTypes(departmentId?: number): Promise<ApiList<PIncomeType>> {
+  const { data } = await apiConfig.get<any[]>("/p-income-type");
+  // Map a nuestro modelo plano
+  let items: PIncomeType[] = (data ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    departmentId: t?.department?.id,
+  }));
+  if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
+  return { data: items };
 }
 
-// ===== EXCEL: Listado de Ingresos Proyectados (pIncome) =====
-export async function downloadPIncomeListExcel(filters: PIncomeFilters) {
-  const params = clean(filters);
-  const res = await apiConfig.get<Blob>("/report-proj/pincome/excel", {
-    params,
-    responseType: "blob",
+export async function createPIncomeType(payload: CreatePIncomeTypeDTO): Promise<PIncomeType> {
+  const { data } = await apiConfig.post<any>("/p-income-type", payload);
+  return {
+    id: data.id,
+    name: data.name,
+    departmentId: data?.department?.id ?? payload.departmentId,
+  };
+}
+
+
+export async function listPIncomeSubTypes(pIncomeTypeId: number): Promise<ApiList<PIncomeSubType>> {
+  const { data } = await apiConfig.get<any[]>("/p-income-sub-type", {
+    params: { pIncomeTypeId },
   });
+  const items: PIncomeSubType[] = (data ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+    pIncomeTypeId: s?.pIncomeType?.id ?? pIncomeTypeId,
+  }));
+  return { data: items };
+}
 
-  const cd = (res as any).headers?.["content-disposition"];
-  const filename = filenameFromCD(
-    cd,
-    `reporte-pincome-${new Date().toISOString().slice(0, 10)}.xlsx`
-  );
+export async function createPIncomeSubType(payload: CreatePIncomeSubTypeDTO): Promise<PIncomeSubType> {
+  const { data } = await apiConfig.post<any>("/p-income-sub-type", payload);
+  return {
+    id: data.id,
+    name: data.name,
+    pIncomeTypeId: data?.pIncomeType?.id ?? payload.pIncomeTypeId,
+  };
+}
 
-  const blob = res.data;
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+
+export async function createPIncome(payload: CreatePIncomeDTO): Promise<PIncome> {
+  const body = {
+    pIncomeSubTypeId: payload.pIncomeSubTypeId,
+ 
+    amount: Number(payload.amount).toFixed(2)
+  };
+
+  const { data } = await apiConfig.post<any>("/p-income", body);
+
+  return {
+    id: data.id,
+    amount: data.amount,
+    pIncomeSubType: {
+      id: data?.pIncomeSubType?.id ?? payload.pIncomeSubTypeId,
+      name: data?.pIncomeSubType?.name ?? "",
+      pIncomeTypeId: data?.pIncomeSubType?.pIncomeType?.id,
+    },
+  };
 }

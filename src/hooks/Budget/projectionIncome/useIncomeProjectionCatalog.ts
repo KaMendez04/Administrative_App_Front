@@ -3,12 +3,10 @@ import type {
   PIncomeSubType,
   PIncomeType,
 } from "../../../models/Budget/incomeProjectionType";
-import {
-  listDepartments,
-  listPIncomeSubTypes,
-  listPIncomeTypes,
-} from "../../../services/Budget/projectionIncomeService";
+
 import { useQuery } from "@tanstack/react-query";
+import { listDepartments } from "../../../services/Budget/IncomeService";
+import { listPIncomeSubTypes, listPIncomeTypes } from "../../../services/Budget/projectionIncomeService";
 
 // Adaptador para mantener tu shape { data, loading, error }
 function adaptQuery<T>(q: {
