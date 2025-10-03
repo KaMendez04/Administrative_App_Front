@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type {
-  Department,
-  IncomeFilters,
-  IncomeSubType,
-  IncomeType,
-  ReportIncome,
-} from "../../../models/Budget/incomeProjectionType";
+
 
 import { listDepartments } from "../../../services/Budget/projectionIncomeService";
 import {
@@ -17,6 +11,7 @@ import {
   downloadIncomeCompareExcel,
   downloadPIncomeListExcel,
 } from "../../../services/Budget/reportPIncome/incomeReportService";
+import type { Department, IncomeFilters, IncomeSubType, IncomeType, ReportIncome } from "../../../models/Budget/IncomeType";
 
 /* =========================
    1) Filtros controlados

@@ -1,5 +1,6 @@
-import type { PIncomeFilters, PIncomeSubType, PIncomeType, ReportPIncome } from "../../../models/Budget/incomeProjectionType";
-import type { Department, IncomeType } from "../../../models/Budget/IncomeType";
+
+import type { Department, IncomeFilters, IncomeSubType, IncomeType, ReportIncome } from "../../../models/Budget/IncomeType";
+
 import apiConfig from "../../apiConfig";
 
 
@@ -8,16 +9,16 @@ export async function listDepartments(): Promise<Department[]> {
   return data ?? [];
 }
 
-export async function listIncomeTypes(departmentId?: number): Promise<PIncomeType[]> {
+export async function listIncomeTypes(departmentId?: number): Promise<IncomeType[]> {
   const { data } = await apiConfig.get<any[]>("/income-type");
-  let items: PIncomeType[] = (data ?? []).map((t: any) => ({
+  let items: IncomeType[] = (data ?? []).map((t: any) => ({
     id: t.id, name: t.name, departmentId: t?.department?.id,
   }));
   if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
   return items;
 }
 
-export async function listIncomeSubTypes(incomeTypeId?: number): Promise<PIncomeSubType[]> {
+export async function listIncomeSubTypes(incomeTypeId?: number): Promise<IncomeSubType[]> {
   const { data } = await apiConfig.get<any[]>("/income-sub-type", {
     params: incomeTypeId ? { incomeTypeId } : undefined,
   });
@@ -25,8 +26,8 @@ export async function listIncomeSubTypes(incomeTypeId?: number): Promise<PIncome
     id: s.id, name: s.name, incomeTypeId: s?.incomeType?.id,
   }));
 }
-export async function getIncomeReport(params: PIncomeFilters): Promise<ReportPIncome> {
-  const { data } = await apiConfig.get<ReportPIncome>("/report-proj/income", { params });
+export async function getIncomeReport(params: IncomeFilters): Promise<ReportIncome> {
+  const { data } = await apiConfig.get<ReportIncome>("/report-proj/income", { params });
   return data;
 }
 
@@ -45,7 +46,7 @@ function clean<T extends object>(obj: T): Partial<T> {
     try { return decodeURIComponent(m[1].replace(/"/g, "").trim()); } catch { return def; }
   }
   
-  export async function downloadIncomeReportPDF(filters: PIncomeFilters) {
+  export async function downloadIncomeReportPDF(filters: IncomeFilters) {
     const params = clean(filters);
     const res = await apiConfig.get<Blob>("/report-proj/income/pdf", {
       params,
@@ -66,7 +67,7 @@ function clean<T extends object>(obj: T): Partial<T> {
     URL.revokeObjectURL(url);
   }
   
-  export async function previewIncomeReportPDF(filters: PIncomeFilters) {
+  export async function previewIncomeReportPDF(filters: IncomeFilters) {
     const params = clean(filters);
     const res = await apiConfig.get<Blob>("/report-proj/income/pdf", {
       params,
@@ -78,7 +79,7 @@ function clean<T extends object>(obj: T): Partial<T> {
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
   // ===== EXCEL: Comparativo de Ingresos =====
-export async function downloadIncomeCompareExcel(filters: PIncomeFilters) {
+export async function downloadIncomeCompareExcel(filters: IncomeFilters) {
   const params = clean(filters);
   const res = await apiConfig.get<Blob>("/report-proj/income/excel", {
     params,
@@ -88,7 +89,7 @@ export async function downloadIncomeCompareExcel(filters: PIncomeFilters) {
   const cd = (res as any).headers?.["content-disposition"];
   const filename = filenameFromCD(
     cd,
-    `reporte-comparativo-ingresos-${new Date().toISOString().slice(0, 10)}.xlsx`
+    `reporte-comparativo-ingresos-${new Date().toISOString().slice(0, 10)}.xlsx`  
   );
 
   const blob = res.data;
@@ -103,7 +104,7 @@ export async function downloadIncomeCompareExcel(filters: PIncomeFilters) {
 }
 
 // ===== EXCEL: Listado de Ingresos Proyectados (pIncome) =====
-export async function downloadPIncomeListExcel(filters: PIncomeFilters) {
+export async function downloadPIncomeListExcel(filters: IncomeFilters) {
   const params = clean(filters);
   const res = await apiConfig.get<Blob>("/report-proj/pincome/excel", {
     params,
@@ -113,7 +114,7 @@ export async function downloadPIncomeListExcel(filters: PIncomeFilters) {
   const cd = (res as any).headers?.["content-disposition"];
   const filename = filenameFromCD(
     cd,
-    `reporte-pincome-${new Date().toISOString().slice(0, 10)}.xlsx`
+    `reporte-pincome-${new Date().toISOString().slice(0, 10)}'.xlsx`
   );
 
   const blob = res.data;

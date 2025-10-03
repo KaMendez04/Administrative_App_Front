@@ -1,3 +1,33 @@
+/* ================== Tipos / Model ================== */
+export type FiltersBase = {
+  start?: string;
+  end?: string;
+  departmentId?: number;
+};
+
+export type IncomeFilters = FiltersBase & {
+  incomeTypeId?: number;
+  incomeSubTypeId?: number;
+};
+
+export type RowIncome = {
+  incomeSubTypeId: number;
+  name: string;
+  real: number;
+  projected: number;
+  /** Diferencia = PROYECTADO - REAL (como venías usando en comparativo) */
+  difference: number;
+};
+
+export type ReportIncome = {
+  filters: IncomeFilters;
+  rows: RowIncome[];
+  totals: {
+    real: number;
+    projected: number;
+    difference: number;
+  };
+};
 export interface Department {
   id: number;
   name: string;
@@ -6,20 +36,20 @@ export interface Department {
 export interface IncomeType {
   id: number;
   name: string;
-  departmentId: number;
+  departmentId?: number;
 }
 
 export interface IncomeSubType {
   id: number;
   name: string;
-  incomeTypeId: number;
+  incomeTypeId?: number;
 }
 
 export interface Income {
   id: number;
   amount: string; 
   date: string;   // YYYY-MM-DD
-  incomeSubType: IncomeSubType;
+  incomeSubType?: IncomeSubType;
 }
 
 export type CreateDepartmentDTO = {

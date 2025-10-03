@@ -2,10 +2,9 @@ import type { ApiList, CreateDepartmentDTO, CreatePIncomeDTO, CreatePIncomeSubTy
 import apiConfig from "../apiConfig";
 
 
-export async function listDepartments(): Promise<ApiList<Department>> {
+export async function listDepartments(): Promise<Department[]> {
   const { data } = await apiConfig.get<Department[]>("/department");
- 
-  return { data };
+  return data; // ← devuelve el array, no { data }
 }
 
 export async function createDepartment(payload: CreateDepartmentDTO): Promise<Department> {
