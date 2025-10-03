@@ -5,13 +5,13 @@ export type FiltersBase = {
   departmentId?: number;
 };
 
-export type IncomeFilters = FiltersBase & {
-  incomeTypeId?: number;
-  incomeSubTypeId?: number;
+export type PIncomeFilters = FiltersBase & {
+  pIncomeTypeId?: number;
+  pIncomeSubTypeId?: number;
 };
 
-export type RowIncome = {
-  incomeSubTypeId: number;
+export type RowPIncome = {
+  pIncomeSubTypeId: number;
   name: string;
   real: number;
   projected: number;
@@ -19,14 +19,19 @@ export type RowIncome = {
   difference: number;
 };
 
-export type ReportIncome = {
-  filters: IncomeFilters;
-  rows: RowIncome[];
+export type ReportPIncome = {
+  filters: PIncomeFilters;
+  rows: RowPIncome[];
   totals: {
     real: number;
     projected: number;
     difference: number;
   };
+};
+
+export type ApiList<T> = {
+  data: T[];
+  total?: number;
 };
 
 /** ===== Catálogos (para selects) ===== */
@@ -35,14 +40,40 @@ export type Department = {
   name: string;
 };
 
-export type IncomeType = {
-  id: number;
+export type CreateDepartmentDTO = {
   name: string;
-  departmentId?: number;
 };
 
-export type IncomeSubType = {
+export type PIncomeType = {
   id: number;
   name: string;
-  incomeTypeId?: number;
+  departmentId?: number; 
+};
+
+export type PIncomeSubType = {
+  id: number;
+  name: string;
+  pIncomeTypeId?: number; 
+};
+
+export type CreatePIncomeTypeDTO = {
+  name: string;
+  departmentId: number;
+};
+
+export type CreatePIncomeSubTypeDTO = {
+  name: string;
+  pIncomeTypeId: number;
+};
+
+export interface PIncome {
+  id: number;
+  amount: string; 
+ 
+  pIncomeSubType: PIncomeSubType;
+}
+
+export type CreatePIncomeDTO = {
+  pIncomeSubTypeId: number;
+  amount: number;
 };

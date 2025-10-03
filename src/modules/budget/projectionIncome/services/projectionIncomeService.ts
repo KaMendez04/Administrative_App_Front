@@ -1,7 +1,5 @@
-
-
 import apiConfig from "../../../../apiConfig/apiConfig";
-
+import type { ApiList, CreateDepartmentDTO, CreatePIncomeDTO, CreatePIncomeSubTypeDTO, CreatePIncomeTypeDTO, Department, PIncome, PIncomeSubType, PIncomeType } from "../models/incomeProjectionType";
 
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");

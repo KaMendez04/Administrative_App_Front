@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import PIncomeForm from "./components/PIncomeForm";
+import CatalogModal from "./components/PIncomeCatalogModal";
 
 
 export default function PIncomePage() {
@@ -29,7 +30,7 @@ export default function PIncomePage() {
       </div>
 
       {/* Modal: agregar Departamento / Tipo / SubTipo */}
-      <PCatalogModal
+      <CatalogModal
         open={openCatalog}
         onClose={() => setOpenCatalog(false)}
       />

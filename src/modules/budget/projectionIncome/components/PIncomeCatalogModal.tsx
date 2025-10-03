@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { X, Plus } from "lucide-react";
 import { useDepartments, usePIncomeTypes } from "../hooks/useIncomeProjectionCatalog";
+import type { PIncomeType } from "../models/incomeProjectionType";
+import { useCreateDepartment, useCreateIncomeSubType, useCreateIncomeType } from "../hooks/useIncomeProjectionMutations";
 
 type Props = {
   open: boolean;

@@ -1,7 +1,6 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { listDepartments, listPIncomeSubTypes, listPIncomeTypes } from "../services/projectionIncomeService";
-import type { Department } from "../models/incomeProjectionType";
+import type { Department, PIncomeSubType, PIncomeType } from "../models/incomeProjectionType";
 
 // Adaptador para mantener tu shape { data, loading, error }
 function adaptQuery<T>(q: {

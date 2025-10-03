@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { parseCR, useMoneyInput } from "../../../../hooks/Budget/useMoneyInput";
 import { useDepartments, usePIncomeSubTypes, usePIncomeTypes } from "../hooks/useIncomeProjectionCatalog";
 import { useCreatePIncomeEntry } from "../hooks/useIncomeProjectionMutations";
+import type { CreatePIncomeDTO } from "../models/incomeProjectionType";
 
 
 type Props = {

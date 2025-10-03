@@ -1,5 +1,5 @@
 
-import type { Department } from "../models/incomeProjectionType";
+import type { CreateDepartmentDTO, CreatePIncomeDTO, CreatePIncomeSubTypeDTO, CreatePIncomeTypeDTO, Department, PIncome, PIncomeSubType, PIncomeType } from "../models/incomeProjectionType";
 import {
   createDepartment,
   createPIncome,
