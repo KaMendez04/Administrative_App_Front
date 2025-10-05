@@ -17,35 +17,46 @@ export function SolicitudViewModal({ open, onClose, solicitud }: Props) {
     });
   };
 
-  const fields = [
+  // Información personal
+  const personalFields = [
     { label: "Cédula", value: solicitud.persona.cedula },
     { label: "Nombre completo", value: `${solicitud.persona.nombre} ${solicitud.persona.apellido1} ${solicitud.persona.apellido2}` },
     { label: "Fecha de nacimiento", value: formatDate(solicitud.persona.fechaNacimiento) },
     { label: "Teléfono", value: solicitud.persona.telefono },
     { label: "Email", value: solicitud.persona.email },
     { label: "Dirección", value: solicitud.persona.direccion || "—" },
-    { label: "Distancia a finca", value: solicitud.asociado.distanciaFinca ? `${solicitud.asociado.distanciaFinca} km` : "—" },
+  ];
+
+  // Datos del asociado
+  const asociadoFields = [
     { label: "Vive en finca", value: solicitud.asociado.viveEnFinca ? "Sí" : "No" },
     { label: "Marca de ganado", value: solicitud.asociado.marcaGanado || "—" },
     { label: "CVO", value: solicitud.asociado.CVO || "—" },
+  ];
+
+  // Núcleo familiar
+  const nucleoFamiliar = solicitud.asociado.nucleoFamiliar;
+
+  // Finca principal (primera del array)
+  const finca = solicitud.asociado.fincas?.[0];
+
+  // Estado de solicitud
+  const solicitudFields = [
     { label: "Estado", value: solicitud.estado },
+    { label: "Fecha de solicitud", value: formatDate(solicitud.createdAt) },
   ];
 
   if (solicitud.motivo) {
-    fields.push({ label: "Motivo de rechazo", value: solicitud.motivo });
+    solicitudFields.push({ label: "Motivo de rechazo", value: solicitud.motivo });
   }
-
-  fields.push(
-    { label: "Fecha de solicitud", value: formatDate(solicitud.createdAt) },
-    { label: "Última actualización", value: formatDate(solicitud.updatedAt) }
-  );
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div 
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] p-6 border-b border-[#EAEFE0] rounded-t-2xl">
           <div className="flex items-start justify-between">
             <div>
@@ -71,26 +82,141 @@ export function SolicitudViewModal({ open, onClose, solicitud }: Props) {
           </div>
         </div>
 
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {fields.map((field, idx) => (
-              <div 
-                key={idx} 
-                className={`rounded-xl bg-[#F8F9F3] p-4 ${
-                  field.label === "Motivo de rechazo" ? "md:col-span-2" : ""
-                }`}
-              >
-                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                  {field.label}
+        <div className="p-6 space-y-6">
+          {/* Información Personal */}
+          <div>
+            <h4 className="text-lg font-bold text-[#33361D] mb-3">Información Personal</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {personalFields.map((field, idx) => (
+                <div key={idx} className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                    {field.label}
+                  </div>
+                  <div className="text-base text-[#33361D] font-medium">
+                    {field.value}
+                  </div>
                 </div>
-                <div className="text-base text-[#33361D] font-medium">
-                  {field.value}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <div className="mt-6 flex justify-end">
+          {/* Datos del Asociado */}
+          <div>
+            <h4 className="text-lg font-bold text-[#33361D] mb-3">Datos del Asociado</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {asociadoFields.map((field, idx) => (
+                <div key={idx} className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                    {field.label}
+                  </div>
+                  <div className="text-base text-[#33361D] font-medium">
+                    {field.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Núcleo Familiar */}
+          {nucleoFamiliar && (
+            <div>
+              <h4 className="text-lg font-bold text-[#33361D] mb-3">Núcleo Familiar</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                    Hombres
+                  </div>
+                  <div className="text-base text-[#33361D] font-medium">
+                    {nucleoFamiliar.nucleoHombres}
+                  </div>
+                </div>
+                <div className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                    Mujeres
+                  </div>
+                  <div className="text-base text-[#33361D] font-medium">
+                    {nucleoFamiliar.nucleoMujeres}
+                  </div>
+                </div>
+                <div className="rounded-xl bg-[#FEF6E0] p-4">
+                  <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">
+                    Total
+                  </div>
+                  <div className="text-base text-[#33361D] font-medium">
+                    {nucleoFamiliar.nucleoTotal}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Datos de la Finca */}
+          {finca && (
+            <div>
+              <h4 className="text-lg font-bold text-[#33361D] mb-3">Datos de la Finca</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                    Nombre
+                  </div>
+                  <div className="text-base text-[#33361D] font-medium">
+                    {finca.nombre}
+                  </div>
+                </div>
+                <div className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                    Área (ha)
+                  </div>
+                  <div className="text-base text-[#33361D] font-medium">
+                    {finca.areaHa}
+                  </div>
+                </div>
+                <div className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                    Número de Plano
+                  </div>
+                  <div className="text-base text-[#33361D] font-medium">
+                    {finca.numeroPlano}
+                  </div>
+                </div>
+                {finca.geografia && (
+                  <div className="rounded-xl bg-[#F8F9F3] p-4">
+                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                      Ubicación
+                    </div>
+                    <div className="text-base text-[#33361D] font-medium">
+                      {finca.geografia.provincia}, {finca.geografia.canton}, {finca.geografia.distrito}
+                      {finca.geografia.caserio && `, ${finca.geografia.caserio}`}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Estado de Solicitud */}
+          <div>
+            <h4 className="text-lg font-bold text-[#33361D] mb-3">Estado de Solicitud</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {solicitudFields.map((field, idx) => (
+                <div 
+                  key={idx} 
+                  className={`rounded-xl bg-[#F8F9F3] p-4 ${
+                    field.label === "Motivo de rechazo" ? "md:col-span-2" : ""
+                  }`}
+                >
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                    {field.label}
+                  </div>
+                  <div className="text-base text-[#33361D] font-medium">
+                    {field.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end">
             <button
               onClick={onClose}
               className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm"
