@@ -1,8 +1,7 @@
 import { z } from "zod";
 
-// Schemas existentes
 export const SolicitudStatusEnum = z.enum(["PENDIENTE", "APROBADO", "RECHAZADO"]);
-export const AssociateStatusEnum = SolicitudStatusEnum; // Alias
+export const AssociateStatusEnum = SolicitudStatusEnum;
 
 const PersonaSchema = z.object({
   idPersona: z.number(),
@@ -18,11 +17,40 @@ const PersonaSchema = z.object({
   updatedAt: z.string(),
 });
 
-const FincaSchema = z.object({
-  idFinca: z.number(),
-  nombre: z.string().nullable().optional(),
+// ✅ Schema de NucleoFamiliar
+const NucleoFamiliarSchema = z.object({
+  idNucleoFamiliar: z.number(),
+  nucleoHombres: z.number(),
+  nucleoMujeres: z.number(),
+  nucleoTotal: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
+// ✅ Schema de Geografia
+const GeografiaSchema = z.object({
+  idGeografia: z.number(),
+  provincia: z.string(),
+  canton: z.string(),
+  distrito: z.string(),
+  caserio: z.string().nullable().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+// ✅ Schema de Finca expandido
+const FincaSchema = z.object({
+  idFinca: z.number(),
+  nombre: z.string(),
+  areaHa: z.string(),
+  numeroPlano: z.string(),
+  idGeografia: z.number().nullable().optional(),
+  geografia: GeografiaSchema.nullable().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+// ✅ Schema de Asociado expandido
 const AsociadoSchema = z.object({
   idAsociado: z.number(),
   distanciaFinca: z.string().nullable().optional(),
@@ -32,10 +60,11 @@ const AsociadoSchema = z.object({
   estado: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  nucleoFamiliar: NucleoFamiliarSchema.nullable().optional(),
   fincas: z.array(FincaSchema).optional().default([]),
 });
 
-// ✅ Schema para Solicitud (usado en AdminRequestsPage)
+// Schema para Solicitud
 export const SolicitudSchema = z.object({
   idSolicitud: z.number(),
   persona: PersonaSchema,
@@ -49,9 +78,11 @@ export const SolicitudSchema = z.object({
 });
 
 export type Solicitud = z.infer<typeof SolicitudSchema>;
+export type NucleoFamiliar = z.infer<typeof NucleoFamiliarSchema>;
+export type Geografia = z.infer<typeof GeografiaSchema>;
+export type Finca = z.infer<typeof FincaSchema>;
 
-// ✅ Schema para Associate (usado en AssociatesApprovedPage)
-// ✅ Schema para Associate - asegúrate de que coincida con el backend
+// Schema para Associate
 export const AssociateSchema = z.object({
   idAsociado: z.number(),
   persona: PersonaSchema,
@@ -62,6 +93,7 @@ export const AssociateSchema = z.object({
   estado: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  nucleoFamiliar: NucleoFamiliarSchema.nullable().optional(),
   fincas: z.array(FincaSchema).optional().default([]),
   solicitud: z.object({
     idSolicitud: z.number(),
@@ -76,7 +108,7 @@ export const AssociateSchema = z.object({
 
 export type Associate = z.infer<typeof AssociateSchema>;
 
-// Schema de lista de solicitudes
+// Resto de schemas...
 export const SolicitudListResponseSchema = z.object({
   items: z.array(SolicitudSchema),
   total: z.coerce.number(),
@@ -86,7 +118,6 @@ export const SolicitudListResponseSchema = z.object({
 
 export type SolicitudListResponse = z.infer<typeof SolicitudListResponseSchema>;
 
-// ✅ Schema de lista de associates
 export const AssociateListResponseSchema = z.object({
   items: z.array(AssociateSchema),
   total: z.coerce.number(),
@@ -96,7 +127,6 @@ export const AssociateListResponseSchema = z.object({
 
 export type AssociateListResponse = z.infer<typeof AssociateListResponseSchema>;
 
-// Resto de schemas
 export const AdminListParamsSchema = z.object({
   status: SolicitudStatusEnum.optional(),
   search: z.string().trim().optional(),
