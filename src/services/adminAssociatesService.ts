@@ -1,67 +1,55 @@
-import { AdminAssociateSchema, AdminListResponseSchema, type AdminAssociate, type AdminListParams, type AdminListResponse, type UpdateAssociateValues } from "../schemas/adminAssociates";
-import apiConfig from "./apiConfig";
-
-export async function listAssociates(params: AdminListParams): Promise<AdminListResponse> {
-  const response = await apiConfig.get("/associates", { params });
-  const data = response.data;
-  const parsed = AdminListResponseSchema.safeParse(data);
+import { 
+    AssociateSchema, 
+    AssociateListResponseSchema, 
+    type Associate, 
+    type AdminListParams, 
+    type AssociateListResponse,
+    type UpdateAssociateValues 
+  } from "../schemas/adminSolicitudes";
+  import apiConfig from "./apiConfig";
   
-  if (!parsed.success) {
-    console.error("Error validando respuesta de listAssociates:", parsed.error);
-    throw new Error("Respuesta inválida en listAssociates");
+  export async function listAssociates(params: AdminListParams): Promise<AssociateListResponse> {
+    const queryParams: any = {
+      page: params.page,
+      limit: params.limit,
+      estado: true, // Solo activos
+    };
+  
+    if (params.search) queryParams.search = params.search;
+    if (params.sort) queryParams.sort = params.sort;
+  
+    const response = await apiConfig.get("/associates", { params: queryParams });
+    
+    // ✅ Log para debug - quítalo después
+    console.log('Response from /associates:', response.data);
+    
+    // ✅ Parsea con el schema correcto
+    const parsed = AssociateListResponseSchema.safeParse(response.data);
+    
+    if (!parsed.success) {
+      console.error('Schema validation failed:', parsed.error);
+      throw new Error('Error al validar la respuesta del servidor');
+    }
+    
+    return parsed.data;
   }
   
-  return parsed.data;
-}
-
-export async function getAssociate(id: number): Promise<AdminAssociate> {
-  const response = await apiConfig.get(`/associates/${id}`);
-  const data = response.data;
-  const parsed = AdminAssociateSchema.safeParse(data);
-  
-  if (!parsed.success) {
-    console.error("Error validando respuesta de getAssociate:", parsed.error);
-    throw new Error("Respuesta inválida en getAssociate");
+  export async function getAssociate(id: number): Promise<Associate> {
+    const response = await apiConfig.get(`/associates/${id}`);
+    
+    console.log('Response from /associates/:id:', response.data);
+    
+    const parsed = AssociateSchema.safeParse(response.data);
+    
+    if (!parsed.success) {
+      console.error('Schema validation failed:', parsed.error);
+      throw new Error('Error al validar la respuesta del servidor');
+    }
+    
+    return parsed.data;
   }
   
-  return parsed.data;
-}
-
-export async function approveAssociate(id: number): Promise<AdminAssociate> {
-  const response = await apiConfig.patch(`/associates/${id}/approve`, {});
-  const data = response.data;
-  const parsed = AdminAssociateSchema.safeParse(data);
-  
-  if (!parsed.success) {
-    console.error("Error validando respuesta de approveAssociate:", parsed.error);
-    throw new Error("Respuesta inválida en approveAssociate");
+  export async function updateAssociate(id: number, patch: UpdateAssociateValues): Promise<Associate> {
+    const response = await apiConfig.patch(`/associates/${id}`, patch);
+    return AssociateSchema.parse(response.data);
   }
-  
-  return parsed.data;
-}
-
-export async function rejectAssociate(id: number, motivo: string): Promise<AdminAssociate> {
-  const response = await apiConfig.patch(`/associates/${id}/reject`, { motivo });
-  const data = response.data;
-  const parsed = AdminAssociateSchema.safeParse(data);
-  
-  if (!parsed.success) {
-    console.error("Error validando respuesta de rejectAssociate:", parsed.error);
-    throw new Error("Respuesta inválida en rejectAssociate");
-  }
-  
-  return parsed.data;
-}
-
-export async function updateAssociate(id: number, patch: UpdateAssociateValues): Promise<AdminAssociate> {
-  const response = await apiConfig.patch(`/associates/${id}`, patch);
-  const data = response.data;
-  const parsed = AdminAssociateSchema.safeParse(data);
-  
-  if (!parsed.success) {
-    console.error("Error validando respuesta de updateAssociate:", parsed.error);
-    throw new Error("Respuesta inválida en updateAssociate");
-  }
-  
-  return parsed.data;
-}

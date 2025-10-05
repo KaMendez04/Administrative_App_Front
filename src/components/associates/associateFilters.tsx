@@ -1,4 +1,4 @@
-import { AssociateStatusEnum } from "../../schemas/adminAssociates";
+import { AssociateStatusEnum } from "../../schemas/adminSolicitudes";
 
 type Props = {
   status?: "PENDIENTE" | "APROBADO" | "RECHAZADO";

@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { UpdateAssociateSchema, type UpdateAssociateValues } from "../../schemas/adminAssociates";
+import { UpdateAssociateSchema, type UpdateAssociateValues } from "../../schemas/adminSolicitudes";
 
 function validateWithZod(v: any) {
   const r = UpdateAssociateSchema.safeParse(v);

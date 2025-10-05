@@ -43,7 +43,7 @@ import PIncomeProjectionsPage from '../pages/Budget/Reports/PIncome'
 import ExtraReportPage from '../pages/Budget/Reports/extraReportPage'
 import AssociatesSubnav from '../pages/Budget/Navbar/AssociatesSubnav'
 import AssociatesApprovedPage from '../pages/associates/associatesApprovedPage'
-import AdminRequestsPage from '../pages/associates/AssociatesRequestPage'
+import AdminRequestsPage from '../pages/associates/AdminRequestPage'
 
 
 function requireRole(allowed: "ADMIN" | "JUNTA") {

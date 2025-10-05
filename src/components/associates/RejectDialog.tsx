@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { RejectSchema, type RejectValues } from "../../schemas/adminAssociates";
+import { RejectSchema, type RejectValues } from "../../schemas/adminSolicitudes";
 
 function validateWithZod(v: any) {
   const r = RejectSchema.safeParse(v);

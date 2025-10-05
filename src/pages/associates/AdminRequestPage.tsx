@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useAdminAssociatesList } from "../../hooks/associates/useAssociatesList";
-import { useApproveAssociate } from "../../hooks/associates/useApproveAssociate";
-import { useRejectAssociate } from "../../hooks/associates/useRejectAssociate";
-import { useAdminAssociateDetail } from "../../hooks/associates/useAdminAssociateDetail";
+import { useQuery } from "@tanstack/react-query";
+import { useAdminSolicitudesList } from "../../hooks/associates/useAdminSolicitudesList";
+import { useApproveSolicitud } from "../../hooks/associates/useApproveSolicitud";
+import { useRejectSolicitud } from "../../hooks/associates/useRejectSolicitud";
+import { getSolicitud } from "../../services/adminSolicitudesService";
 import { RejectDialog } from "../../components/associates/RejectDialog";
-import { AssociateViewModal } from "../../components/associates/AssociateViewModal";
+import { SolicitudViewModal } from "../../components/associates/SolicitudViewModal";
 
 function KPICard({
   label,
@@ -24,33 +25,31 @@ function KPICard({
   );
 }
 
-function StatusPill({ s }: { s: "PENDIENTE" | "APROBADO" | "RECHAZADO" }) {
-  const cls =
-    s === "PENDIENTE"
-      ? "bg-yellow-100 text-yellow-800"
-      : s === "APROBADO"
-      ? "bg-green-100 text-green-800"
-      : "bg-red-100 text-red-800";
-  return (
-    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${cls}`}>
-      {s}
-    </span>
-  );
-}
-
 export default function AdminRequestsPage() {
   const [status, setStatus] = useState<"PENDIENTE"|"APROBADO"|"RECHAZADO"|undefined>("PENDIENTE");
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const limit = 20;
 
-  const { data, isLoading } = useAdminAssociatesList({ status, search, page, limit, sort: "createdAt:desc" });
-  const approve = useApproveAssociate();
-  const reject = useRejectAssociate();
+  const { data, isLoading } = useAdminSolicitudesList({ 
+    status, 
+    search, 
+    page, 
+    limit, 
+    sort: "createdAt:desc" 
+  });
+  
+  const approve = useApproveSolicitud();
+  const reject = useRejectSolicitud();
 
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
-  const detail = useAdminAssociateDetail(viewId ?? 0);
+  
+  const { data: viewDetail } = useQuery({
+    queryKey: ["solicitud", viewId],
+    queryFn: () => getSolicitud(viewId!),
+    enabled: !!viewId,
+  });
 
   return (
     <div className="min-h-screen">
@@ -69,7 +68,7 @@ export default function AdminRequestsPage() {
             <input
               placeholder="Buscar por cédula, nombre, email..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] placeholder:text-gray-400 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
             />
           </div>
@@ -122,18 +121,26 @@ export default function AdminRequestsPage() {
               <div className="bg-white">
                 {(data?.items ?? []).map((r) => (
                   <div
-                    key={r.id}
+                    key={r.idSolicitud}
                     className="grid grid-cols-7 gap-4 px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition"
                   >
-                    <div className="font-medium">{r.cedula}</div>
-                    <div className="font-medium">{`${r.nombre} ${r.apellido1}`}</div>
-                    <div>{r.telefono}</div>
-                    <div className="truncate">{r.email}</div>
-                    <div><StatusPill s={r.estado as any} /></div>
+                    <div className="font-medium">{r.persona.cedula}</div>
+                    <div className="font-medium">{`${r.persona.nombre} ${r.persona.apellido1}`}</div>
+                    <div>{r.persona.telefono}</div>
+                    <div className="truncate">{r.persona.email}</div>
+                    <div>
+                      <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
+                        r.estado === "PENDIENTE" ? "bg-yellow-100 text-yellow-800" :
+                        r.estado === "APROBADO" ? "bg-green-100 text-green-800" :
+                        "bg-red-100 text-red-800"
+                      }`}>
+                        {r.estado}
+                      </span>
+                    </div>
                     <div>{new Date(r.createdAt).toLocaleDateString("es-CR")}</div>
                     <div className="text-right flex gap-2 justify-end">
                       <button
-                        onClick={() => setViewId(r.id)}
+                        onClick={() => setViewId(r.idSolicitud)}
                         className="px-3 py-1 rounded-lg border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition text-xs"
                       >
                         Ver
@@ -141,13 +148,14 @@ export default function AdminRequestsPage() {
                       {r.estado === "PENDIENTE" && (
                         <>
                           <button
-                            onClick={() => approve.mutate(r.id)}
-                            className="px-3 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition text-xs"
+                            onClick={() => approve.mutate(r.idSolicitud)}
+                            disabled={approve.isPending}
+                            className="px-3 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition text-xs disabled:opacity-50"
                           >
                             Aprobar
                           </button>
                           <button
-                            onClick={() => setRejectId(r.id)}
+                            onClick={() => setRejectId(r.idSolicitud)}
                             className="px-3 py-1 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition text-xs"
                           >
                             Rechazar
@@ -198,10 +206,10 @@ export default function AdminRequestsPage() {
           }}
         />
 
-        <AssociateViewModal
+        <SolicitudViewModal
           open={viewId != null}
           onClose={() => setViewId(null)}
-          associate={detail.data ?? null}
+          solicitud={viewDetail ?? null}
         />
       </div>
     </div>

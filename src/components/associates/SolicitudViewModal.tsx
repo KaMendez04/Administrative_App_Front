@@ -1,13 +1,13 @@
-import type { Associate } from "../../schemas/adminSolicitudes";
+import type { Solicitud } from "../../schemas/adminSolicitudes";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  associate: Associate | null;
+  solicitud: Solicitud | null;
 };
 
-export function AssociateViewModal({ open, onClose, associate }: Props) {
-  if (!open || !associate) return null;
+export function SolicitudViewModal({ open, onClose, solicitud }: Props) {
+  if (!open || !solicitud) return null;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("es-CR", {
@@ -17,25 +17,27 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
     });
   };
 
-  const persona = associate.persona;
-
   const fields = [
-    { label: "Cédula", value: persona.cedula },
-    { label: "Nombre completo", value: `${persona.nombre} ${persona.apellido1} ${persona.apellido2}` },
-    { label: "Fecha de nacimiento", value: formatDate(persona.fechaNacimiento) },
-    { label: "Teléfono", value: persona.telefono },
-    { label: "Email", value: persona.email },
-    { label: "Dirección", value: persona.direccion || "—" },
-    { label: "Distancia a finca", value: associate.distanciaFinca ? `${associate.distanciaFinca} km` : "—" },
-    { label: "Vive en finca", value: associate.viveEnFinca ? "Sí" : "No" },
-    { label: "Marca de ganado", value: associate.marcaGanado || "—" },
-    { label: "CVO", value: associate.CVO || "—" },
-    { label: "Estado", value: associate.estado ? "Activo" : "Inactivo" },
+    { label: "Cédula", value: solicitud.persona.cedula },
+    { label: "Nombre completo", value: `${solicitud.persona.nombre} ${solicitud.persona.apellido1} ${solicitud.persona.apellido2}` },
+    { label: "Fecha de nacimiento", value: formatDate(solicitud.persona.fechaNacimiento) },
+    { label: "Teléfono", value: solicitud.persona.telefono },
+    { label: "Email", value: solicitud.persona.email },
+    { label: "Dirección", value: solicitud.persona.direccion || "—" },
+    { label: "Distancia a finca", value: solicitud.asociado.distanciaFinca ? `${solicitud.asociado.distanciaFinca} km` : "—" },
+    { label: "Vive en finca", value: solicitud.asociado.viveEnFinca ? "Sí" : "No" },
+    { label: "Marca de ganado", value: solicitud.asociado.marcaGanado || "—" },
+    { label: "CVO", value: solicitud.asociado.CVO || "—" },
+    { label: "Estado", value: solicitud.estado },
   ];
 
+  if (solicitud.motivo) {
+    fields.push({ label: "Motivo de rechazo", value: solicitud.motivo });
+  }
+
   fields.push(
-    { label: "Fecha de registro", value: formatDate(associate.createdAt) },
-    { label: "Última actualización", value: formatDate(associate.updatedAt) }
+    { label: "Fecha de solicitud", value: formatDate(solicitud.createdAt) },
+    { label: "Última actualización", value: formatDate(solicitud.updatedAt) }
   );
 
   return (
@@ -47,12 +49,14 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
         <div className="sticky top-0 bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] p-6 border-b border-[#EAEFE0] rounded-t-2xl">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-2xl font-bold text-[#33361D]">Detalles del Asociado</h3>
+              <h3 className="text-2xl font-bold text-[#33361D]">Detalles de la Solicitud</h3>
               <div className="mt-2">
                 <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                  associate.estado ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                  solicitud.estado === "PENDIENTE" ? "bg-yellow-100 text-yellow-800" :
+                  solicitud.estado === "APROBADO" ? "bg-green-100 text-green-800" :
+                  "bg-red-100 text-red-800"
                 }`}>
-                  {associate.estado ? "Activo" : "Inactivo"}
+                  {solicitud.estado}
                 </span>
               </div>
             </div>
@@ -70,7 +74,12 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field, idx) => (
-              <div key={idx} className="rounded-xl bg-[#F8F9F3] p-4">
+              <div 
+                key={idx} 
+                className={`rounded-xl bg-[#F8F9F3] p-4 ${
+                  field.label === "Motivo de rechazo" ? "md:col-span-2" : ""
+                }`}
+              >
                 <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
                   {field.label}
                 </div>

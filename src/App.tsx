@@ -10,7 +10,7 @@ import FAQEdition from './pages/editionPage/FAQ/FAQEdition'
 import ManualPage from './pages/ManualPage'
 import VolunteersPage from './pages/VolunteersPage'
 import AssociatesApprovedPage from './pages/associates/associatesApprovedPage'
-import AdminRequestsPage from './pages/associates/AssociatesRequestPage'
+import AdminRequestsPage from './pages/associates/AdminRequestPage'
 
 function App() {
 

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useAdminAssociatesList } from "../../hooks/associates/useAssociatesList";
+import { useQuery } from "@tanstack/react-query";
+import { useAdminAssociatesList } from "../../hooks/associates/useAdminSolicitudesList";
 import { useUpdateAssociate } from "../../hooks/associates/useUpdateAssociate";
-import { useAdminAssociateDetail } from "../../hooks/associates/useAdminAssociateDetail";
+import { getAssociate } from "../../services/adminAssociatesService";
 import { AssociateEditDrawer } from "../../components/associates/AssociateEditDrawer";
 import { AssociateViewModal } from "../../components/associates/AssociateViewModal";
 
@@ -24,17 +25,33 @@ function KPICard({
 }
 
 export default function AssociatesApprovedPage() {
-  const [status] = useState<"APROBADO">("APROBADO");
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const limit = 20;
 
-  const { data, isLoading } = useAdminAssociatesList({ status, search, page, limit, sort: "createdAt:desc" });
+  const { data, isLoading } = useAdminAssociatesList({ 
+    status: "APROBADO",
+    search, 
+    page, 
+    limit, 
+    sort: "createdAt:desc" 
+  });
 
   const [editId, setEditId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
-  const editDetail = useAdminAssociateDetail(editId ?? 0);
-  const viewDetail = useAdminAssociateDetail(viewId ?? 0);
+  
+  const { data: editDetail } = useQuery({
+    queryKey: ["associate", editId],
+    queryFn: () => getAssociate(editId!),
+    enabled: !!editId,
+  });
+
+  const { data: viewDetail } = useQuery({
+    queryKey: ["associate", viewId],
+    queryFn: () => getAssociate(viewId!),
+    enabled: !!viewId,
+  });
+
   const update = useUpdateAssociate();
 
   return (
@@ -77,26 +94,28 @@ export default function AssociatesApprovedPage() {
                 </div>
               </div>
               <div className="bg-white">
-                {(data?.items ?? []).map((r) => (
+                {(data?.items ?? []).map((asociado) => (
                   <div
-                    key={r.id}
+                    key={asociado.idAsociado}
                     className="grid grid-cols-7 gap-4 px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition"
                   >
-                    <div className="font-medium">{r.cedula}</div>
-                    <div className="font-medium">{`${r.nombre} ${r.apellido1} ${r.apellido2}`}</div>
-                    <div>{r.telefono}</div>
-                    <div className="truncate">{r.email}</div>
-                    <div className="font-medium">{r.marcaGanado || "—"}</div>
-                    <div>{new Date(r.createdAt).toLocaleDateString("es-CR")}</div>
+                    <div className="font-medium">{asociado.persona.cedula}</div>
+                    <div className="font-medium">
+                      {`${asociado.persona.nombre} ${asociado.persona.apellido1} ${asociado.persona.apellido2}`}
+                    </div>
+                    <div>{asociado.persona.telefono}</div>
+                    <div className="truncate">{asociado.persona.email}</div>
+                    <div className="font-medium">{asociado.marcaGanado || "—"}</div>
+                    <div>{new Date(asociado.createdAt).toLocaleDateString("es-CR")}</div>
                     <div className="text-right flex gap-2 justify-end">
                       <button
-                        onClick={() => setViewId(r.id)}
+                        onClick={() => setViewId(asociado.idAsociado)}
                         className="px-3 py-1 rounded-lg border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition text-xs"
                       >
                         Ver
                       </button>
                       <button
-                        onClick={() => setEditId(r.id)}
+                        onClick={() => setEditId(asociado.idAsociado)}
                         className="px-3 py-1 rounded-lg bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition text-xs"
                       >
                         Editar
@@ -139,20 +158,20 @@ export default function AssociatesApprovedPage() {
         <AssociateViewModal
           open={viewId != null}
           onClose={() => setViewId(null)}
-          associate={viewDetail.data ?? null}
+          associate={viewDetail ?? null}
         />
 
-        {editId != null && editDetail.data && (
+        {editId != null && editDetail && (
           <AssociateEditDrawer
             open={true}
             onClose={() => setEditId(null)}
             initial={{
-              telefono: editDetail.data.telefono,
-              email: editDetail.data.email,
-              direccion: editDetail.data.direccion ?? "",
-              marcaGanado: editDetail.data.marcaGanado ?? "",
-              CVO: editDetail.data.CVO ?? "",
-              nombreCompleto: `${editDetail.data.nombre} ${editDetail.data.apellido1} ${editDetail.data.apellido2}`,
+              telefono: editDetail.persona.telefono,
+              email: editDetail.persona.email,
+              direccion: editDetail.persona.direccion ?? "",
+              marcaGanado: editDetail.marcaGanado ?? "",
+              CVO: editDetail.CVO ?? "",
+              nombreCompleto: `${editDetail.persona.nombre} ${editDetail.persona.apellido1} ${editDetail.persona.apellido2}`,
             }}
             onSave={async (patch) => {
               if (!editId) return;
