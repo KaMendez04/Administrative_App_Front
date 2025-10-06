@@ -30,10 +30,11 @@ export default function AssociatesApprovedPage() {
   const limit = 20;
 
   const { data, isLoading } = useAdminAssociatesList({ 
+    estado: true, // ✅ Boolean, no string
     search, 
     page, 
     limit, 
-    sort: "createdAt:desc" 
+    sort: "createdAt:asc" 
   });
 
   const [editId, setEditId] = useState<number | null>(null);

@@ -143,8 +143,9 @@ export const AdminListParamsSchema = z.object({
 
 export type AdminListParams = z.infer<typeof AdminListParamsSchema>;
 
-// Schema para parámetros de Associates (sin status)
+// Schema para Associates (sin status, con estado)
 export const AssociateListParamsSchema = z.object({
+  estado: z.boolean().optional(), // true = activos, false = inactivos
   search: z.string().trim().optional(),
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(20),

@@ -2,34 +2,27 @@ import {
     AssociateSchema, 
     AssociateListResponseSchema, 
     type Associate, 
-    type AdminListParams, 
     type AssociateListResponse,
-    type UpdateAssociateValues 
+    type UpdateAssociateValues, 
+    type AssociateListParams
   } from "../schemas/adminSolicitudes";
   import apiConfig from "./apiConfig";
   
-  export async function listAssociates(params: AdminListParams): Promise<AssociateListResponse> {
-    const queryParams: any = {
-      page: params.page,
-      limit: params.limit,
-    };
-  
-    if (params.search) queryParams.search = params.search;
-    if (params.sort) queryParams.sort = params.sort;
-  
-    const response = await apiConfig.get("/associates", { params: queryParams });
-    
-    console.log('📦 Raw backend response:', response.data);
-    
-    const parsed = AssociateListResponseSchema.safeParse(response.data);
-    
-    if (!parsed.success) {
-      console.error('❌ Zod validation failed:', parsed.error.format());
-      throw new Error('Error de validación');
-    }
-  
-    return parsed.data;
-  }
+ 
+export async function listAssociates(params: AssociateListParams): Promise<AssociateListResponse> {
+  const queryParams: any = {
+    page: params.page,
+    limit: params.limit,
+  };
+
+  // ✅ Enviar estado como boolean
+  if (params.estado !== undefined) queryParams.estado = params.estado;
+  if (params.search) queryParams.search = params.search;
+  if (params.sort) queryParams.sort = params.sort;
+
+  const response = await apiConfig.get("/associates", { params: queryParams });
+  return AssociateListResponseSchema.parse(response.data);
+}
   
   export async function getAssociate(id: number): Promise<Associate> {
     const response = await apiConfig.get(`/associates/${id}`);

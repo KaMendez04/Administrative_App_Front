@@ -12,7 +12,8 @@ export function useAdminSolicitudesList(params: AdminListParams) {
   });
 }
 
-export function useAdminAssociatesList(params: AssociateListParams) { // Cambiar tipo
+// Hook separado para Associates
+export function useAdminAssociatesList(params: AssociateListParams) {
   return useQuery({
     queryKey: ['associates', params],
     queryFn: () => listAssociates(params),
