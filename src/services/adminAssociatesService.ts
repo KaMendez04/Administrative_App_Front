@@ -12,7 +12,6 @@ import {
     const queryParams: any = {
       page: params.page,
       limit: params.limit,
-      estado: true, // Solo activos
     };
   
     if (params.search) queryParams.search = params.search;
@@ -20,17 +19,15 @@ import {
   
     const response = await apiConfig.get("/associates", { params: queryParams });
     
-    // ✅ Log para debug - quítalo después
-    console.log('Response from /associates:', response.data);
+    console.log('📦 Raw backend response:', response.data);
     
-    // ✅ Parsea con el schema correcto
     const parsed = AssociateListResponseSchema.safeParse(response.data);
     
     if (!parsed.success) {
-      console.error('Schema validation failed:', parsed.error);
-      throw new Error('Error al validar la respuesta del servidor');
+      console.error('❌ Zod validation failed:', parsed.error.format());
+      throw new Error('Error de validación');
     }
-    
+  
     return parsed.data;
   }
   

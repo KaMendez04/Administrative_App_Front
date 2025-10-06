@@ -19,7 +19,6 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
 
   const persona = associate.persona;
 
-  // Información personal
   const personalFields = [
     { label: "Cédula", value: persona.cedula },
     { label: "Nombre completo", value: `${persona.nombre} ${persona.apellido1} ${persona.apellido2}` },
@@ -29,18 +28,15 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
     { label: "Dirección", value: persona.direccion || "—" },
   ];
 
-  // Datos del asociado
   const asociadoFields = [
     { label: "Vive en finca", value: associate.viveEnFinca ? "Sí" : "No" },
     { label: "Marca de ganado", value: associate.marcaGanado || "—" },
     { label: "CVO", value: associate.CVO || "—" },
+    { label: "Es propietario", value: associate.esPropietario ? "Sí" : "No" },  // ✅ Agregar
     { label: "Estado", value: associate.estado ? "Activo" : "Inactivo" },
   ];
 
-  // Núcleo familiar
   const nucleoFamiliar = associate.nucleoFamiliar;
-
-  // Fincas
   const fincas = associate.fincas || [];
 
   return (
@@ -49,7 +45,6 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] p-6 border-b border-[#EAEFE0] rounded-t-2xl">
           <div className="flex items-start justify-between">
             <div>
@@ -62,10 +57,7 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                 </span>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition"
-            >
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -80,12 +72,8 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {personalFields.map((field, idx) => (
                 <div key={idx} className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                    {field.label}
-                  </div>
-                  <div className="text-base text-[#33361D] font-medium">
-                    {field.value}
-                  </div>
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">{field.label}</div>
+                  <div className="text-base text-[#33361D] font-medium">{field.value}</div>
                 </div>
               ))}
             </div>
@@ -97,12 +85,8 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {asociadoFields.map((field, idx) => (
                 <div key={idx} className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                    {field.label}
-                  </div>
-                  <div className="text-base text-[#33361D] font-medium">
-                    {field.value}
-                  </div>
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">{field.label}</div>
+                  <div className="text-base text-[#33361D] font-medium">{field.value}</div>
                 </div>
               ))}
             </div>
@@ -114,28 +98,16 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
               <h4 className="text-lg font-bold text-[#33361D] mb-3">Núcleo Familiar</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                    Hombres
-                  </div>
-                  <div className="text-base text-[#33361D] font-medium">
-                    {nucleoFamiliar.nucleoHombres}
-                  </div>
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Hombres</div>
+                  <div className="text-base text-[#33361D] font-medium">{nucleoFamiliar.nucleoHombres}</div>
                 </div>
                 <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                    Mujeres
-                  </div>
-                  <div className="text-base text-[#33361D] font-medium">
-                    {nucleoFamiliar.nucleoMujeres}
-                  </div>
+                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Mujeres</div>
+                  <div className="text-base text-[#33361D] font-medium">{nucleoFamiliar.nucleoMujeres}</div>
                 </div>
                 <div className="rounded-xl bg-[#FEF6E0] p-4">
-                  <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">
-                    Total
-                  </div>
-                  <div className="text-base text-[#33361D] font-medium">
-                    {nucleoFamiliar.nucleoTotal}
-                  </div>
+                  <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Total</div>
+                  <div className="text-base text-[#33361D] font-medium">{nucleoFamiliar.nucleoTotal}</div>
                 </div>
               </div>
             </div>
@@ -158,29 +130,28 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="rounded-lg bg-[#F8F9F3] p-3">
-                        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                          Área (ha)
-                        </div>
-                        <div className="text-sm text-[#33361D] font-medium">
-                          {finca.areaHa}
-                        </div>
+                        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Área (ha)</div>
+                        <div className="text-sm text-[#33361D] font-medium">{finca.areaHa}</div>
                       </div>
                       <div className="rounded-lg bg-[#F8F9F3] p-3">
-                        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                          Número de Plano
-                        </div>
-                        <div className="text-sm text-[#33361D] font-medium">
-                          {finca.numeroPlano}
-                        </div>
+                        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de Plano</div>
+                        <div className="text-sm text-[#33361D] font-medium">{finca.numeroPlano}</div>
                       </div>
                       {finca.geografia && (
                         <div className="rounded-lg bg-[#F8F9F3] p-3 md:col-span-2">
-                          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                            Ubicación
-                          </div>
+                          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Ubicación</div>
                           <div className="text-sm text-[#33361D] font-medium">
                             {finca.geografia.provincia}, {finca.geografia.canton}, {finca.geografia.distrito}
                             {finca.geografia.caserio && `, ${finca.geografia.caserio}`}
+                          </div>
+                        </div>
+                      )}
+                      {/* Propietario de esta finca (si existe y NO es el asociado) */}
+                      {finca.propietario && !associate.esPropietario && (
+                        <div className="rounded-lg bg-[#FEF6E0] p-3 md:col-span-2">
+                          <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Propietario</div>
+                          <div className="text-sm text-[#33361D] font-medium">
+                            {`${finca.propietario.persona.nombre} ${finca.propietario.persona.apellido1} ${finca.propietario.persona.apellido2}`} - {finca.propietario.persona.cedula}
                           </div>
                         </div>
                       )}
@@ -196,29 +167,18 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
             <h4 className="text-lg font-bold text-[#33361D] mb-3">Información del Registro</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-xl bg-[#F8F9F3] p-4">
-                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                  Fecha de registro
-                </div>
-                <div className="text-base text-[#33361D] font-medium">
-                  {formatDate(associate.createdAt)}
-                </div>
+                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Fecha de registro</div>
+                <div className="text-base text-[#33361D] font-medium">{formatDate(associate.createdAt)}</div>
               </div>
               <div className="rounded-xl bg-[#F8F9F3] p-4">
-                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                  Última actualización
-                </div>
-                <div className="text-base text-[#33361D] font-medium">
-                  {formatDate(associate.updatedAt)}
-                </div>
+                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Última actualización</div>
+                <div className="text-base text-[#33361D] font-medium">{formatDate(associate.updatedAt)}</div>
               </div>
             </div>
           </div>
 
           <div className="flex justify-end">
-            <button
-              onClick={onClose}
-              className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm"
-            >
+            <button onClick={onClose} className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm">
               Cerrar
             </button>
           </div>

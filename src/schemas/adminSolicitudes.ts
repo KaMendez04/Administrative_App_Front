@@ -17,7 +17,6 @@ const PersonaSchema = z.object({
   updatedAt: z.string(),
 });
 
-// ✅ Schema de NucleoFamiliar
 const NucleoFamiliarSchema = z.object({
   idNucleoFamiliar: z.number(),
   nucleoHombres: z.number(),
@@ -27,7 +26,6 @@ const NucleoFamiliarSchema = z.object({
   updatedAt: z.string(),
 });
 
-// ✅ Schema de Geografia
 const GeografiaSchema = z.object({
   idGeografia: z.number(),
   provincia: z.string(),
@@ -38,7 +36,14 @@ const GeografiaSchema = z.object({
   updatedAt: z.string(),
 });
 
-// ✅ Schema de Finca expandido
+// ✅ Schema de Propietario (FALTABA)
+const PropietarioSchema = z.object({
+  idPropietario: z.number(),
+  persona: PersonaSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
 const FincaSchema = z.object({
   idFinca: z.number(),
   nombre: z.string(),
@@ -46,17 +51,18 @@ const FincaSchema = z.object({
   numeroPlano: z.string(),
   idGeografia: z.number().nullable().optional(),
   geografia: GeografiaSchema.nullable().optional(),
+  propietario: PropietarioSchema.nullable().optional(),  // ✅ Agregar
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
-// ✅ Schema de Asociado expandido
 const AsociadoSchema = z.object({
   idAsociado: z.number(),
   distanciaFinca: z.string().nullable().optional(),
   viveEnFinca: z.boolean(),
   marcaGanado: z.string().nullable().optional(),
   CVO: z.string().nullable().optional(),
+  esPropietario: z.boolean().optional().default(false),  // ✅ Agregar
   estado: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -64,7 +70,6 @@ const AsociadoSchema = z.object({
   fincas: z.array(FincaSchema).optional().default([]),
 });
 
-// Schema para Solicitud
 export const SolicitudSchema = z.object({
   idSolicitud: z.number(),
   persona: PersonaSchema,
@@ -80,9 +85,9 @@ export const SolicitudSchema = z.object({
 export type Solicitud = z.infer<typeof SolicitudSchema>;
 export type NucleoFamiliar = z.infer<typeof NucleoFamiliarSchema>;
 export type Geografia = z.infer<typeof GeografiaSchema>;
+export type Propietario = z.infer<typeof PropietarioSchema>;  // ✅ Exportar
 export type Finca = z.infer<typeof FincaSchema>;
 
-// Schema para Associate
 export const AssociateSchema = z.object({
   idAsociado: z.number(),
   persona: PersonaSchema,
@@ -90,6 +95,7 @@ export const AssociateSchema = z.object({
   viveEnFinca: z.boolean(),
   marcaGanado: z.string().nullable().optional(),
   CVO: z.string().nullable().optional(),
+  esPropietario: z.boolean().optional().default(false),  // ✅ Agregar
   estado: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -136,6 +142,16 @@ export const AdminListParamsSchema = z.object({
 });
 
 export type AdminListParams = z.infer<typeof AdminListParamsSchema>;
+
+// Schema para parámetros de Associates (sin status)
+export const AssociateListParamsSchema = z.object({
+  search: z.string().trim().optional(),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(100).default(20),
+  sort: z.string().trim().optional(),
+});
+
+export type AssociateListParams = z.infer<typeof AssociateListParamsSchema>;
 
 export const RejectSchema = z.object({
   motivo: z.string().trim().min(5, "Explica brevemente el motivo (mínimo 5 caracteres)").max(255),

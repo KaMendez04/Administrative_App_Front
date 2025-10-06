@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { listAssociates } from "../../services/adminAssociatesService";
-import type { AdminListParams } from "../../schemas/adminSolicitudes";
+import type { AdminListParams, AssociateListParams } from "../../schemas/adminSolicitudes";
 import { listSolicitudes } from "../../services/adminSolicitudesService";
 
 export function useAdminSolicitudesList(params: AdminListParams) {
@@ -12,7 +12,7 @@ export function useAdminSolicitudesList(params: AdminListParams) {
   });
 }
 
-export function useAdminAssociatesList(params: AdminListParams) {
+export function useAdminAssociatesList(params: AssociateListParams) { // Cambiar tipo
   return useQuery({
     queryKey: ['associates', params],
     queryFn: () => listAssociates(params),

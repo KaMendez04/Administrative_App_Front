@@ -30,7 +30,6 @@ export default function AssociatesApprovedPage() {
   const limit = 20;
 
   const { data, isLoading } = useAdminAssociatesList({ 
-    status: "APROBADO",
     search, 
     page, 
     limit, 

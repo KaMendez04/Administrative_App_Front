@@ -18,7 +18,20 @@ export async function listSolicitudes(params: AdminListParams): Promise<Solicitu
   if (params.sort) queryParams.sort = params.sort;
 
   const response = await apiConfig.get("/solicitudes", { params: queryParams });
-  return SolicitudListResponseSchema.parse(response.data);
+  
+  console.log('📦 Raw response:', response.data);
+  
+  const parsed = SolicitudListResponseSchema.safeParse(response.data);
+  
+  if (!parsed.success) {
+    console.error('❌ Zod validation error:', parsed.error.format());
+    console.error('❌ Issues:', parsed.error.issues);
+    throw new Error('Error al validar la respuesta del servidor');
+  }
+  
+  console.log('✅ Parsed successfully:', parsed.data);
+  
+  return parsed.data;
 }
 
 export async function getSolicitud(id: number): Promise<Solicitud> {
