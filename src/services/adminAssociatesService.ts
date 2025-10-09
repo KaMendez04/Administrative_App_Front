@@ -1,9 +1,9 @@
-import { 
-  AssociateSchema, 
-  AssociateListResponseSchema, 
-  type Associate, 
+import {
+  AssociateSchema,
+  AssociateListResponseSchema,
+  type Associate,
   type AssociateListResponse,
-  type UpdateAssociateValues, 
+  type UpdateAssociateValues,
   type AssociateListParams
 } from "../schemas/adminSolicitudes";
 import apiConfig from "./apiConfig";
@@ -14,16 +14,32 @@ export async function listAssociates(params: AssociateListParams): Promise<Assoc
     page: params.page,
     limit: params.limit,
   };
-
+  
   if (params.estado !== undefined) queryParams.estado = params.estado;
   if (params.search) queryParams.search = params.search;
   if (params.sort) queryParams.sort = params.sort;
-
+  
   const response = await apiConfig.get("/associates", { params: queryParams });
   return AssociateListResponseSchema.parse(response.data);
 }
 
-// ✅ Detalle completo (para modales/páginas de detalle)
+// ✅ NUEVO: Detalle BÁSICO (sin cargar TODA la info de fincas - para lazy loading)
+export async function getAssociateBasic(id: number): Promise<Associate> {
+  const response = await apiConfig.get(`/associates/${id}/basic`);
+  
+  console.log('📦 Basic associate response:', response.data);
+  
+  const parsed = AssociateSchema.safeParse(response.data);
+  
+  if (!parsed.success) {
+    console.error('❌ Schema validation failed:', parsed.error.format());
+    throw new Error('Error al validar la respuesta del servidor');
+  }
+  
+  return parsed.data;
+}
+
+// ✅ Detalle completo (mantener para otros usos si es necesario)
 export async function getAssociate(id: number): Promise<Associate> {
   const response = await apiConfig.get(`/associates/${id}`);
   

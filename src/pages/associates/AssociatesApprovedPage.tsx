@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-
 import { useUpdateAssociate } from "../../hooks/associates/useUpdateAssociate";
-import { getAssociate } from "../../services/adminAssociatesService";
+
 import { AssociateEditDrawer } from "../../components/associates/AssociateEditDrawer";
 import { AssociateViewModal } from "../../components/associates/AssociateViewModal";
 import { useAdminAssociatesList } from "../../hooks/associates/useAdminAssociateList";
+import { useAssociateDetail } from "../../hooks/associates/useAdminAssociateDetail";
 
 function KPICard({
   label,
@@ -31,27 +30,19 @@ export default function AssociatesApprovedPage() {
   const limit = 20;
 
   const { data, isLoading } = useAdminAssociatesList({ 
-    estado: true, // ✅ Boolean, no string
+    estado: true,
     search, 
     page, 
     limit, 
-    sort: "createdAt:asc" 
+    sort: "createdAt:desc" 
   });
 
   const [editId, setEditId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
   
-  const { data: editDetail } = useQuery({
-    queryKey: ["associate", editId],
-    queryFn: () => getAssociate(editId!),
-    enabled: !!editId,
-  });
-
-  const { data: viewDetail } = useQuery({
-    queryKey: ["associate", viewId],
-    queryFn: () => getAssociate(viewId!),
-    enabled: !!viewId,
-  });
+  // ✅ Usar el hook de detalle básico
+  const { data: editDetail } = useAssociateDetail(editId);
+  const { data: viewDetail, isLoading: isLoadingDetail } = useAssociateDetail(viewId);
 
   const update = useUpdateAssociate();
 
@@ -160,6 +151,7 @@ export default function AssociatesApprovedPage() {
           open={viewId != null}
           onClose={() => setViewId(null)}
           associate={viewDetail ?? null}
+          isLoading={isLoadingDetail} // ✅ Pasar loading
         />
 
         {editId != null && editDetail && (

@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAssociate } from "../../services/adminAssociatesService";
+import { getAssociateBasic } from "../../services/adminAssociatesService";
 
-// ✅ Para cargar TODO el detalle (modal/página completa)
-export function useAdminAssociateDetail(id: number) {
+export function useAssociateDetail(id: number | null) {
   return useQuery({
-    queryKey: ["associate", id],
-    queryFn: () => getAssociate(id),
+    queryKey: ["associate-detail", id],
+    queryFn: async () => {
+      if (!id) throw new Error("ID es requerido");
+      return getAssociateBasic(id);
+    },
     enabled: !!id,
-    staleTime: 60_000,
+    staleTime: 300_000, // 5 minutos
   });
 }

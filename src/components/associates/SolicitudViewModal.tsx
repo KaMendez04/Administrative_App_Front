@@ -1,4 +1,5 @@
 import type { Solicitud } from "../../schemas/adminSolicitudes";
+import { FincaAccordion } from "./FincaAccordion";
 
 type Props = {
   open: boolean;
@@ -18,7 +19,6 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
     });
   };
 
-  // ✅ Mostrar loader mientras carga
   if (isLoading || !solicitud) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -147,276 +147,20 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
             </div>
           )}
 
-          {/* ✅ FINCAS - Con acordeones */}
+          {/* ✅ FINCAS - Usar el componente FincaAccordion */}
           {solicitud.asociado.fincas && solicitud.asociado.fincas.length > 0 && (
             <div>
               <h4 className="text-lg font-bold text-[#33361D] mb-3">
                 Fincas ({solicitud.asociado.fincas.length})
               </h4>
               
-              {solicitud.asociado.fincas.map((finca, fincaIdx) => (
-                <details key={finca.idFinca} className="mb-4 rounded-xl border-2 border-[#EAEFE0] overflow-hidden" open={fincaIdx === 0}>
-                  <summary className="bg-[#EAEFE0] px-4 py-3 cursor-pointer font-bold text-[#33361D] hover:bg-[#d9e4cd] transition">
-                    {finca.nombre} - {finca.areaHa} ha
-                    {finca.geografia && ` - ${finca.geografia.provincia}, ${finca.geografia.canton}`}
-                  </summary>
-                  
-                  <div className="p-4 bg-white space-y-4">
-                    {/* Datos básicos de finca */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="rounded-xl bg-[#F8F9F3] p-4">
-                        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Nombre</div>
-                        <div className="text-base text-[#33361D] font-medium">{finca.nombre}</div>
-                      </div>
-                      <div className="rounded-xl bg-[#F8F9F3] p-4">
-                        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Área (ha)</div>
-                        <div className="text-base text-[#33361D] font-medium">{finca.areaHa}</div>
-                      </div>
-                      <div className="rounded-xl bg-[#F8F9F3] p-4">
-                        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de Plano</div>
-                        <div className="text-base text-[#33361D] font-medium">{finca.numeroPlano}</div>
-                      </div>
-                      {finca.geografia && (
-                        <div className="rounded-xl bg-[#F8F9F3] p-4">
-                          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Ubicación</div>
-                          <div className="text-base text-[#33361D] font-medium">
-                            {finca.geografia.provincia}, {finca.geografia.canton}, {finca.geografia.distrito}
-                            {finca.geografia.caserio && `, ${finca.geografia.caserio}`}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Propietario (solo si NO es el asociado) */}
-                    {finca.propietario && !solicitud.asociado.esPropietario && (
-                      <div>
-                        <h5 className="text-base font-bold text-[#33361D] mb-2">Propietario de esta finca</h5>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="rounded-xl bg-[#FEF6E0] p-4">
-                            <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Nombre completo</div>
-                            <div className="text-base text-[#33361D] font-medium">
-                              {`${finca.propietario.persona.nombre} ${finca.propietario.persona.apellido1} ${finca.propietario.persona.apellido2}`}
-                            </div>
-                          </div>
-                          <div className="rounded-xl bg-[#FEF6E0] p-4">
-                            <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Cédula</div>
-                            <div className="text-base text-[#33361D] font-medium">{finca.propietario.persona.cedula}</div>
-                          </div>
-                          <div className="rounded-xl bg-[#FEF6E0] p-4">
-                            <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Teléfono</div>
-                            <div className="text-base text-[#33361D] font-medium">{finca.propietario.persona.telefono}</div>
-                          </div>
-                          <div className="rounded-xl bg-[#FEF6E0] p-4">
-                            <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Email</div>
-                            <div className="text-base text-[#33361D] font-medium">{finca.propietario.persona.email}</div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Hato */}
-                    {finca.hato && (
-                      <div>
-                        <h5 className="text-base font-bold text-[#33361D] mb-2">Hato</h5>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="rounded-xl bg-[#F8F9F3] p-4">
-                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Tipo de explotación</div>
-                            <div className="text-base text-[#33361D] font-medium">{finca.hato.tipoExplotacion ?? "—"}</div>
-                          </div>
-                          <div className="rounded-xl bg-[#F8F9F3] p-4">
-                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Total de ganado</div>
-                            <div className="text-base text-[#33361D] font-medium">{finca.hato.totalGanado ?? "—"}</div>
-                          </div>
-                          <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Raza predominante</div>
-                            <div className="text-base text-[#33361D] font-medium">{finca.hato.razaPredominante ?? "—"}</div>
-                          </div>
-
-                          {Array.isArray(finca.hato.animales) && finca.hato.animales.length > 0 && (
-                            <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-2">Animales</div>
-                              <div className="space-y-2">
-                                {finca.hato.animales.map((a, i) => (
-                                  <div key={a.idAnimal ?? i} className="flex flex-wrap items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2">
-                                    <div className="text-sm font-semibold text-[#33361D]">{a.nombre ?? "—"}</div>
-                                    <div className="text-xs text-[#33361D]">Edad: {a.edad ?? "—"}</div>
-                                    <div className="text-xs text-[#33361D]">Cantidad: {a.cantidad ?? "—"}</div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Forrajes */}
-                    {Array.isArray(finca.forrajes) && finca.forrajes.length > 0 && (
-                      <div>
-                        <h5 className="text-base font-bold text-[#33361D] mb-2">Forrajes</h5>
-                        <div className="space-y-2">
-                          {finca.forrajes.map((f, i) => (
-                            <div key={f.idForraje ?? i} className="rounded-xl bg-[#F8F9F3] p-4">
-                              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div>
-                                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Tipo de forraje</div>
-                                  <div className="text-base text-[#33361D] font-medium">{f.tipoForraje ?? "—"}</div>
-                                </div>
-                                <div>
-                                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Variedad</div>
-                                  <div className="text-base text-[#33361D] font-medium">{f.variedad ?? "—"}</div>
-                                </div>
-                                <div>
-                                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Hectáreas</div>
-                                  <div className="text-base text-[#33361D] font-medium">{f.hectareas ?? "—"}</div>
-                                </div>
-                                <div>
-                                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Utilización</div>
-                                  <div className="text-base text-[#33361D] font-medium">{f.utilizacion ?? "—"}</div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Registros productivos y Fuentes de agua */}
-                    {(finca.registrosProductivos || (Array.isArray(finca.fuentesAgua) && finca.fuentesAgua.length > 0)) && (
-                      <div>
-                        <h5 className="text-base font-bold text-[#33361D] mb-2">Registros productivos y fuentes de agua</h5>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {finca.registrosProductivos && (
-                            <>
-                              <div className="rounded-xl bg-[#F8F9F3] p-4">
-                                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Reproductivos</div>
-                                <div className="text-base text-[#33361D] font-medium">{finca.registrosProductivos.reproductivos ? "Sí" : "No"}</div>
-                              </div>
-                              <div className="rounded-xl bg-[#F8F9F3] p-4">
-                                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Costos productivos</div>
-                                <div className="text-base text-[#33361D] font-medium">{finca.registrosProductivos.costosProductivos ? "Sí" : "No"}</div>
-                              </div>
-                            </>
-                          )}
-
-                          {Array.isArray(finca.fuentesAgua) && finca.fuentesAgua.length > 0 && (
-                            <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-2">Fuentes de agua</div>
-                              <div className="space-y-2">
-                                {finca.fuentesAgua.map((fa, i) => (
-                                  <div key={fa.idFuenteAgua ?? i} className="flex items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2">
-                                    <div className="text-sm font-semibold text-[#33361D]">{fa.nombre ?? "—"}</div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Métodos de riego */}
-                    {Array.isArray(finca.metodosRiego) && finca.metodosRiego.length > 0 && (
-                      <div>
-                        <h5 className="text-base font-bold text-[#33361D] mb-2">Métodos de riego</h5>
-                        <div className="rounded-xl bg-[#F8F9F3] p-4">
-                          <div className="space-y-2">
-                            {finca.metodosRiego.map((mr, i) => (
-                              <div key={mr.idMetodoRiego ?? i} className="flex items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2">
-                                <div className="text-sm font-semibold text-[#33361D]">{mr.nombre ?? "—"}</div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Actividades */}
-                    {Array.isArray(finca.actividades) && finca.actividades.length > 0 && (
-                      <div>
-                        <h5 className="text-base font-bold text-[#33361D] mb-2">Actividades</h5>
-                        <div className="rounded-xl bg-[#F8F9F3] p-4">
-                          <div className="space-y-2">
-                            {finca.actividades.map((ac, i) => (
-                              <div key={ac.idActividad ?? i} className="flex items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2">
-                                <div className="text-sm font-semibold text-[#33361D]">{ac.nombre ?? "—"}</div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Infraestructura y Equipo de Producción */}
-                    {(finca.infraestructura || (Array.isArray(finca.tipoCercaLinks) && finca.tipoCercaLinks.length > 0) || (Array.isArray(finca.infraLinks) && finca.infraLinks.length > 0)) && (
-                      <div>
-                        <h5 className="text-base font-bold text-[#33361D] mb-2">Infraestructura y equipo de producción</h5>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {finca.infraestructura && (
-                            <>
-                              <div className="rounded-xl bg-[#F8F9F3] p-4">
-                                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de aparatos</div>
-                                <div className="text-base text-[#33361D] font-medium">{finca.infraestructura.numeroAparatos ?? "—"}</div>
-                              </div>
-                              <div className="rounded-xl bg-[#F8F9F3] p-4">
-                                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de bebederos</div>
-                                <div className="text-base text-[#33361D] font-medium">{finca.infraestructura.numeroBebederos ?? "—"}</div>
-                              </div>
-                              <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de saleros</div>
-                                <div className="text-base text-[#33361D] font-medium">{finca.infraestructura.numeroSaleros ?? "—"}</div>
-                              </div>
-                            </>
-                          )}
-
-                          {Array.isArray(finca.tipoCercaLinks) && finca.tipoCercaLinks.length > 0 && (
-                            <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-2">Tipos de cerca</div>
-                              <div className="flex flex-wrap gap-2">
-                                {finca.tipoCercaLinks.map((tc, i) => {
-                                  const t = tc.tipoCerca ?? {};
-                                  const chips: string[] = [];
-                                  if (t.viva) chips.push("Viva");
-                                  if (t.electrica) chips.push("Eléctrica");
-                                  if (t.pMuerto) chips.push("P. muerto");
-                                  return (
-                                    <div key={tc.id ?? i} className="flex flex-wrap gap-2">
-                                      {chips.length > 0 ? (
-                                        chips.map((c, j) => (
-                                          <span key={`${i}-${j}`} className="px-2 py-1 text-xs font-semibold rounded bg-white border border-[#EAEFE0] text-[#33361D]">
-                                            {c}
-                                          </span>
-                                        ))
-                                      ) : (
-                                        <span className="text-sm text-[#33361D]">—</span>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {Array.isArray(finca.infraLinks) && finca.infraLinks.length > 0 && (
-                            <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-2">Infraestructura (detalles)</div>
-                              <div className="space-y-2">
-                                {finca.infraLinks.map((il, i) => (
-                                  <div key={il.id ?? i} className="rounded border border-[#EAEFE0] bg-white p-3">
-                                    <div className="text-sm font-semibold text-[#33361D]">{il.infraestructura?.nombre ?? "—"}</div>
-                                    {il.infraestructura?.descripcion && (
-                                      <div className="text-xs text-[#33361D] mt-1">{il.infraestructura.descripcion}</div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </details>
+              {solicitud.asociado.fincas.map((finca, idx) => (
+                <FincaAccordion
+                  key={finca.idFinca}
+                  finca={finca}
+                  isFirst={idx === 0}
+                  esPropietario={solicitud.asociado.esPropietario ?? false}
+                />
               ))}
             </div>
           )}
