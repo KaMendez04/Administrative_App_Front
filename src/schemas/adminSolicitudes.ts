@@ -92,6 +92,54 @@ const MetodoRiegoSchema = z.object({
   nombre: z.string().nullable().optional(),
 });
 
+const ActividadSchema = z.object({
+  idActividad: z.number().nullable().optional(),
+  idFinca: z.number().nullable().optional(),
+  nombre: z.string().nullable().optional(),
+});
+
+// === Infraestructura (resumen de conteos) ===
+const InfraestructuraResumenSchema = z.object({
+  idInfraestructura: z.number().nullable().optional(),
+  numeroAparatos: z.number().nullable().optional(),
+  numeroBebederos: z.number().nullable().optional(),
+  numeroSaleros: z.number().nullable().optional(),
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
+});
+
+// === Tipo de cerca (flags) ===
+const TipoCercaSchema = z.object({
+  idTipoCerca: z.number().nullable().optional(),
+  viva: z.boolean().nullable().optional(),
+  electrica: z.boolean().nullable().optional(),
+  pMuerto: z.boolean().nullable().optional(),
+});
+
+// Link de tipo de cerca
+const TipoCercaLinkSchema = z.object({
+  id: z.number().nullable().optional(),
+  idFinca: z.number().nullable().optional(),
+  idTipoCerca: z.number().nullable().optional(),
+  tipoCerca: TipoCercaSchema.nullable().optional(),
+});
+
+// === Infraestructura (detallada) ===
+const InfraestructuraDetalleSchema = z.object({
+  idInfraestructura: z.number().nullable().optional(),
+  nombre: z.string().nullable().optional(),
+  descripcion: z.string().nullable().optional(),
+});
+
+// Link de infraestructura detallada
+const InfraLinkSchema = z.object({
+  id: z.number().nullable().optional(),
+  idFinca: z.number().nullable().optional(),
+  idInfraestructura: z.number().nullable().optional(),
+  infraestructura: InfraestructuraDetalleSchema.nullable().optional(),
+});
+
+
 const FincaSchema = z.object({
   idFinca: z.number(),
   nombre: z.string(),
@@ -105,6 +153,10 @@ const FincaSchema = z.object({
   registrosProductivos: RegistrosProductivosSchema.nullable().optional(), // ✅ agregado
   fuentesAgua: z.array(FuenteAguaSchema).nullable().optional().default([]), // ✅ agregado
   metodosRiego: z.array(MetodoRiegoSchema).nullable().optional().default([]),
+  actividades: z.array(ActividadSchema).nullable().optional().default([]),
+  infraestructura: InfraestructuraResumenSchema.nullable().optional(),   // ✅ nuevo
+  tipoCercaLinks: z.array(TipoCercaLinkSchema).nullable().optional().default([]), // ✅ nuevo
+  infraLinks: z.array(InfraLinkSchema).nullable().optional().default([]), // ✅ nuevo
   createdAt: z.string(),
   updatedAt: z.string(),
 });

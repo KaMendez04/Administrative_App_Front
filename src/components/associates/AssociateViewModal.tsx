@@ -319,6 +319,126 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
   </div>
 )}
 
+{/* Actividades — fuera del cuadro, mismo diseño */}
+{Array.isArray(finca.actividades) && finca.actividades.length > 0 && (
+  <div className="mt-4">
+    <h4 className="text-lg font-bold text-[#33361D] mb-3">Actividades</h4>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Listado</div>
+        <div className="space-y-2">
+          {finca.actividades.map((ac, i) => (
+            <div
+              key={ac.idActividad ?? i}
+              className="flex items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2"
+            >
+              <div className="text-sm font-semibold text-[#33361D]">
+                {ac.nombre ?? "—"}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+{/* Infraestructura y Equipo de Producción — fuera del cuadro */}
+{(finca?.infraestructura ||
+  (Array.isArray(finca?.tipoCercaLinks) && finca.tipoCercaLinks.length > 0) ||
+  (Array.isArray(finca?.infraLinks) && finca.infraLinks.length > 0)) && (
+  <div className="mt-4">
+    <h4 className="text-lg font-bold text-[#33361D] mb-3">Infraestructura y equipo de producción</h4>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Conteos de infraestructura */}
+      {finca.infraestructura && (
+        <>
+          <div className="rounded-xl bg-[#F8F9F3] p-4">
+            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+              Número de aparatos
+            </div>
+            <div className="text-base text-[#33361D] font-medium">
+              {finca.infraestructura.numeroAparatos ?? "—"}
+            </div>
+          </div>
+          <div className="rounded-xl bg-[#F8F9F3] p-4">
+            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+              Número de bebederos
+            </div>
+            <div className="text-base text-[#33361D] font-medium">
+              {finca.infraestructura.numeroBebederos ?? "—"}
+            </div>
+          </div>
+          <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+              Número de saleros
+            </div>
+            <div className="text-base text-[#33361D] font-medium">
+              {finca.infraestructura.numeroSaleros ?? "—"}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Tipos de cerca */}
+      {Array.isArray(finca.tipoCercaLinks) && finca.tipoCercaLinks.length > 0 && (
+        <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Tipos de cerca</div>
+          <div className="flex flex-wrap gap-2">
+            {finca.tipoCercaLinks.map((tc, i) => {
+              const t = tc.tipoCerca ?? {};
+              const chips: string[] = [];
+              if (t.viva) chips.push("Viva");
+              if (t.electrica) chips.push("Eléctrica");
+              if (t.pMuerto) chips.push("P. muerto");
+              return (
+                <div key={tc.id ?? i} className="flex flex-wrap gap-2">
+                  {chips.length > 0 ? (
+                    chips.map((c, j) => (
+                      <span
+                        key={`${i}-${j}`}
+                        className="px-2 py-1 text-xs font-semibold rounded bg-white border border-[#EAEFE0] text-[#33361D]"
+                      >
+                        {c}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm text-[#33361D]">—</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Infraestructura (detalles) */}
+      {Array.isArray(finca.infraLinks) && finca.infraLinks.length > 0 && (
+        <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Infraestructura (detalles)</div>
+          <div className="space-y-2">
+            {finca.infraLinks.map((il, i) => (
+              <div
+                key={il.id ?? i}
+                className="rounded border border-[#EAEFE0] bg-white p-3"
+              >
+                <div className="text-sm font-semibold text-[#33361D]">
+                  {il.infraestructura?.nombre ?? "—"}
+                </div>
+                {il.infraestructura?.descripcion && (
+                  <div className="text-xs text-[#33361D] mt-1">
+                    {il.infraestructura.descripcion}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
                   </div>
                 ))}
               </div>
