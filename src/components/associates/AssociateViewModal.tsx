@@ -298,11 +298,33 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                         </div>
                       </div>
                     )}
+                    {/* Métodos de riego */}
+{Array.isArray(finca.metodosRiego) && finca.metodosRiego.length > 0 && (
+  <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+      Métodos de riego
+    </div>
+    <div className="space-y-2">
+      {finca.metodosRiego.map((mr, i) => (
+        <div
+          key={mr.idMetodoRiego ?? i}
+          className="flex items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2"
+        >
+          <div className="text-sm font-semibold text-[#33361D]">
+            {mr.nombre ?? "—"}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
                   </div>
                 ))}
               </div>
             </div>
           )}
+          
 
           {/* Fechas */}
           <div>

@@ -87,6 +87,11 @@ const FuenteAguaSchema = z.object({
   nombre: z.string().nullable().optional(),
 });
 
+const MetodoRiegoSchema = z.object({
+  idMetodoRiego: z.number().nullable().optional(),
+  nombre: z.string().nullable().optional(),
+});
+
 const FincaSchema = z.object({
   idFinca: z.number(),
   nombre: z.string(),
@@ -99,6 +104,7 @@ const FincaSchema = z.object({
   forrajes: z.array(ForrajeSchema).nullable().optional().default([]),
   registrosProductivos: RegistrosProductivosSchema.nullable().optional(), // ✅ agregado
   fuentesAgua: z.array(FuenteAguaSchema).nullable().optional().default([]), // ✅ agregado
+  metodosRiego: z.array(MetodoRiegoSchema).nullable().optional().default([]),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
