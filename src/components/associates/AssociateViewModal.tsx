@@ -32,7 +32,7 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
     { label: "Vive en finca", value: associate.viveEnFinca ? "Sí" : "No" },
     { label: "Marca de ganado", value: associate.marcaGanado || "—" },
     { label: "CVO", value: associate.CVO || "—" },
-    { label: "Es propietario", value: associate.esPropietario ? "Sí" : "No" },  // ✅ Agregar
+    { label: "Es propietario", value: associate.esPropietario ? "Sí" : "No" },
     { label: "Estado", value: associate.estado ? "Activo" : "Inactivo" },
   ];
 
@@ -41,7 +41,7 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
+      <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
@@ -50,9 +50,11 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
             <div>
               <h3 className="text-2xl font-bold text-[#33361D]">Detalles del Asociado</h3>
               <div className="mt-2">
-                <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                  associate.estado ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                }`}>
+                <span
+                  className={`px-3 py-1 rounded-lg text-sm font-bold ${
+                    associate.estado ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                  }`}
+                >
                   {associate.estado ? "Activo" : "Inactivo"}
                 </span>
               </div>
@@ -128,6 +130,7 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                       </span>
                       <span className="text-sm font-bold text-[#33361D]">{finca.nombre}</span>
                     </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="rounded-lg bg-[#F8F9F3] p-3">
                         <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Área (ha)</div>
@@ -137,6 +140,7 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                         <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de Plano</div>
                         <div className="text-sm text-[#33361D] font-medium">{finca.numeroPlano}</div>
                       </div>
+
                       {finca.geografia && (
                         <div className="rounded-lg bg-[#F8F9F3] p-3 md:col-span-2">
                           <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Ubicación</div>
@@ -146,15 +150,60 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                           </div>
                         </div>
                       )}
-                      {/* Propietario de esta finca (si existe y NO es el asociado) */}
+
+                      {/* Propietario (si existe y NO es el asociado) */}
                       {finca.propietario && !associate.esPropietario && (
                         <div className="rounded-lg bg-[#FEF6E0] p-3 md:col-span-2">
                           <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Propietario</div>
                           <div className="text-sm text-[#33361D] font-medium">
-                            {`${finca.propietario.persona.nombre} ${finca.propietario.persona.apellido1} ${finca.propietario.persona.apellido2}`} - {finca.propietario.persona.cedula}
+                            {`${finca.propietario.persona.nombre} ${finca.propietario.persona.apellido1} ${finca.propietario.persona.apellido2}`} -{" "}
+                            {finca.propietario.persona.cedula}
                           </div>
                         </div>
                       )}
+
+                      {/* Hato — ESTE BLOQUE DEBE IR DENTRO DEL map, COMO AQUÍ */}
+                      {finca.hato && (
+                        <div className="rounded-lg bg-[#F8F9F3] p-3 md:col-span-2">
+                          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Hato</div>
+
+                          {/* Resumen */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <div className="text-[11px] font-bold uppercase text-[#556B2F] mb-0.5">Tipo de explotación</div>
+                              <div className="text-sm text-[#33361D] font-medium">{finca.hato?.tipoExplotacion ?? "—"}</div>
+                            </div>
+                            <div>
+                              <div className="text-[11px] font-bold uppercase text-[#556B2F] mb-0.5">Total de ganado</div>
+                              <div className="text-sm text-[#33361D] font-medium">{finca.hato?.totalGanado ?? "—"}</div>
+                            </div>
+                            <div>
+                              <div className="text-[11px] font-bold uppercase text-[#556B2F] mb-0.5">Raza predominante</div>
+                              <div className="text-sm text-[#33361D] font-medium">{finca.hato?.razaPredominante ?? "—"}</div>
+                            </div>
+                          </div>
+
+                          {/* Animales */}
+                          {Array.isArray(finca.hato?.animales) && finca.hato!.animales.length > 0 && (
+                            <div className="mt-3">
+                              <div className="text-[11px] font-bold uppercase text-[#556B2F] mb-1">Animales</div>
+                              <div className="space-y-2">
+                                {finca.hato!.animales.map((a, i) => (
+                                  <div
+                                    key={a.idAnimal ?? i}
+                                    className="flex flex-wrap items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2"
+                                  >
+                                    <div className="text-sm font-semibold text-[#33361D]">{a.nombre ?? "—"}</div>
+                                    <div className="text-xs text-[#33361D]">Edad: {a.edad ?? "—"}</div>
+                                    <div className="text-xs text-[#33361D]">Cantidad: {a.cantidad ?? "—"}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {/* FIN HATO */}
                     </div>
                   </div>
                 ))}
@@ -178,7 +227,10 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
           </div>
 
           <div className="flex justify-end">
-            <button onClick={onClose} className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm">
+            <button
+              onClick={onClose}
+              className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm"
+            >
               Cerrar
             </button>
           </div>

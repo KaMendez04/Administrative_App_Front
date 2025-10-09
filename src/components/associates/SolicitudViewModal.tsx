@@ -200,6 +200,66 @@ export function SolicitudViewModal({ open, onClose, solicitud }: Props) {
             </div>
           </div>
 
+          {/* Hato */}
+{finca?.hato && (
+  <div>
+    <h4 className="text-lg font-bold text-[#33361D] mb-3">Hato</h4>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="rounded-xl bg-[#F8F9F3] p-4">
+        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+          Tipo de explotación
+        </div>
+        <div className="text-base text-[#33361D] font-medium">
+          {finca.hato?.tipoExplotacion ?? "—"}
+        </div>
+      </div>
+
+      <div className="rounded-xl bg-[#F8F9F3] p-4">
+        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+          Total de ganado
+        </div>
+        <div className="text-base text-[#33361D] font-medium">
+          {finca.hato?.totalGanado ?? "—"}
+        </div>
+      </div>
+
+      <div className="rounded-xl bg-[#F8F9F3] p-4">
+        <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+          Raza predominante
+        </div>
+        <div className="text-base text-[#33361D] font-medium">
+          {finca.hato?.razaPredominante ?? "—"}
+        </div>
+      </div>
+
+      {Array.isArray(finca.hato?.animales) && finca.hato!.animales.length > 0 && (
+        <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+            Animales
+          </div>
+          <div className="space-y-2">
+            {finca.hato!.animales.map((a, i) => (
+              <div
+                key={a.idAnimal ?? i}
+                className="flex flex-wrap items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2"
+              >
+                <div className="text-sm font-semibold text-[#33361D]">{a.nombre ?? "—"}</div>
+                <div className="text-xs text-[#33361D]">Edad: {a.edad ?? "—"}</div>
+                <div className="text-xs text-[#33361D]">Cantidad: {a.cantidad ?? "—"}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
+
+
+
+
+
           <div className="flex justify-end">
             <button onClick={onClose} className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm">
               Cerrar

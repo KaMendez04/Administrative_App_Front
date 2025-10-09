@@ -44,6 +44,27 @@ const PropietarioSchema = z.object({
   updatedAt: z.string(),
 });
 
+/* ===================== */
+/*        HATO           */
+/* ===================== */
+const HatoAnimalSchema = z.object({
+  idAnimal: z.number().nullable().optional(),
+  nombre: z.string().nullable().optional(),
+  edad: z.number().nullable().optional(),
+  cantidad: z.number().nullable().optional(),
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
+});
+
+const HatoSchema = z.object({
+  idHato: z.number().nullable().optional(),
+  tipoExplotacion: z.string().nullable().optional(),
+  totalGanado: z.number().nullable().optional(),
+  razaPredominante: z.string().nullable().optional(),
+  animales: z.array(HatoAnimalSchema).nullable().optional().default([]),
+});
+/* ===================== */
+
 const FincaSchema = z.object({
   idFinca: z.number(),
   nombre: z.string(),
@@ -52,6 +73,7 @@ const FincaSchema = z.object({
   idGeografia: z.number().nullable().optional(),
   geografia: GeografiaSchema.nullable().optional(),
   propietario: PropietarioSchema.nullable().optional(),  // ✅ Agregar
+  hato: HatoSchema.nullable().optional(),                // ✅ tipado
   createdAt: z.string(),
   updatedAt: z.string(),
 });
