@@ -41,7 +41,7 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
+      <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
@@ -50,9 +50,11 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
             <div>
               <h3 className="text-2xl font-bold text-[#33361D]">Detalles del Asociado</h3>
               <div className="mt-2">
-                <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                  associate.estado ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                }`}>
+                <span
+                  className={`px-3 py-1 rounded-lg text-sm font-bold ${
+                    associate.estado ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                  }`}
+                >
                   {associate.estado ? "Activo" : "Inactivo"}
                 </span>
               </div>
@@ -163,22 +165,34 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                       </div>
                     </div>
 
-                    {/* Hato — fuera del cuadro, mismo diseño que “Estado de Solicitud” */}
+                    {/* Hato — fuera del cuadro, mismo diseño “Estado de Solicitud” */}
                     {finca.hato && (
                       <div className="mt-4">
                         <h4 className="text-lg font-bold text-[#33361D] mb-3">Hato</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="rounded-xl bg-[#F8F9F3] p-4">
-                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Tipo de explotación</div>
-                            <div className="text-base text-[#33361D] font-medium">{finca.hato?.tipoExplotacion ?? "—"}</div>
+                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                              Tipo de explotación
+                            </div>
+                            <div className="text-base text-[#33361D] font-medium">
+                              {finca.hato?.tipoExplotacion ?? "—"}
+                            </div>
                           </div>
                           <div className="rounded-xl bg-[#F8F9F3] p-4">
-                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Total de ganado</div>
-                            <div className="text-base text-[#33361D] font-medium">{finca.hato?.totalGanado ?? "—"}</div>
+                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                              Total de ganado
+                            </div>
+                            <div className="text-base text-[#33361D] font-medium">
+                              {finca.hato?.totalGanado ?? "—"}
+                            </div>
                           </div>
                           <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Raza predominante</div>
-                            <div className="text-base text-[#33361D] font-medium">{finca.hato?.razaPredominante ?? "—"}</div>
+                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                              Raza predominante
+                            </div>
+                            <div className="text-base text-[#33361D] font-medium">
+                              {finca.hato?.razaPredominante ?? "—"}
+                            </div>
                           </div>
 
                           {Array.isArray(finca.hato?.animales) && finca.hato!.animales.length > 0 && (
@@ -202,7 +216,7 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                       </div>
                     )}
 
-                    {/* Forrajes — fuera del cuadro, mismo diseño que “Estado de Solicitud” */}
+                    {/* Forrajes — fuera del cuadro, mismo diseño “Estado de Solicitud” */}
                     {Array.isArray(finca.forrajes) && finca.forrajes.length > 0 && (
                       <div className="mt-4">
                         <h4 className="text-lg font-bold text-[#33361D] mb-3">Forrajes</h4>
@@ -232,6 +246,58 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                         </div>
                       </div>
                     )}
+
+                    {/* Registros productivos y Fuentes de agua — fuera del cuadro */}
+                    {(finca.registrosProductivos ||
+                      (Array.isArray(finca.fuentesAgua) && finca.fuentesAgua.length > 0)) && (
+                      <div className="mt-4">
+                        <h4 className="text-lg font-bold text-[#33361D] mb-3">
+                          Registros productivos y fuentes de agua
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {finca.registrosProductivos && (
+                            <>
+                              <div className="rounded-xl bg-[#F8F9F3] p-4">
+                                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                                  Reproductivos
+                                </div>
+                                <div className="text-base text-[#33361D] font-medium">
+                                  {finca.registrosProductivos.reproductivos ? "Sí" : "No"}
+                                </div>
+                              </div>
+                              <div className="rounded-xl bg-[#F8F9F3] p-4">
+                                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                                  Costos productivos
+                                </div>
+                                <div className="text-base text-[#33361D] font-medium">
+                                  {finca.registrosProductivos.costosProductivos ? "Sí" : "No"}
+                                </div>
+                              </div>
+                            </>
+                          )}
+
+                          {Array.isArray(finca.fuentesAgua) && finca.fuentesAgua.length > 0 && (
+                            <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+                              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                                Fuentes de agua
+                              </div>
+                              <div className="space-y-2">
+                                {finca.fuentesAgua.map((fa, i) => (
+                                  <div
+                                    key={fa.idFuenteAgua ?? i}
+                                    className="flex items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2"
+                                  >
+                                    <div className="text-sm font-semibold text-[#33361D]">
+                                      {fa.nombre ?? "—"}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -254,7 +320,10 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
           </div>
 
           <div className="flex justify-end">
-            <button onClick={onClose} className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm">
+            <button
+              onClick={onClose}
+              className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm"
+            >
               Cerrar
             </button>
           </div>

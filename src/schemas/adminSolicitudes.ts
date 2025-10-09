@@ -44,9 +44,7 @@ const PropietarioSchema = z.object({
   updatedAt: z.string(),
 });
 
-/* ===================== */
-/*          HATO         */
-/* ===================== */
+/* ============ HATO ============ */
 const HatoAnimalSchema = z.object({
   idAnimal: z.number().nullable().optional(),
   nombre: z.string().nullable().optional(),
@@ -64,9 +62,7 @@ const HatoSchema = z.object({
   animales: z.array(HatoAnimalSchema).nullable().optional().default([]),
 });
 
-/* ===================== */
-/*        FORRAJES       */
-/* ===================== */
+/* ========== FORRAJES ========== */
 const ForrajeSchema = z.object({
   idForraje: z.number().nullable().optional(),
   tipoForraje: z.string().nullable().optional(),
@@ -75,6 +71,20 @@ const ForrajeSchema = z.object({
   utilizacion: z.string().nullable().optional(),
   createdAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional(),
+});
+
+/* === REGISTROS PRODUCTIVOS === */
+const RegistrosProductivosSchema = z.object({
+  idRegistrosProductivos: z.number().nullable().optional(),
+  reproductivos: z.boolean().nullable().optional(),
+  costosProductivos: z.boolean().nullable().optional(),
+});
+
+/* ====== FUENTES DE AGUA ====== */
+const FuenteAguaSchema = z.object({
+  idFuenteAgua: z.number().nullable().optional(),
+  idFinca: z.number().nullable().optional(),
+  nombre: z.string().nullable().optional(),
 });
 
 const FincaSchema = z.object({
@@ -86,7 +96,9 @@ const FincaSchema = z.object({
   geografia: GeografiaSchema.nullable().optional(),
   propietario: PropietarioSchema.nullable().optional(),
   hato: HatoSchema.nullable().optional(),
-  forrajes: z.array(ForrajeSchema).nullable().optional().default([]), // ✅ agregado
+  forrajes: z.array(ForrajeSchema).nullable().optional().default([]),
+  registrosProductivos: RegistrosProductivosSchema.nullable().optional(), // ✅ agregado
+  fuentesAgua: z.array(FuenteAguaSchema).nullable().optional().default([]), // ✅ agregado
   createdAt: z.string(),
   updatedAt: z.string(),
 });

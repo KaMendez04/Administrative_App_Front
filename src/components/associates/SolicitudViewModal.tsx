@@ -287,6 +287,48 @@ export function SolicitudViewModal({ open, onClose, solicitud }: Props) {
 )}
 
 
+{/* Registros productivos y Fuentes de agua */}
+{(finca?.registrosProductivos || (Array.isArray(finca?.fuentesAgua) && finca!.fuentesAgua.length > 0)) && (
+  <div className="mt-4">
+    <h4 className="text-lg font-bold text-[#33361D] mb-3">Registros productivos y fuentes de agua</h4>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {finca?.registrosProductivos && (
+        <>
+          <div className="rounded-xl bg-[#F8F9F3] p-4">
+            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Reproductivos</div>
+            <div className="text-base text-[#33361D] font-medium">
+              {finca.registrosProductivos.reproductivos ? "Sí" : "No"}
+            </div>
+          </div>
+          <div className="rounded-xl bg-[#F8F9F3] p-4">
+            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Costos productivos</div>
+            <div className="text-base text-[#33361D] font-medium">
+              {finca.registrosProductivos.costosProductivos ? "Sí" : "No"}
+            </div>
+          </div>
+        </>
+      )}
+
+      {Array.isArray(finca?.fuentesAgua) && finca.fuentesAgua.length > 0 && (
+        <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Fuentes de agua</div>
+          <div className="space-y-2">
+            {finca.fuentesAgua.map((fa, i) => (
+              <div
+                key={fa.idFuenteAgua ?? i}
+                className="flex items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2"
+              >
+                <div className="text-sm font-semibold text-[#33361D]">{fa.nombre ?? "—"}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
+
 
 
 
