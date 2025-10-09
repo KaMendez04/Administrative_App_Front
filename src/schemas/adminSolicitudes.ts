@@ -36,7 +36,7 @@ const GeografiaSchema = z.object({
   updatedAt: z.string(),
 });
 
-// ✅ Schema de Propietario (FALTABA)
+// ✅ Propietario
 const PropietarioSchema = z.object({
   idPropietario: z.number(),
   persona: PersonaSchema,
@@ -45,7 +45,7 @@ const PropietarioSchema = z.object({
 });
 
 /* ===================== */
-/*        HATO           */
+/*          HATO         */
 /* ===================== */
 const HatoAnimalSchema = z.object({
   idAnimal: z.number().nullable().optional(),
@@ -63,7 +63,19 @@ const HatoSchema = z.object({
   razaPredominante: z.string().nullable().optional(),
   animales: z.array(HatoAnimalSchema).nullable().optional().default([]),
 });
+
 /* ===================== */
+/*        FORRAJES       */
+/* ===================== */
+const ForrajeSchema = z.object({
+  idForraje: z.number().nullable().optional(),
+  tipoForraje: z.string().nullable().optional(),
+  variedad: z.string().nullable().optional(),
+  hectareas: z.string().nullable().optional(),
+  utilizacion: z.string().nullable().optional(),
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
+});
 
 const FincaSchema = z.object({
   idFinca: z.number(),
@@ -72,8 +84,9 @@ const FincaSchema = z.object({
   numeroPlano: z.string(),
   idGeografia: z.number().nullable().optional(),
   geografia: GeografiaSchema.nullable().optional(),
-  propietario: PropietarioSchema.nullable().optional(),  // ✅ Agregar
-  hato: HatoSchema.nullable().optional(),                // ✅ tipado
+  propietario: PropietarioSchema.nullable().optional(),
+  hato: HatoSchema.nullable().optional(),
+  forrajes: z.array(ForrajeSchema).nullable().optional().default([]), // ✅ agregado
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -84,7 +97,7 @@ const AsociadoSchema = z.object({
   viveEnFinca: z.boolean(),
   marcaGanado: z.string().nullable().optional(),
   CVO: z.string().nullable().optional(),
-  esPropietario: z.boolean().optional().default(false),  // ✅ Agregar
+  esPropietario: z.boolean().optional().default(false),
   estado: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -107,7 +120,7 @@ export const SolicitudSchema = z.object({
 export type Solicitud = z.infer<typeof SolicitudSchema>;
 export type NucleoFamiliar = z.infer<typeof NucleoFamiliarSchema>;
 export type Geografia = z.infer<typeof GeografiaSchema>;
-export type Propietario = z.infer<typeof PropietarioSchema>;  // ✅ Exportar
+export type Propietario = z.infer<typeof PropietarioSchema>;
 export type Finca = z.infer<typeof FincaSchema>;
 
 export const AssociateSchema = z.object({
@@ -117,7 +130,7 @@ export const AssociateSchema = z.object({
   viveEnFinca: z.boolean(),
   marcaGanado: z.string().nullable().optional(),
   CVO: z.string().nullable().optional(),
-  esPropietario: z.boolean().optional().default(false),  // ✅ Agregar
+  esPropietario: z.boolean().optional().default(false),
   estado: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -165,7 +178,7 @@ export const AdminListParamsSchema = z.object({
 
 export type AdminListParams = z.infer<typeof AdminListParamsSchema>;
 
-// Schema para Associates (sin status, con estado)
+// Associates (sin status, con estado)
 export const AssociateListParamsSchema = z.object({
   estado: z.boolean().optional(), // true = activos, false = inactivos
   search: z.string().trim().optional(),

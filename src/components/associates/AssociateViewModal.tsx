@@ -34,7 +34,6 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
     { label: "CVO", value: associate.CVO || "—" },
     { label: "Es propietario", value: associate.esPropietario ? "Sí" : "No" },
     { label: "Estado", value: associate.estado ? "Activo" : "Inactivo" },
-    { label: "Distancia a la finca", value: associate.distanciaFinca != null ? `${associate.distanciaFinca}` : "—" },
   ];
 
   const nucleoFamiliar = associate.nucleoFamiliar;
@@ -164,43 +163,27 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                       </div>
                     </div>
 
-                    {/* Hato — sección fuera del cuadro, mismo diseño de “Estado de Solicitud” */}
+                    {/* Hato — fuera del cuadro, mismo diseño que “Estado de Solicitud” */}
                     {finca.hato && (
                       <div className="mt-4">
                         <h4 className="text-lg font-bold text-[#33361D] mb-3">Hato</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="rounded-xl bg-[#F8F9F3] p-4">
-                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                              Tipo de explotación
-                            </div>
-                            <div className="text-base text-[#33361D] font-medium">
-                              {finca.hato?.tipoExplotacion ?? "—"}
-                            </div>
+                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Tipo de explotación</div>
+                            <div className="text-base text-[#33361D] font-medium">{finca.hato?.tipoExplotacion ?? "—"}</div>
                           </div>
-
                           <div className="rounded-xl bg-[#F8F9F3] p-4">
-                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                              Total de ganado
-                            </div>
-                            <div className="text-base text-[#33361D] font-medium">
-                              {finca.hato?.totalGanado ?? "—"}
-                            </div>
+                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Total de ganado</div>
+                            <div className="text-base text-[#33361D] font-medium">{finca.hato?.totalGanado ?? "—"}</div>
                           </div>
-
                           <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                              Raza predominante
-                            </div>
-                            <div className="text-base text-[#33361D] font-medium">
-                              {finca.hato?.razaPredominante ?? "—"}
-                            </div>
+                            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Raza predominante</div>
+                            <div className="text-base text-[#33361D] font-medium">{finca.hato?.razaPredominante ?? "—"}</div>
                           </div>
 
                           {Array.isArray(finca.hato?.animales) && finca.hato!.animales.length > 0 && (
                             <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                                Animales
-                              </div>
+                              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Animales</div>
                               <div className="space-y-2">
                                 {finca.hato!.animales.map((a, i) => (
                                   <div
@@ -215,6 +198,37 @@ export function AssociateViewModal({ open, onClose, associate }: Props) {
                               </div>
                             </div>
                           )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Forrajes — fuera del cuadro, mismo diseño que “Estado de Solicitud” */}
+                    {Array.isArray(finca.forrajes) && finca.forrajes.length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="text-lg font-bold text-[#33361D] mb-3">Forrajes</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {finca.forrajes.map((f, i) => (
+                            <div key={f.idForraje ?? i} className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Tipo de forraje</div>
+                                  <div className="text-base text-[#33361D] font-medium">{f.tipoForraje ?? "—"}</div>
+                                </div>
+                                <div>
+                                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Variedad</div>
+                                  <div className="text-base text-[#33361D] font-medium">{f.variedad ?? "—"}</div>
+                                </div>
+                                <div>
+                                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Hectáreas</div>
+                                  <div className="text-base text-[#33361D] font-medium">{f.hectareas ?? "—"}</div>
+                                </div>
+                                <div>
+                                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Utilización</div>
+                                  <div className="text-base text-[#33361D] font-medium">{f.utilizacion ?? "—"}</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}

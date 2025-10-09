@@ -255,6 +255,37 @@ export function SolicitudViewModal({ open, onClose, solicitud }: Props) {
   </div>
 )}
 
+{/* Forrajes — fuera del cuadro, mismo diseño que Estado de Solicitud */}
+{Array.isArray(finca?.forrajes) && finca.forrajes.length > 0 && (
+  <div className="mt-4">
+    <h4 className="text-lg font-bold text-[#33361D] mb-3">Forrajes</h4>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {finca.forrajes.map((f, i) => (
+        <div key={f.idForraje ?? i} className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Tipo de forraje</div>
+              <div className="text-base text-[#33361D] font-medium">{f.tipoForraje ?? "—"}</div>
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Variedad</div>
+              <div className="text-base text-[#33361D] font-medium">{f.variedad ?? "—"}</div>
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Hectáreas</div>
+              <div className="text-base text-[#33361D] font-medium">{f.hectareas ?? "—"}</div>
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Utilización</div>
+              <div className="text-base text-[#33361D] font-medium">{f.utilizacion ?? "—"}</div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
 
 
 
