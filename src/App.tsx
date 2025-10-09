@@ -9,7 +9,7 @@ import ServicesEdition from './pages/editionPage/ServicesEdition'
 import FAQEdition from './pages/editionPage/FAQ/FAQEdition'
 import ManualPage from './pages/ManualPage'
 import VolunteersPage from './pages/VolunteersPage'
-import AssociatesApprovedPage from './pages/associates/associatesApprovedPage'
+import AssociatesApprovedPage from './pages/associates/AssociatesApprovedPage'
 import AdminRequestsPage from './pages/associates/AdminRequestPage'
 
 function App() {

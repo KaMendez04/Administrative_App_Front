@@ -42,7 +42,7 @@ import PSpends from '../pages/Budget/Reports/PSpends'
 import PIncomeProjectionsPage from '../pages/Budget/Reports/PIncome'
 import ExtraReportPage from '../pages/Budget/Reports/extraReportPage'
 import AssociatesSubnav from '../pages/Budget/Navbar/AssociatesSubnav'
-import AssociatesApprovedPage from '../pages/associates/associatesApprovedPage'
+import AssociatesApprovedPage from '../pages/associates/AssociatesApprovedPage'
 import AdminRequestsPage from '../pages/associates/AdminRequestPage'
 
 
