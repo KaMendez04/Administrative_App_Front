@@ -4,11 +4,24 @@ import { toast } from "sonner";
 
 export function useApproveSolicitud() {
   const qc = useQueryClient();
+  
   return useMutation({
     mutationFn: (id: number) => approveSolicitud(id),
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
+      // ✅ Invalidar listas
       qc.invalidateQueries({ queryKey: ["solicitudes"] });
       qc.invalidateQueries({ queryKey: ["associates"] });
+      
+      // ✅ Actualizar el detalle en caché sin recargar
+      qc.setQueryData(["solicitud", id], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          estado: "APROBADO",
+          fechaResolucion: new Date(),
+        };
+      });
+      
       toast.success("Solicitud aprobada correctamente");
     },
     onError: (error: any) => {

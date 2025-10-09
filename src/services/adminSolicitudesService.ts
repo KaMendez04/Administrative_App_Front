@@ -7,6 +7,7 @@ import {
 } from "../schemas/adminSolicitudes";
 import apiConfig from "./apiConfig";
 
+// ✅ Listado ligero (para tablas)
 export async function listSolicitudes(params: AdminListParams): Promise<SolicitudListResponse> {
   const queryParams: any = {
     page: params.page,
@@ -25,31 +26,53 @@ export async function listSolicitudes(params: AdminListParams): Promise<Solicitu
   
   if (!parsed.success) {
     console.error('❌ Zod validation error:', parsed.error.format());
-    console.error('❌ Issues:', parsed.error.issues);
     throw new Error('Error al validar la respuesta del servidor');
   }
-  
-  console.log('✅ Parsed successfully:', parsed.data);
   
   return parsed.data;
 }
 
+// ✅ Detalle completo (para modales - trae TODO)
 export async function getSolicitud(id: number): Promise<Solicitud> {
   const response = await apiConfig.get(`/solicitudes/${id}`);
-  return SolicitudSchema.parse(response.data);
+  
+  console.log('📦 Response from /solicitudes/:id:', response.data);
+  
+  const parsed = SolicitudSchema.safeParse(response.data);
+  
+  if (!parsed.success) {
+    console.error('❌ Schema validation failed:', parsed.error);
+    throw new Error('Error al validar la respuesta del servidor');
+  }
+  
+  return parsed.data;
 }
 
-export async function approveSolicitud(id: number): Promise<Solicitud> {
-  const response = await apiConfig.patch(`/solicitudes/${id}/status`, { 
+// ✅ Aprobar solicitud
+export async function approveSolicitud(id: number): Promise<any> {
+  const response = await apiConfig.patch(`/solicitudes/${id}/estado`, { 
     estado: "APROBADO" 
   });
-  return SolicitudSchema.parse(response.data);
+  return response.data; // ✅ Retorna respuesta simplificada del backend
 }
 
-export async function rejectSolicitud(id: number, motivo: string): Promise<Solicitud> {
-  const response = await apiConfig.patch(`/solicitudes/${id}/status`, { 
+// ✅ Rechazar solicitud
+export async function rejectSolicitud(id: number, motivo: string): Promise<any> {
+  const response = await apiConfig.patch(`/solicitudes/${id}/estado`, { 
     estado: "RECHAZADO",
     motivo 
   });
-  return SolicitudSchema.parse(response.data);
+  return response.data;
+}
+
+// ✅ Estadísticas
+export async function getSolicitudesStats() {
+  const response = await apiConfig.get('/solicitudes/stats');
+  return response.data;
+}
+
+// ✅ Por estado
+export async function getSolicitudesByStatus(status: string) {
+  const response = await apiConfig.get(`/solicitudes/estado/${status}`);
+  return response.data;
 }

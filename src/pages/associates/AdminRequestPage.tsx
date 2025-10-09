@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useAdminSolicitudesList } from "../../hooks/associates/useAdminSolicitudesList";
+import { useAdminSolicitudDetail } from "../../hooks/associates/useAdminSolicitudDetail"; // ✅ Nuevo hook
 import { useApproveSolicitud } from "../../hooks/associates/useApproveSolicitud";
 import { useRejectSolicitud } from "../../hooks/associates/useRejectSolicitud";
-import { getSolicitud } from "../../services/adminSolicitudesService";
 import { RejectDialog } from "../../components/associates/RejectDialog";
 import { SolicitudViewModal } from "../../components/associates/SolicitudViewModal";
 
@@ -45,11 +44,8 @@ export default function AdminRequestsPage() {
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
   
-  const { data: viewDetail } = useQuery({
-    queryKey: ["solicitud", viewId],
-    queryFn: () => getSolicitud(viewId!),
-    enabled: !!viewId,
-  });
+  // ✅ Usar el nuevo hook que carga TODO
+  const { data: viewDetail, isLoading: isLoadingDetail } = useAdminSolicitudDetail(viewId ?? 0);
 
   return (
     <div className="min-h-screen">
@@ -152,7 +148,7 @@ export default function AdminRequestsPage() {
                             disabled={approve.isPending}
                             className="px-3 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition text-xs disabled:opacity-50"
                           >
-                            Aprobar
+                            {approve.isPending ? "..." : "Aprobar"}
                           </button>
                           <button
                             onClick={() => setRejectId(r.idSolicitud)}
@@ -210,6 +206,7 @@ export default function AdminRequestsPage() {
           open={viewId != null}
           onClose={() => setViewId(null)}
           solicitud={viewDetail ?? null}
+          isLoading={isLoadingDetail} // ✅ Pasar estado de carga
         />
       </div>
     </div>

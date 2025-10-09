@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAdminAssociatesList } from "../../hooks/associates/useAdminSolicitudesList";
+
 import { useUpdateAssociate } from "../../hooks/associates/useUpdateAssociate";
 import { getAssociate } from "../../services/adminAssociatesService";
 import { AssociateEditDrawer } from "../../components/associates/AssociateEditDrawer";
 import { AssociateViewModal } from "../../components/associates/AssociateViewModal";
+import { useAdminAssociatesList } from "../../hooks/associates/useAdminAssociateList";
 
 function KPICard({
   label,

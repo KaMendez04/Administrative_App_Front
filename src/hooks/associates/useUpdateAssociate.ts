@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 export function useUpdateAssociate() {
   const qc = useQueryClient();
+  
   return useMutation({
     mutationFn: ({ id, patch }: { id: number; patch: UpdateAssociateValues }) => 
       updateAssociate(id, patch),
