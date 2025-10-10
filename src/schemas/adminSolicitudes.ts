@@ -145,6 +145,13 @@ const CorrienteElectricaSchema = z.object({
   privada: z.boolean().nullable().optional(),
 });
 
+const AccesoSchema = z.object({
+  idAcceso: z.number().nullable().optional(),
+  nombre: z.string().nullable().optional(),
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
+});
+
 const FincaSchema = z.object({
   idFinca: z.number(),
   nombre: z.string(),
@@ -163,6 +170,7 @@ const FincaSchema = z.object({
   tipoCercaLinks: z.array(TipoCercaLinkSchema).nullable().optional().default([]),
   infraLinks: z.array(InfraLinkSchema).nullable().optional().default([]),
   corriente: CorrienteElectricaSchema.nullable().optional(), // ✅ NUEVO
+  accesos: z.array(AccesoSchema).nullable().optional().default([]),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

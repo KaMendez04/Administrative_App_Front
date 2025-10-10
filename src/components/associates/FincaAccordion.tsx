@@ -10,9 +10,8 @@ import {
   useFincaInfraestructuras,
   useFincaOtrosEquipos,
   useFincaRegistrosProductivos,
+  useFincaAccesos,
 } from "../../hooks/associates";
-// ❌ ELIMINAR ESTE IMPORT COMPLETAMENTE
-// import { useFincaCorriente } from "../../hooks/associates/useFincaCorriente";
 
 type Props = {
   finca: any;
@@ -33,17 +32,14 @@ export function FincaAccordion({ finca, isFirst, esPropietario }: Props) {
   const { data: infraestructuras = [], isLoading: loadingInfraestructuras } = useFincaInfraestructuras(isOpen ? finca?.idFinca : null);
   const { data: otrosEquipos = [], isLoading: loadingEquipos } = useFincaOtrosEquipos(isOpen ? finca?.idFinca : null);
   const { data: registrosProductivos, isLoading: loadingRegistros } = useFincaRegistrosProductivos(isOpen ? finca?.idFinca : null);
-  
-  // ❌ ELIMINAR ESTA LÍNEA COMPLETAMENTE
-  // const { data: corriente, isLoading: loadingCorriente } = useFincaCorriente(isOpen ? finca?.idFinca : null);
-  
-  // ✅ USAR DIRECTAMENTE finca.corriente
+  const { data: accesos = [], isLoading: loadingAccesos } = useFincaAccesos(isOpen ? finca?.idFinca : null);
+ 
   const corriente = finca?.corriente;
   
   const isLoadingAny = 
     loadingHato || loadingForrajes || loadingFuentes || loadingMetodos || 
     loadingActividades || loadingInfra || loadingTipos || loadingInfraestructuras || 
-    loadingEquipos || loadingRegistros; // ❌ QUITAR loadingCorriente
+    loadingEquipos || loadingRegistros || loadingAccesos; 
     
   return (
     <details
@@ -368,6 +364,24 @@ export function FincaAccordion({ finca, isFirst, esPropietario }: Props) {
                           Cantidad: {oe?.cantidad ?? "—"}
                         </div>
                       </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+             {Array.isArray(accesos) && accesos.length > 0 && (
+              <div>
+                <h5 className="text-base font-bold text-[#33361D] mb-2">Vías de acceso</h5>
+                <div className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {accesos.map((acceso: any, i: number) => (
+                      <span
+                        key={acceso?.idAcceso ?? i}
+                        className="px-3 py-1 text-sm font-semibold rounded-lg bg-white border-2 border-[#EAEFE0] text-[#33361D]"
+                      >
+                        {acceso?.nombre ?? "—"}
+                      </span>
                     ))}
                   </div>
                 </div>

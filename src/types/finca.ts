@@ -111,3 +111,10 @@ export interface Hato {
     publica?: boolean | null;
     privada?: boolean | null;
   }
+
+  export interface Acceso {
+    idAcceso?: number | null;
+    nombre?: string | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+  }

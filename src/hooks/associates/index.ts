@@ -8,3 +8,4 @@ export { useFincaTiposCerca } from './useFincaTiposCerca';
 export { useFincaInfraestructuras } from './useFincaInfraestructuras';
 export { useFincaOtrosEquipos } from './useFincaOtrosEquipos';
 export { useFincaRegistrosProductivos } from './useFincaRegistrosProductivos';
+export { useFincaAccesos } from './useFincaAccesos';
