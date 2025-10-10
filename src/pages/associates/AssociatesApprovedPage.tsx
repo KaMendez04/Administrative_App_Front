@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useUpdateAssociate } from "../../hooks/associates/useUpdateAssociate";
-
 import { AssociateEditDrawer } from "../../components/associates/AssociateEditDrawer";
 import { AssociateViewModal } from "../../components/associates/AssociateViewModal";
 import { useAdminAssociatesList } from "../../hooks/associates/useAdminAssociateList";
 import { useAssociateDetail } from "../../hooks/associates/useAdminAssociateDetail";
+import { getCurrentUser } from "../../services/auth"; // ✅ IMPORTAR
 
 function KPICard({
   label,
@@ -29,6 +29,10 @@ export default function AssociatesApprovedPage() {
   const [page, setPage] = useState(1);
   const limit = 20;
 
+  // ✅ Obtener rol del usuario (mismo patrón que en otras páginas)
+  const role = getCurrentUser()?.role?.name?.toUpperCase();
+  const isReadOnly = role === "JUNTA";
+
   const { data, isLoading } = useAdminAssociatesList({ 
     estado: undefined,
     search, 
@@ -45,6 +49,9 @@ export default function AssociatesApprovedPage() {
 
   const update = useUpdateAssociate();
 
+  const getEstadoLabel = () => {
+    return "Todos";
+  };
 
   return (
     <div className="min-h-screen">
@@ -55,7 +62,8 @@ export default function AssociatesApprovedPage() {
           <KPICard label="Página Actual" value={`${data?.page ?? 1} / ${data?.pages ?? 1}`} tone="alt" />
         </div>
 
-        {/* Filtros - Igual que en Solicitudes */}
+        
+
         <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm mb-6">
           <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
           
@@ -69,7 +77,7 @@ export default function AssociatesApprovedPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-      
+          
           </div>
         </div>
 
@@ -122,12 +130,19 @@ export default function AssociatesApprovedPage() {
                       >
                         Ver
                       </button>
-                      <button
-                        onClick={() => setEditId(asociado.idAsociado)}
-                        className="px-3 py-1 rounded-lg bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition text-xs"
-                      >
-                        Editar
-                      </button>
+                      {/* ✅ DESHABILITAR BOTÓN EDITAR PARA JUNTA */}
+                      {!isReadOnly ? (
+                        <button
+                          onClick={() => setEditId(asociado.idAsociado)}
+                          className="px-3 py-1 rounded-lg bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition text-xs"
+                        >
+                          Editar
+                        </button>
+                      ) : (
+                        <span className="px-3 py-1 text-xs text-gray-500 italic">
+                          
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -170,7 +185,8 @@ export default function AssociatesApprovedPage() {
           isLoading={isLoadingDetail}
         />
 
-        {editId != null && editDetail && (
+        {/* ✅ SOLO ADMIN puede editar */}
+        {!isReadOnly && editId != null && editDetail && (
           <AssociateEditDrawer
             open={true}
             onClose={() => setEditId(null)}

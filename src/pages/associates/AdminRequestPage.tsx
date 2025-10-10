@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useAdminSolicitudesList } from "../../hooks/associates/useAdminSolicitudesList";
-import { useAdminSolicitudDetail } from "../../hooks/associates/useAdminSolicitudDetail"; // ✅ Nuevo hook
+import { useAdminSolicitudDetail } from "../../hooks/associates/useAdminSolicitudDetail";
 import { useApproveSolicitud } from "../../hooks/associates/useApproveSolicitud";
 import { useRejectSolicitud } from "../../hooks/associates/useRejectSolicitud";
 import { RejectDialog } from "../../components/associates/RejectDialog";
 import { SolicitudViewModal } from "../../components/associates/SolicitudViewModal";
+import { getCurrentUser } from "../../services/auth"; // ✅ IMPORTAR
 
 function KPICard({
   label,
@@ -30,6 +31,10 @@ export default function AdminRequestsPage() {
   const [page, setPage] = useState(1);
   const limit = 20;
 
+  // ✅ Obtener rol del usuario actual (mismo patrón que PersonalPage)
+  const role = getCurrentUser()?.role?.name?.toUpperCase();
+  const isReadOnly = role === "JUNTA";
+
   const { data, isLoading } = useAdminSolicitudesList({ 
     status, 
     search, 
@@ -44,7 +49,6 @@ export default function AdminRequestsPage() {
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
   
-  // ✅ Usar el nuevo hook que carga TODO
   const { data: viewDetail, isLoading: isLoadingDetail } = useAdminSolicitudDetail(viewId ?? 0);
 
   return (
@@ -57,6 +61,7 @@ export default function AdminRequestsPage() {
           <KPICard label="Estado" value={status || "Todos"} tone="gold" />
         </div>
 
+        
         <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm mb-6">
           <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
           
@@ -141,7 +146,7 @@ export default function AdminRequestsPage() {
                       >
                         Ver
                       </button>
-                      {r.estado === "PENDIENTE" && (
+                      {r.estado === "PENDIENTE" && !isReadOnly && (
                         <>
                           <button
                             onClick={() => approve.mutate(r.idSolicitud)}
@@ -157,6 +162,11 @@ export default function AdminRequestsPage() {
                             Rechazar
                           </button>
                         </>
+                      )}
+                      {r.estado === "PENDIENTE" && isReadOnly && (
+                        <span className="px-3 py-1 text-xs text-gray-500 italic">
+                          
+                        </span>
                       )}
                     </div>
                   </div>
@@ -206,7 +216,7 @@ export default function AdminRequestsPage() {
           open={viewId != null}
           onClose={() => setViewId(null)}
           solicitud={viewDetail ?? null}
-          isLoading={isLoadingDetail} // ✅ Pasar estado de carga
+          isLoading={isLoadingDetail}
         />
       </div>
     </div>
