@@ -11,6 +11,7 @@ import {
   useFincaOtrosEquipos,
   useFincaRegistrosProductivos,
   useFincaAccesos,
+  useFincaCanales,
 } from "../../hooks/associates";
 
 type Props = {
@@ -33,13 +34,14 @@ export function FincaAccordion({ finca, isFirst, esPropietario }: Props) {
   const { data: otrosEquipos = [], isLoading: loadingEquipos } = useFincaOtrosEquipos(isOpen ? finca?.idFinca : null);
   const { data: registrosProductivos, isLoading: loadingRegistros } = useFincaRegistrosProductivos(isOpen ? finca?.idFinca : null);
   const { data: accesos = [], isLoading: loadingAccesos } = useFincaAccesos(isOpen ? finca?.idFinca : null);
- 
+  const { data: canales = [], isLoading: loadingCanales } = useFincaCanales(isOpen ? finca?.idFinca : null); 
+
   const corriente = finca?.corriente;
   
   const isLoadingAny = 
     loadingHato || loadingForrajes || loadingFuentes || loadingMetodos || 
     loadingActividades || loadingInfra || loadingTipos || loadingInfraestructuras || 
-    loadingEquipos || loadingRegistros || loadingAccesos; 
+    loadingEquipos || loadingRegistros || loadingAccesos || loadingCanales; 
     
   return (
     <details
@@ -387,6 +389,25 @@ export function FincaAccordion({ finca, isFirst, esPropietario }: Props) {
                 </div>
               </div>
             )}
+
+            {Array.isArray(canales) && canales.length > 0 && (
+              <div>
+                <h5 className="text-base font-bold text-[#33361D] mb-2">Canales de comercialización</h5>
+                <div className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {canales.map((canal: any, i: number) => (
+                      <span
+                        key={canal?.idCanal ?? i}
+                        className="px-3 py-1 text-sm font-semibold rounded-lg bg-white border-2 border-[#EAEFE0] text-[#33361D]"
+                      >
+                        {canal?.nombre ?? "—"}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
           </>
         )}
       </div>
