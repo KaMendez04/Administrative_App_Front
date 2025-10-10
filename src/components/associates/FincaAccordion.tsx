@@ -11,6 +11,8 @@ import {
   useFincaOtrosEquipos,
   useFincaRegistrosProductivos,
 } from "../../hooks/associates";
+// ❌ ELIMINAR ESTE IMPORT COMPLETAMENTE
+// import { useFincaCorriente } from "../../hooks/associates/useFincaCorriente";
 
 type Props = {
   finca: any;
@@ -31,12 +33,18 @@ export function FincaAccordion({ finca, isFirst, esPropietario }: Props) {
   const { data: infraestructuras = [], isLoading: loadingInfraestructuras } = useFincaInfraestructuras(isOpen ? finca?.idFinca : null);
   const { data: otrosEquipos = [], isLoading: loadingEquipos } = useFincaOtrosEquipos(isOpen ? finca?.idFinca : null);
   const { data: registrosProductivos, isLoading: loadingRegistros } = useFincaRegistrosProductivos(isOpen ? finca?.idFinca : null);
-
+  
+  // ❌ ELIMINAR ESTA LÍNEA COMPLETAMENTE
+  // const { data: corriente, isLoading: loadingCorriente } = useFincaCorriente(isOpen ? finca?.idFinca : null);
+  
+  // ✅ USAR DIRECTAMENTE finca.corriente
+  const corriente = finca?.corriente;
+  
   const isLoadingAny = 
     loadingHato || loadingForrajes || loadingFuentes || loadingMetodos || 
     loadingActividades || loadingInfra || loadingTipos || loadingInfraestructuras || 
-    loadingEquipos || loadingRegistros;
-
+    loadingEquipos || loadingRegistros; // ❌ QUITAR loadingCorriente
+    
   return (
     <details
       className="mb-4 rounded-xl border-2 border-[#EAEFE0] overflow-hidden"
@@ -82,6 +90,30 @@ export function FincaAccordion({ finca, isFirst, esPropietario }: Props) {
                 </div>
               )}
             </div>
+
+            {/* ✅ Corriente Eléctrica */}
+            {corriente && (
+              <div>
+                <h5 className="text-base font-bold text-[#33361D] mb-2">Corriente eléctrica en la finca</h5>
+                <div className="rounded-xl bg-[#F8F9F3] p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {corriente?.publica && (
+                      <span className="px-3 py-1 text-sm font-semibold rounded-lg bg-white border-2 border-[#EAEFE0] text-[#33361D]">
+                        Pública
+                      </span>
+                    )}
+                    {corriente?.privada && (
+                      <span className="px-3 py-1 text-sm font-semibold rounded-lg bg-white border-2 border-[#EAEFE0] text-[#33361D]">
+                        Privada
+                      </span>
+                    )}
+                    {!corriente?.publica && !corriente?.privada && (
+                      <span className="text-sm text-[#33361D]">No hay</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Propietario */}
             {finca?.propietario && !esPropietario && (

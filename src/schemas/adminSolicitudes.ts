@@ -139,6 +139,11 @@ const InfraLinkSchema = z.object({
   infraestructura: InfraestructuraDetalleSchema.nullable().optional(),
 });
 
+const CorrienteElectricaSchema = z.object({
+  idCorrienteElectrica: z.number().nullable().optional(),
+  publica: z.boolean().nullable().optional(),
+  privada: z.boolean().nullable().optional(),
+});
 
 const FincaSchema = z.object({
   idFinca: z.number(),
@@ -150,17 +155,17 @@ const FincaSchema = z.object({
   propietario: PropietarioSchema.nullable().optional(),
   hato: HatoSchema.nullable().optional(),
   forrajes: z.array(ForrajeSchema).nullable().optional().default([]),
-  registrosProductivos: RegistrosProductivosSchema.nullable().optional(), // ✅ agregado
-  fuentesAgua: z.array(FuenteAguaSchema).nullable().optional().default([]), // ✅ agregado
+  registrosProductivos: RegistrosProductivosSchema.nullable().optional(),
+  fuentesAgua: z.array(FuenteAguaSchema).nullable().optional().default([]),
   metodosRiego: z.array(MetodoRiegoSchema).nullable().optional().default([]),
   actividades: z.array(ActividadSchema).nullable().optional().default([]),
-  infraestructura: InfraestructuraResumenSchema.nullable().optional(),   // ✅ nuevo
-  tipoCercaLinks: z.array(TipoCercaLinkSchema).nullable().optional().default([]), // ✅ nuevo
-  infraLinks: z.array(InfraLinkSchema).nullable().optional().default([]), // ✅ nuevo
+  infraestructura: InfraestructuraResumenSchema.nullable().optional(),
+  tipoCercaLinks: z.array(TipoCercaLinkSchema).nullable().optional().default([]),
+  infraLinks: z.array(InfraLinkSchema).nullable().optional().default([]),
+  corriente: CorrienteElectricaSchema.nullable().optional(), // ✅ NUEVO
   createdAt: z.string(),
   updatedAt: z.string(),
 });
-
 const AsociadoSchema = z.object({
   idAsociado: z.number(),
   distanciaFinca: z.string().nullable().optional(),

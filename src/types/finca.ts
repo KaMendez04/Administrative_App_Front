@@ -105,3 +105,9 @@ export interface Hato {
     createdAt?: string | null;
     updatedAt?: string | null;
   }
+
+  export interface CorrienteElectrica {
+    idCorrienteElectrica?: number | null;
+    publica?: boolean | null;
+    privada?: boolean | null;
+  }
