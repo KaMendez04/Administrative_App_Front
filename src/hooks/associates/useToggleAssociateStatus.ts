@@ -7,13 +7,19 @@ export function useToggleAssociateStatus() {
   
   return useMutation({
     mutationFn: (id: number) => toggleAssociateStatus(id),
-    onSuccess: (_data, id) => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["associates"] });
-      qc.invalidateQueries({ queryKey: ["associate", id] });
-      toast.success("Estado actualizado correctamente");
+      qc.invalidateQueries({ queryKey: ["associate-detail", data.idAsociado] });
+      
+      const mensaje = data.estado 
+        ? "Asociado activado correctamente" 
+        : "Asociado desactivado correctamente";
+      
+      toast.success(mensaje);
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Error al cambiar el estado");
+      const mensaje = error?.response?.data?.message || error?.message || "Error al cambiar el estado del asociado";
+      toast.error(mensaje);
     },
   });
 }

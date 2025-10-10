@@ -25,12 +25,13 @@ function KPICard({
 }
 
 export default function AssociatesApprovedPage() {
+  const [estadoFilter, setEstadoFilter] = useState<boolean | undefined>(undefined);
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const limit = 20;
 
   const { data, isLoading } = useAdminAssociatesList({ 
-    estado: true,
+    estado: estadoFilter,
     search, 
     page, 
     limit, 
@@ -40,11 +41,17 @@ export default function AssociatesApprovedPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
   
-  // ✅ Usar el hook de detalle básico
   const { data: editDetail } = useAssociateDetail(editId);
   const { data: viewDetail, isLoading: isLoadingDetail } = useAssociateDetail(viewId);
 
   const update = useUpdateAssociate();
+
+  // Función para determinar el texto del estado
+  const getEstadoLabel = () => {
+    if (estadoFilter === true) return "Activos";
+    if (estadoFilter === false) return "Inactivos";
+    return "Todos";
+  };
 
   return (
     <div className="min-h-screen">
@@ -53,18 +60,54 @@ export default function AssociatesApprovedPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
           <KPICard label="Total Asociados" value={data?.total ?? 0} tone="base" />
           <KPICard label="Página Actual" value={`${data?.page ?? 1} / ${data?.pages ?? 1}`} tone="alt" />
-          <KPICard label="Estado" value="Aprobados" tone="gold" />
+          <KPICard label="Estado" value={getEstadoLabel()} tone="gold" />
         </div>
 
+        {/* Filtros - Igual que en Solicitudes */}
         <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm mb-6">
-          <div className="text-sm font-bold text-[#33361D] mb-4">Búsqueda</div>
+          <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
           
-          <input
-            placeholder="Buscar por cédula, nombre, email..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] placeholder:text-gray-400 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
-          />
+          <div className="mb-4">
+            <input
+              placeholder="Buscar por cédula, nombre, email..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] placeholder:text-gray-400 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => { setEstadoFilter(true); setPage(1); }}
+              className={`px-4 py-2 rounded-xl font-semibold transition ${
+                estadoFilter === true
+                  ? "bg-[#5B732E] text-white shadow-sm"
+                  : "border-2 border-[#EAEFE0] text-[#33361D] hover:bg-[#EAEFE0]"
+              }`}
+            >
+              Activos
+            </button>
+            <button
+              onClick={() => { setEstadoFilter(false); setPage(1); }}
+              className={`px-4 py-2 rounded-xl font-semibold transition ${
+                estadoFilter === false
+                  ? "bg-[#5B732E] text-white shadow-sm"
+                  : "border-2 border-[#EAEFE0] text-[#33361D] hover:bg-[#EAEFE0]"
+              }`}
+            >
+              Inactivos
+            </button>
+            <button
+              onClick={() => { setEstadoFilter(undefined); setPage(1); }}
+              className={`px-4 py-2 rounded-xl font-semibold transition ${
+                estadoFilter === undefined
+                  ? "bg-[#5B732E] text-white shadow-sm"
+                  : "border-2 border-[#EAEFE0] text-[#33361D] hover:bg-[#EAEFE0]"
+              }`}
+            >
+              Todos
+            </button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -75,12 +118,13 @@ export default function AssociatesApprovedPage() {
           <>
             <div className="rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
               <div className="bg-[#EAEFE0] px-4 py-3">
-                <div className="grid grid-cols-7 gap-4 text-sm font-bold text-[#33361D]">
+                <div className="grid grid-cols-8 gap-4 text-sm font-bold text-[#33361D]">
                   <div>Cédula</div>
                   <div>Nombre</div>
                   <div>Teléfono</div>
                   <div>Email</div>
                   <div>Marca Ganado</div>
+                  <div>Estado</div>
                   <div>Fecha</div>
                   <div className="text-right">Acciones</div>
                 </div>
@@ -89,7 +133,7 @@ export default function AssociatesApprovedPage() {
                 {(data?.items ?? []).map((asociado) => (
                   <div
                     key={asociado.idAsociado}
-                    className="grid grid-cols-7 gap-4 px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition"
+                    className="grid grid-cols-8 gap-4 px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition"
                   >
                     <div className="font-medium">{asociado.persona.cedula}</div>
                     <div className="font-medium">
@@ -98,6 +142,15 @@ export default function AssociatesApprovedPage() {
                     <div>{asociado.persona.telefono}</div>
                     <div className="truncate">{asociado.persona.email}</div>
                     <div className="font-medium">{asociado.marcaGanado || "—"}</div>
+                    <div>
+                      <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
+                        asociado.estado 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-red-100 text-red-800"
+                      }`}>
+                        {asociado.estado ? "Activo" : "Inactivo"}
+                      </span>
+                    </div>
                     <div>{new Date(asociado.createdAt).toLocaleDateString("es-CR")}</div>
                     <div className="text-right flex gap-2 justify-end">
                       <button
@@ -151,7 +204,7 @@ export default function AssociatesApprovedPage() {
           open={viewId != null}
           onClose={() => setViewId(null)}
           associate={viewDetail ?? null}
-          isLoading={isLoadingDetail} // ✅ Pasar loading
+          isLoading={isLoadingDetail}
         />
 
         {editId != null && editDetail && (
@@ -165,6 +218,8 @@ export default function AssociatesApprovedPage() {
               marcaGanado: editDetail.marcaGanado ?? "",
               CVO: editDetail.CVO ?? "",
               nombreCompleto: `${editDetail.persona.nombre} ${editDetail.persona.apellido1} ${editDetail.persona.apellido2}`,
+              idAsociado: editDetail.idAsociado,
+              estado: editDetail.estado,
             }}
             onSave={async (patch) => {
               if (!editId) return;
