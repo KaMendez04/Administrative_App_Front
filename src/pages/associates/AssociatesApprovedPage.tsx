@@ -25,13 +25,12 @@ function KPICard({
 }
 
 export default function AssociatesApprovedPage() {
-  const [estadoFilter, setEstadoFilter] = useState<boolean | undefined>(undefined);
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const limit = 20;
 
   const { data, isLoading } = useAdminAssociatesList({ 
-    estado: estadoFilter,
+    estado: undefined,
     search, 
     page, 
     limit, 
@@ -46,12 +45,6 @@ export default function AssociatesApprovedPage() {
 
   const update = useUpdateAssociate();
 
-  // Función para determinar el texto del estado
-  const getEstadoLabel = () => {
-    if (estadoFilter === true) return "Activos";
-    if (estadoFilter === false) return "Inactivos";
-    return "Todos";
-  };
 
   return (
     <div className="min-h-screen">
@@ -60,7 +53,6 @@ export default function AssociatesApprovedPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
           <KPICard label="Total Asociados" value={data?.total ?? 0} tone="base" />
           <KPICard label="Página Actual" value={`${data?.page ?? 1} / ${data?.pages ?? 1}`} tone="alt" />
-          <KPICard label="Estado" value={getEstadoLabel()} tone="gold" />
         </div>
 
         {/* Filtros - Igual que en Solicitudes */}
@@ -77,36 +69,7 @@ export default function AssociatesApprovedPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => { setEstadoFilter(true); setPage(1); }}
-              className={`px-4 py-2 rounded-xl font-semibold transition ${
-                estadoFilter === true
-                  ? "bg-[#5B732E] text-white shadow-sm"
-                  : "border-2 border-[#EAEFE0] text-[#33361D] hover:bg-[#EAEFE0]"
-              }`}
-            >
-              Activos
-            </button>
-            <button
-              onClick={() => { setEstadoFilter(false); setPage(1); }}
-              className={`px-4 py-2 rounded-xl font-semibold transition ${
-                estadoFilter === false
-                  ? "bg-[#5B732E] text-white shadow-sm"
-                  : "border-2 border-[#EAEFE0] text-[#33361D] hover:bg-[#EAEFE0]"
-              }`}
-            >
-              Inactivos
-            </button>
-            <button
-              onClick={() => { setEstadoFilter(undefined); setPage(1); }}
-              className={`px-4 py-2 rounded-xl font-semibold transition ${
-                estadoFilter === undefined
-                  ? "bg-[#5B732E] text-white shadow-sm"
-                  : "border-2 border-[#EAEFE0] text-[#33361D] hover:bg-[#EAEFE0]"
-              }`}
-            >
-              Todos
-            </button>
+      
           </div>
         </div>
 

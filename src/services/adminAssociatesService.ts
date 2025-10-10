@@ -15,7 +15,7 @@ export async function listAssociates(params: AssociateListParams): Promise<Assoc
     limit: params.limit,
   };
   
-  if (params.estado !== undefined) queryParams.estado = params.estado;
+  if (params.estado !== undefined) queryParams.estado = params.estado ? 1 : 0;
   if (params.search) queryParams.search = params.search;
   if (params.sort) queryParams.sort = params.sort;
   
