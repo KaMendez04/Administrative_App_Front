@@ -1,5 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { UpdateAssociateSchema, type UpdateAssociateValues } from "../../schemas/adminSolicitudes";
+import { useToggleAssociateStatus } from "../../hooks/associates/useToggleAssociateStatus";
+import Swal from "sweetalert2";
 
 function validateWithZod(v: any) {
   const r = UpdateAssociateSchema.safeParse(v);
@@ -15,7 +17,11 @@ function validateWithZod(v: any) {
 type Props = {
   open: boolean;
   onClose: () => void;
-  initial: UpdateAssociateValues & { nombreCompleto?: string };
+  initial: UpdateAssociateValues & { 
+    nombreCompleto?: string;
+    idAsociado?: number;
+    estado?: boolean;
+  };
   onSave: (patch: UpdateAssociateValues) => Promise<void> | void;
 };
 
@@ -30,6 +36,8 @@ const fields: Array<{ name: FieldName; label: string; placeholder?: string }> = 
 ];
 
 export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
+  const toggleStatus = useToggleAssociateStatus();
+
   const form = useForm({
     defaultValues: {
       telefono:    initial.telefono    ?? "",
@@ -50,7 +58,37 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
     },
   });
 
+  const handleToggleClick = async () => {
+    const currentStatus = initial.estado ?? false;
+    
+    const result = await Swal.fire({
+      title: currentStatus ? '¿Desactivar asociado?' : '¿Activar asociado?',
+      html: currentStatus 
+        ? `Estás a punto de <span style="color: #dc2626; font-weight: 600;">desactivar</span> a <span style="color: #33361D; font-weight: 600;">${initial.nombreCompleto}</span>. El asociado no podrá acceder a la plataforma hasta que sea reactivado.`
+        : `Estás a punto de <span style="color: #16a34a; font-weight: 600;">activar</span> a <span style="color: #33361D; font-weight: 600;">${initial.nombreCompleto}</span>. El asociado podrá acceder a la plataforma.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: currentStatus ? '#dc2626' : '#5B732E',
+      cancelButtonColor: '#dc2626',
+      confirmButtonText: currentStatus ? 'Sí, desactivar' : 'Sí, activar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: false,
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-xl px-6 py-3 font-semibold',
+        cancelButton: 'rounded-xl px-6 py-3 font-semibold',
+      }
+    });
+
+    if (result.isConfirmed && initial.idAsociado) {
+      await toggleStatus.mutateAsync(initial.idAsociado);
+      onClose();
+    }
+  };
+
   if (!open) return null;
+
+  const currentStatus = initial.estado ?? false;
 
   return (
     <div className="fixed inset-0 z-50">
@@ -76,7 +114,9 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
             aria-label="Cerrar"
             className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 hover:bg-white/90 border border-[#EAEFE0] text-[#33361D] shadow-sm"
           >
-            ×
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
@@ -86,6 +126,39 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
           className="flex-1 overflow-y-auto px-6 pt-6 pb-32"
         >
           <div className="grid grid-cols-1 gap-5">
+            {/* ✅ TOGGLE DE ESTADO */}
+            <div className="rounded-xl bg-[#F8F9F3] p-4 border-2 border-[#EAEFE0]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="block text-sm font-semibold text-[#33361D] mb-1">
+                    Estado del Asociado
+                  </label>
+                  <p className="text-xs text-gray-600">
+                    {currentStatus ? "El asociado está activo y puede acceder" : "El asociado está inactivo"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleToggleClick}
+                  disabled={toggleStatus.isPending}
+                  className={`
+                    relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out
+                    ${currentStatus ? "bg-[#5B732E]" : "bg-gray-300"}
+                    ${toggleStatus.isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-90"}
+                  `}
+                  aria-label={currentStatus ? "Desactivar asociado" : "Activar asociado"}
+                >
+                  <span
+                    className={`
+                      inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out
+                      ${currentStatus ? "translate-x-6" : "translate-x-1"}
+                    `}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Campos del formulario */}
             {fields.map(({ name, label, placeholder }) => (
               <form.Field key={name} name={name}>
                 {(f: any) => (

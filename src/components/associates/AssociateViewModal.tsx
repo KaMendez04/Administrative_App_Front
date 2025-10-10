@@ -49,7 +49,6 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
     { label: "Marca de ganado", value: associate.marcaGanado || "—" },
     { label: "CVO", value: associate.CVO || "—" },
     { label: "Es propietario", value: associate.esPropietario ? "Sí" : "No" },
-    { label: "Estado", value: associate.estado ? "Activo" : "Inactivo" },
   ];
 
   const nucleoFamiliar = associate.nucleoFamiliar;
@@ -65,12 +64,20 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-2xl font-bold text-[#33361D]">Detalles del Asociado</h3>
-              <div className="mt-2">
+              <div className="mt-2 flex items-center gap-2">
                 <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
                   associate.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                 }`}>
                   {associate.estado ? "Activo" : "Inactivo"}
                 </span>
+                
+                {/* Indicador visual adicional */}
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-2 h-2 rounded-full ${associate.estado ? "bg-green-500" : "bg-red-500"}`} />
+                  <span className="text-xs text-gray-600 font-medium">
+                    {associate.estado ? "En operación" : "Sin acceso"}
+                  </span>
+                </div>
               </div>
             </div>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
@@ -137,7 +144,7 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
             </div>
           )}
 
-          {/* ✅ FINCAS - Usar el componente FincaAccordion */}
+          {/* Fincas */}
           {associate.fincas && associate.fincas.length > 0 && (
             <div>
               <h4 className="text-lg font-bold text-[#33361D] mb-3">
