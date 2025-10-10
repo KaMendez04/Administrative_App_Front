@@ -9,3 +9,5 @@ export { useFincaInfraestructuras } from './useFincaInfraestructuras';
 export { useFincaOtrosEquipos } from './useFincaOtrosEquipos';
 export { useFincaRegistrosProductivos } from './useFincaRegistrosProductivos';
 export { useFincaAccesos } from './useFincaAccesos';
+export { useFincaCanales } from './useFincaCanales';
+export { useAssociateNecesidades } from './useAssociateNecesidades';

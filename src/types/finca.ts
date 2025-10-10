@@ -118,3 +118,18 @@ export interface Hato {
     createdAt?: string | null;
     updatedAt?: string | null;
   }
+
+  export interface CanalComercializacion {
+    idCanal?: number | null;
+    nombre?: string | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+  }
+
+  export interface Necesidad {
+    idNecesidad?: number | null;
+    orden?: number | null;
+    descripcion?: string | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+  }

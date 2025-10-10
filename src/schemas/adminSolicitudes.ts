@@ -152,6 +152,21 @@ const AccesoSchema = z.object({
   updatedAt: z.string().nullable().optional(),
 });
 
+const CanalComercializacionSchema = z.object({
+  idCanal: z.number().nullable().optional(),
+  nombre: z.string().nullable().optional(),
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
+});
+
+const NecesidadSchema = z.object({
+  idNecesidad: z.number().nullable().optional(),
+  orden: z.number().nullable().optional(),
+  descripcion: z.string().nullable().optional(),
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
+});
+
 const FincaSchema = z.object({
   idFinca: z.number(),
   nombre: z.string(),
@@ -171,6 +186,8 @@ const FincaSchema = z.object({
   infraLinks: z.array(InfraLinkSchema).nullable().optional().default([]),
   corriente: CorrienteElectricaSchema.nullable().optional(), // ✅ NUEVO
   accesos: z.array(AccesoSchema).nullable().optional().default([]),
+  canales: z.array(CanalComercializacionSchema).nullable().optional().default([]),
+  necesidades: z.array(NecesidadSchema).nullable().optional().default([]),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
