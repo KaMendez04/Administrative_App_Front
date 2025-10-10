@@ -48,7 +48,6 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
     { label: "Vive en finca", value: associate.viveEnFinca ? "Sí" : "No" },
     { label: "Marca de ganado", value: associate.marcaGanado || "—" },
     { label: "CVO", value: associate.CVO || "—" },
-    { label: "Es propietario", value: associate.esPropietario ? "Sí" : "No" },
   ];
 
   const nucleoFamiliar = associate.nucleoFamiliar;

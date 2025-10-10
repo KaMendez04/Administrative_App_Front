@@ -15,11 +15,21 @@ import {
 type Props = {
   finca: any;
   isFirst: boolean;
-  esPropietario: boolean;
+  esPropietario: boolean; // ← Este prop ya no se usará directamente
 };
 
-export function FincaAccordion({ finca, isFirst, esPropietario }: Props) {
+export function FincaAccordion({ finca, isFirst }: Props) {
   const [isOpen, setIsOpen] = useState(isFirst);
+
+  // ✅ Calcular si realmente hay un propietario diferente
+  const tienePropietarioDiferente = Boolean(
+    finca?.propietario && 
+    finca?.propietario?.persona &&
+    finca?.propietario?.persona?.cedula
+  );
+  
+  // El asociado ES propietario si NO hay un propietario diferente
+  const esPropietarioReal = !tienePropietarioDiferente;
 
   const { data: hato, isLoading: loadingHato } = useFincaHato(isOpen ? finca?.idFinca : null);
   const { data: forrajes = [], isLoading: loadingForrajes } = useFincaForrajes(isOpen ? finca?.idFinca : null);
@@ -72,8 +82,21 @@ export function FincaAccordion({ finca, isFirst, esPropietario }: Props) {
                 <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de Plano</div>
                 <div className="text-base text-[#33361D] font-medium">{finca?.numeroPlano ?? "—"}</div>
               </div>
+
+              {/* ✅ NUEVO: Mostrar si es propietario */}
+              <div className="rounded-xl bg-[#F8F9F3] p-4">
+                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
+                  Es Propietario
+                </div>
+                <div className={`text-base font-semibold ${
+                  esPropietarioReal ? 'text-green-700' : 'text-amber-700'
+                }`}>
+                  {esPropietarioReal ? "Sí" : "No"}
+                </div>
+              </div>
+
               {finca?.geografia && (
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
+                <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
                   <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Ubicación</div>
                   <div className="text-base text-[#33361D] font-medium">
                     {finca.geografia.provincia}, {finca.geografia.canton}, {finca.geografia.distrito}
@@ -83,8 +106,8 @@ export function FincaAccordion({ finca, isFirst, esPropietario }: Props) {
               )}
             </div>
 
-            {/* Propietario */}
-            {finca?.propietario && !esPropietario && (
+            {/* ✅ CORREGIDO: Mostrar propietario SOLO si NO es el asociado */}
+            {tienePropietarioDiferente && (
               <div>
                 <h5 className="text-base font-bold text-[#33361D] mb-2">Propietario de esta finca</h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

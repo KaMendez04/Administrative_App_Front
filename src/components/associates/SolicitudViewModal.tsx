@@ -48,7 +48,6 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
     { label: "Vive en finca", value: solicitud.asociado.viveEnFinca ? "Sí" : "No" },
     { label: "Marca de ganado", value: solicitud.asociado.marcaGanado || "—" },
     { label: "CVO", value: solicitud.asociado.CVO || "—" },
-    { label: "Es propietario", value: solicitud.asociado.esPropietario ? "Sí" : "No" },
   ];
 
   const nucleoFamiliar = solicitud.asociado.nucleoFamiliar;
