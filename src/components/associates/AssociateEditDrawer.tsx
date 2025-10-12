@@ -91,15 +91,18 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
   const currentStatus = initial.estado ?? false;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" onClick={onClose} />
+      <div 
+        className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" 
+        onClick={onClose} 
+      />
 
-      {/* Drawer */}
-      <div className="absolute right-0 top-0 h-full w-full sm:w-[520px] bg-white shadow-2xl overflow-hidden flex flex-col">
+      {/* 🔸 MODAL CENTRADO */}
+      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="relative">
-          <div className="h-24 bg-gradient-to-r from-[#EAEFE0] via-[#F8F9F3] to-[#FEF6E0]" />
+          <div className="h-20 bg-gradient-to-r from-[#EAEFE0] via-[#F8F9F3] to-[#FEF6E0]" />
           <div className="absolute inset-x-0 bottom-0 px-6 pb-4">
             <h3 className="text-xl font-bold text-[#33361D]">Editar asociado</h3>
             {initial.nombreCompleto && (
@@ -107,12 +110,12 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
             )}
           </div>
 
-          {/* Close */}
+          {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 hover:bg-white/90 border border-[#EAEFE0] text-[#33361D] shadow-sm"
+            className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 hover:bg-white/90 border border-[#EAEFE0] text-[#33361D] shadow-sm transition"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -120,12 +123,12 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
           </button>
         </div>
 
-        {/* Content */}
+        {/* 🔸 CONTENT CON SCROLL */}
         <form
           onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}
-          className="flex-1 overflow-y-auto px-6 pt-6 pb-32"
+          className="flex-1 overflow-y-auto"
         >
-          <div className="grid grid-cols-1 gap-5">
+          <div className="px-6 pt-6 pb-6 space-y-5">
             {/* ✅ TOGGLE DE ESTADO */}
             <div className="rounded-xl bg-[#F8F9F3] p-4 border-2 border-[#EAEFE0]">
               <div className="flex items-center justify-between">
@@ -184,26 +187,22 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
             ))}
           </div>
 
-          {/* Sticky bottom actions */}
-          <div className="pointer-events-none fixed inset-x-0 bottom-0">
-            <div className="mx-auto max-w-[520px] sm:ml-auto sm:mr-0">
-              <div className="pointer-events-auto bg-white/90 backdrop-blur border-t border-[#EAEFE0] px-6 py-4">
-                <div className="flex justify-end gap-3">
-                  <button
-                    type="button"
-                    className="px-5 py-2.5 rounded-xl border border-[#D8E0C7] text-[#33361D] font-semibold hover:bg-[#F7FAF1] transition"
-                    onClick={onClose}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] shadow-sm transition"
-                  >
-                    Guardar cambios
-                  </button>
-                </div>
-              </div>
+          {/* 🔸 FOOTER FIJO EN EL MODAL */}
+          <div className="bg-white/90 backdrop-blur border-t border-[#EAEFE0] px-6 py-4">
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                className="px-5 py-2.5 rounded-xl border border-[#D8E0C7] text-[#33361D] font-semibold hover:bg-[#F7FAF1] transition"
+                onClick={onClose}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2.5 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] shadow-sm transition"
+              >
+                Guardar cambios
+              </button>
             </div>
           </div>
         </form>

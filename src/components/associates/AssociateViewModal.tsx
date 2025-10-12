@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Associate } from "../../schemas/adminSolicitudes";
 import { FincaAccordion } from "./FincaAccordion";
-import { useAssociateNecesidades } from "../../hooks/associates"; // ✅ AGREGAR
+import { useAssociateNecesidades } from "../../hooks/associates";
 
 type Props = {
   open: boolean;
@@ -10,10 +10,11 @@ type Props = {
   isLoading?: boolean;
 };
 
+type Tab = 'info' | 'necesidades' | 'finca'; // 🔸 Agregar 'finca'
+
 export function AssociateViewModal({ open, onClose, associate, isLoading }: Props) {
-  const [selectedTab, setSelectedTab] = useState<'info' | 'necesidades'>('info'); // ✅ AGREGAR
+  const [selectedTab, setSelectedTab] = useState<Tab>('info');
   
-  // ✅ Hook para cargar necesidades
   const { data: necesidades = [], isLoading: loadingNecesidades } = useAssociateNecesidades(
     selectedTab === 'necesidades' && associate ? associate.idAsociado : null
   );
@@ -64,7 +65,7 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div 
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -79,7 +80,6 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
                   {associate.estado ? "Activo" : "Inactivo"}
                 </span>
                 
-                {/* Indicador visual adicional */}
                 <div className="flex items-center gap-1.5">
                   <div className={`w-2 h-2 rounded-full ${associate.estado ? "bg-green-500" : "bg-red-500"}`} />
                   <span className="text-xs text-gray-600 font-medium">
@@ -96,11 +96,11 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
           </div>
         </div>
 
-        {/* ✅ TABS */}
+        {/* 🔸 TABS */}
         <div className="flex border-b border-[#EAEFE0] px-6 bg-white">
           <button
             onClick={() => setSelectedTab('info')}
-            className={`px-4 py-3 font-semibold transition ${
+            className={`px-4 py-3 font-semibold text-sm transition ${
               selectedTab === 'info'
                 ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
                 : 'text-[#33361D] hover:text-[#5B732E]'
@@ -108,9 +108,20 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
           >
             Información General
           </button>
+          {/* 🔸 NUEVA PESTAÑA */}
           <button
+            onClick={() => setSelectedTab('finca')}
+            className={`px-4 py-3 font-semibold text-sm transition ${
+              selectedTab === 'finca'
+                ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
+                : 'text-[#33361D] hover:text-[#5B732E]'
+            }`}
+          >
+            Finca
+          </button>
+                <button
             onClick={() => setSelectedTab('necesidades')}
-            className={`px-4 py-3 font-semibold transition ${
+            className={`px-4 py-3 font-semibold text-sm transition ${
               selectedTab === 'necesidades'
                 ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
                 : 'text-[#33361D] hover:text-[#5B732E]'
@@ -178,28 +189,9 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
                   </div>
                 </div>
               )}
-
-              {/* Fincas */}
-              {associate.fincas && associate.fincas.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-bold text-[#33361D] mb-3">
-                    Fincas ({associate.fincas.length})
-                  </h4>
-                  
-                  {associate.fincas.map((finca, idx) => (
-                    <FincaAccordion
-                      key={finca.idFinca}
-                      finca={finca}
-                      isFirst={idx === 0}
-                      esPropietario={associate.esPropietario ?? false}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
-          {/* ✅ NUEVA PESTAÑA: Necesidades */}
           {selectedTab === 'necesidades' && (
             <div>
               {loadingNecesidades ? (
@@ -240,6 +232,33 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
                     </div>
                   )}
                 </>
+              )}
+            </div>
+          )}
+
+          {/* 🔸 TAB: FINCA */}
+          {selectedTab === 'finca' && (
+            <div>
+              {associate.fincas && associate.fincas.length > 0 ? (
+                <div className="space-y-4">
+                  {associate.fincas.map((finca, idx) => (
+                    <FincaAccordion
+                      key={finca.idFinca}
+                      finca={finca}
+                      isFirst={idx === 0}
+                      esPropietario={associate.esPropietario ?? false}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-[#556B2F] text-lg mb-2">
+                    🏡 No hay fincas registradas
+                  </div>
+                  <p className="text-sm text-[#556B2F] opacity-75">
+                    Las fincas del asociado aparecerán aquí una vez sean registradas
+                  </p>
+                </div>
               )}
             </div>
           )}

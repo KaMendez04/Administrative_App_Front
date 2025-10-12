@@ -26,6 +26,44 @@ type AssociatesTableProps = {
   onEdit: (id: number) => void;
 };
 
+// 🔸 ICONOS SVG
+const EyeIcon = () => (
+  <svg 
+    className="w-5 h-5" 
+    fill="none" 
+    stroke="currentColor" 
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+  >
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+    />
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" 
+    />
+  </svg>
+);
+
+const PencilIcon = () => (
+  <svg 
+    className="w-5 h-5" 
+    fill="none" 
+    stroke="currentColor" 
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+  >
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" 
+    />
+  </svg>
+);
+
 export function AssociatesTable({
   data,
   isLoading,
@@ -33,7 +71,6 @@ export function AssociatesTable({
   onView,
   onEdit,
 }: AssociatesTableProps) {
-  // 🔸 Definir columnas con TanStack Table
   const columnHelper = createColumnHelper<AssociateRow>();
 
   const columns: ColumnDef<AssociateRow, any>[] = [
@@ -102,22 +139,31 @@ export function AssociatesTable({
     }),
     columnHelper.display({
       id: "acciones",
-      header: "Acciones",
-      size: 140,
+       header: () => (
+        <div className="text-center">Acciones</div> // 🔸 Header centrado
+      ),
+      size: 150, // 🔸 Aumentado para dar más espacio
       cell: (info) => (
-        <div className="flex gap-2 justify-end">
+        <div className="flex gap-3 justify-center items-center"> {/* 🔸 gap-3 y justify-center */}
+          {/* 🔸 BOTÓN VER CON ICONO DE OJO */}
           <button
             onClick={() => onView(info.row.original.idAsociado)}
-            className="px-3 py-1.5 min-w-[60px] rounded-lg border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition text-xs"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#F8F9F3] text-[#5B732E] hover:bg-[#EAEFE0] transition-all duration-200 shadow-sm hover:shadow-md"
+            title="Ver detalles"
+            aria-label="Ver detalles del asociado"
           >
-            Ver
+            <EyeIcon />
           </button>
+
+          {/* 🔸 BOTÓN EDITAR CON ICONO DE LÁPIZ */}
           {!isReadOnly && (
             <button
               onClick={() => onEdit(info.row.original.idAsociado)}
-              className="px-3 py-1.5 min-w-[60px] rounded-lg bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition text-xs"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#C19A3D] text-white hover:bg-[#A3853D] transition-all duration-200 shadow-sm hover:shadow-md"
+              title="Editar asociado"
+              aria-label="Editar asociado"
             >
-              Editar
+              <PencilIcon />
             </button>
           )}
         </div>
@@ -125,7 +171,6 @@ export function AssociatesTable({
     }),
   ];
 
-  // 🔸 Crear instancia de la tabla
   const table = useReactTable({
     data,
     columns,
