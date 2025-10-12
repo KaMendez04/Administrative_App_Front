@@ -73,14 +73,7 @@ export function EditableRequirements({
       )}
 
       <div className="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={handleCancelClick}
-          className="px-4 py-2 rounded-md border border-gray-400 text-gray-600 hover:bg-gray-50"
-        >
-          Cancelar
-        </button>
-        <button
+         <button
           type="button"
           onClick={handleSaveClick}
           disabled={!canSave || saving}
@@ -89,6 +82,13 @@ export function EditableRequirements({
           }`}
         >
           {saving ? "Guardando…" : "Guardar"}
+        </button>
+        <button
+          type="button"
+          onClick={handleCancelClick}
+          className="px-4 py-2 rounded-md border border-gray-400 text-gray-600 hover:bg-gray-50"
+        >
+          Cancelar
         </button>
         <button
           type="button"

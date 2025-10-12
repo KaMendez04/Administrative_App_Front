@@ -101,7 +101,7 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
                 </div>
 
                 <div
-                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-2 text-sm text-gray-700 hover:text-red-600 hover:bg-gray-100 cursor-pointer transition-colors duration-200"
                   onClick={handleLogout}
                 >
                   Cerrar Sesión

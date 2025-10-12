@@ -44,7 +44,7 @@ export const showErrorAlertLogin = (message: string) => {
 export const showSuccessAlertRegister = (message: string) => {
   return Swal.fire({
     icon: 'success',
-    title: 'Registration successful',
+    title: 'Registro exitoso',
     text: message,
     timer: 2000,
     showConfirmButton: false,
@@ -54,7 +54,7 @@ export const showSuccessAlertRegister = (message: string) => {
 export const showErrorAlertEmpty = (message: string) => {
   return Swal.fire({
     icon: 'error',
-    title: 'Invalid form',
+    title: 'Formulario inválido',
     text: message,
   });
 };
@@ -62,7 +62,7 @@ export const showErrorAlertEmpty = (message: string) => {
 export const showErrorDuplicateEmail = (message: string) => {
   return Swal.fire({
     icon: 'warning',
-    title: 'Duplicate email',
+    title: 'Email duplicado',
     text: message,
     confirmButtonColor: '#48a6a7',
     customClass: { confirmButton: 'no-border-button' },
@@ -71,15 +71,16 @@ export const showErrorDuplicateEmail = (message: string) => {
 
 export const showWarningAlert = (message: string) => {
   return Swal.fire({
-    title: 'Delete applicaion?',
+    title: '¿Desea continuar?',
     text: message,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#48a6a7',
     customClass: { confirmButton: 'no-border-button' },
     cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, delete it',
-    cancelButtonText: 'No, cancel',
+    confirmButtonText: 'Sí, continuar',
+    cancelButtonText: 'No, cancelar',
+    reverseButtons: false,
   });
 };
 
@@ -104,7 +105,7 @@ export const showConfirmAlert = async (title: string, text: string) => {
     cancelButtonColor: "#d33",     // rojo suave
     confirmButtonText: "Sí, cancelar",
     cancelButtonText: "No, continuar",
-    reverseButtons: true,
+    reverseButtons: false,
     background: "#FAF9F5",
   });
   return result.isConfirmed;
@@ -121,7 +122,7 @@ export const showConfirmDeleteAlert = async (title: string, text: string) => {
     cancelButtonColor: "#d33",     // rojo suave
     confirmButtonText: "Sí, eliminar",
     cancelButtonText: "No, continuar",
-    reverseButtons: true,
+    reverseButtons: false,
     background: "#FAF9F5",
   });
   return result.isConfirmed;
@@ -138,7 +139,7 @@ export const showConfirmOutAlert = async (title: string, text: string) => {
     cancelButtonColor: "#d33",     // rojo suave
     confirmButtonText: "Sí, salir",
     cancelButtonText: "No, continuar",
-    reverseButtons: true,
+    reverseButtons: false,
     background: "#FAF9F5",
   });
   return result.isConfirmed;
