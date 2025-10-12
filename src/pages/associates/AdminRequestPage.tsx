@@ -1,11 +1,33 @@
 import { useState } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper,
+  type ColumnDef,
+} from "@tanstack/react-table";
+import { Eye, CheckCircle, XCircle } from "lucide-react";
 import { useAdminSolicitudesList } from "../../hooks/associates/useAdminSolicitudesList";
 import { useAdminSolicitudDetail } from "../../hooks/associates/useAdminSolicitudDetail";
 import { useApproveSolicitud } from "../../hooks/associates/useApproveSolicitud";
 import { useRejectSolicitud } from "../../hooks/associates/useRejectSolicitud";
 import { RejectDialog } from "../../components/associates/RejectDialog";
 import { SolicitudViewModal } from "../../components/associates/SolicitudViewModal";
-import { getCurrentUser } from "../../services/auth"; // ✅ IMPORTAR
+import { getCurrentUser } from "../../services/auth";
+
+type SolicitudRow = {
+  idSolicitud: number;
+  persona: {
+    cedula: string;
+    nombre: string;
+    apellido1: string;
+    apellido2: string;
+    telefono: string;
+    email: string;
+  };
+  estado: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  createdAt: string;
+};
 
 function KPICard({
   label,
@@ -31,7 +53,6 @@ export default function AdminRequestsPage() {
   const [page, setPage] = useState(1);
   const limit = 20;
 
-  // ✅ Obtener rol del usuario actual (mismo patrón que PersonalPage)
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
 
@@ -51,17 +72,126 @@ export default function AdminRequestsPage() {
   
   const { data: viewDetail, isLoading: isLoadingDetail } = useAdminSolicitudDetail(viewId ?? 0);
 
+  const columnHelper = createColumnHelper<SolicitudRow>();
+
+  const columns: ColumnDef<SolicitudRow, any>[] = [
+    columnHelper.accessor("persona.cedula", {
+      header: "Cédula",
+      size: 120,
+      cell: (info) => (
+        <div className="font-medium text-[#33361D]">{info.getValue()}</div>
+      ),
+    }),
+    columnHelper.accessor((row) => `${row.persona.nombre} ${row.persona.apellido1} ${row.persona.apellido2}`, {
+      id: "nombreCompleto",
+      header: "Nombre",
+      size: 200,
+      cell: (info) => (
+        <div className="font-medium text-[#33361D] truncate" title={info.getValue()}>
+          {info.getValue()}
+        </div>
+      ),
+    }),
+    columnHelper.accessor("persona.telefono", {
+      header: "Teléfono",
+      size: 100,
+      cell: (info) => <div className="text-[#33361D]">{info.getValue()}</div>,
+    }),
+    columnHelper.accessor("persona.email", {
+      header: "Email",
+      size: 180,
+      cell: (info) => (
+        <div className="text-[#33361D] truncate" title={info.getValue()}>
+          {info.getValue()}
+        </div>
+      ),
+    }),
+    columnHelper.accessor("estado", {
+      header: "Estado",
+      size: 110,
+      cell: (info) => (
+        <span className={`inline-block px-2 py-1 rounded-lg text-xs font-bold ${
+          info.getValue() === "PENDIENTE" ? "bg-yellow-100 text-yellow-800" :
+          info.getValue() === "APROBADO" ? "bg-green-100 text-green-800" :
+          "bg-red-100 text-red-800"
+        }`}>
+          {info.getValue()}
+        </span>
+      ),
+    }),
+    columnHelper.accessor("createdAt", {
+      header: "Fecha",
+      size: 110,
+      cell: (info) => (
+        <div className="text-[#33361D]">
+          {new Date(info.getValue()).toLocaleDateString("es-CR")}
+        </div>
+      ),
+    }),
+    columnHelper.display({
+      id: "acciones",
+      header: () => (
+        <div className="text-center">Acciones</div>
+      ),
+      size: 160,
+      cell: (info) => (
+        <div className="flex gap-2 justify-center items-center">
+          {/* Botón Ver */}
+          <button
+            onClick={() => setViewId(info.row.original.idSolicitud)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#F8F9F3] text-[#5B732E] hover:bg-[#EAEFE0] transition-all duration-200 shadow-sm hover:shadow-md"
+            title="Ver detalles"
+            aria-label="Ver detalles de la solicitud"
+          >
+            <Eye className="w-5 h-5" />
+          </button>
+
+          {/* Botones Aprobar/Rechazar - solo si está PENDIENTE y no es read-only */}
+          {info.row.original.estado === "PENDIENTE" && !isReadOnly && (
+            <>
+              <button
+                onClick={() => approve.mutate(info.row.original.idSolicitud)}
+                disabled={approve.isPending}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-green-600 text-white hover:bg-green-700 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Aprobar solicitud"
+                aria-label="Aprobar solicitud"
+              >
+                <CheckCircle className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setRejectId(info.row.original.idSolicitud)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                title="Rechazar solicitud"
+                aria-label="Rechazar solicitud"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </>
+          )}
+        </div>
+      ),
+    }),
+  ];
+
+  const table = useReactTable({
+    data: data?.items ?? [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+  });
+
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
         
+        {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
           <KPICard label="Total Solicitudes" value={data?.total ?? 0} tone="base" />
           <KPICard label="Página Actual" value={`${data?.page ?? 1} / ${data?.pages ?? 1}`} tone="alt" />
           <KPICard label="Estado" value={status || "Todos"} tone="gold" />
         </div>
 
-        
+        {/* Filtros */}
         <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm mb-6">
           <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
           
@@ -101,6 +231,7 @@ export default function AdminRequestsPage() {
           </div>
         </div>
 
+        {/* Tabla */}
         {isLoading ? (
           <div className="rounded-2xl bg-[#F8F9F3] p-8 text-center text-[#556B2F] font-medium">
             Cargando...
@@ -108,77 +239,65 @@ export default function AdminRequestsPage() {
         ) : (
           <>
             <div className="rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
-              <div className="bg-[#EAEFE0] px-4 py-3">
-                <div className="grid grid-cols-7 gap-4 text-sm font-bold text-[#33361D]">
-                  <div>Cédula</div>
-                  <div>Nombre</div>
-                  <div>Teléfono</div>
-                  <div>Email</div>
-                  <div>Estado</div>
-                  <div>Fecha</div>
-                  <div className="text-right">Acciones</div>
-                </div>
-              </div>
-              <div className="bg-white">
-                {(data?.items ?? []).map((r) => (
-                  <div
-                    key={r.idSolicitud}
-                    className="grid grid-cols-7 gap-4 px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition"
-                  >
-                    <div className="font-medium">{r.persona.cedula}</div>
-                    <div className="font-medium">{`${r.persona.nombre} ${r.persona.apellido1}`}</div>
-                    <div>{r.persona.telefono}</div>
-                    <div className="truncate">{r.persona.email}</div>
-                    <div>
-                      <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
-                        r.estado === "PENDIENTE" ? "bg-yellow-100 text-yellow-800" :
-                        r.estado === "APROBADO" ? "bg-green-100 text-green-800" :
-                        "bg-red-100 text-red-800"
-                      }`}>
-                        {r.estado}
-                      </span>
-                    </div>
-                    <div>{new Date(r.createdAt).toLocaleDateString("es-CR")}</div>
-                    <div className="text-right flex gap-2 justify-end">
-                      <button
-                        onClick={() => setViewId(r.idSolicitud)}
-                        className="px-3 py-1 rounded-lg border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition text-xs"
-                      >
-                        Ver
-                      </button>
-                      {r.estado === "PENDIENTE" && !isReadOnly && (
-                        <>
-                          <button
-                            onClick={() => approve.mutate(r.idSolicitud)}
-                            disabled={approve.isPending}
-                            className="px-3 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition text-xs disabled:opacity-50"
+              <div className="overflow-x-auto">
+                <table className="w-full" style={{ tableLayout: "fixed" }}>
+                  <thead className="bg-[#EAEFE0]">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <th
+                            key={header.id}
+                            style={{ width: `${header.getSize()}px` }}
+                            className="px-4 py-3 text-sm font-bold text-[#33361D]"
                           >
-                            {approve.isPending ? "..." : "Aprobar"}
-                          </button>
-                          <button
-                            onClick={() => setRejectId(r.idSolicitud)}
-                            className="px-3 py-1 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition text-xs"
-                          >
-                            Rechazar
-                          </button>
-                        </>
-                      )}
-                      {r.estado === "PENDIENTE" && isReadOnly && (
-                        <span className="px-3 py-1 text-xs text-gray-500 italic">
-                          
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {(data?.items ?? []).length === 0 && (
-                  <div className="py-8 text-center text-gray-400 font-medium">
-                    Sin resultados
-                  </div>
-                )}
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                  <tbody className="bg-white">
+                    {table.getRowModel().rows.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={columns.length}
+                          className="py-8 text-center text-gray-400 font-medium"
+                        >
+                          Sin resultados
+                        </td>
+                      </tr>
+                    ) : (
+                      table.getRowModel().rows.map((row) => (
+                        <tr
+                          key={row.id}
+                          className="hover:bg-[#F8F9F3] transition border-b border-[#EAEFE0]"
+                        >
+                          {row.getVisibleCells().map((cell) => (
+                            <td
+                              key={cell.id}
+                              style={{ width: `${cell.column.getSize()}px` }}
+                              className="px-4 py-3 text-sm"
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
 
+            {/* Paginación */}
             <div className="flex justify-between items-center mt-6">
               <span className="text-sm text-[#556B2F] font-medium">
                 {data?.total ?? 0} resultados — página {data?.page ?? 1} de {data?.pages ?? 1}
