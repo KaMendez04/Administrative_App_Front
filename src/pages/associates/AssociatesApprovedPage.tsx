@@ -4,13 +4,18 @@ import { AssociateEditDrawer } from "../../components/associates/AssociateEditDr
 import { AssociateViewModal } from "../../components/associates/AssociateViewModal";
 import { useAdminAssociatesList } from "../../hooks/associates/useAdminAssociateList";
 import { useAssociateDetail } from "../../hooks/associates/useAdminAssociateDetail";
-import { getCurrentUser } from "../../services/auth"; // ✅ IMPORTAR
+import { getCurrentUser } from "../../services/auth";
+import { AssociatesTable, type AssociateRow } from "../../components/associates/associatesTable";
 
 function KPICard({
   label,
   value,
   tone = "base",
-}: { label: string; value: string | number; tone?: "base" | "alt" | "gold" }) {
+}: {
+  label: string;
+  value: string | number;
+  tone?: "base" | "alt" | "gold";
+}) {
   const toneMap = {
     base: "bg-[#F8F9F3] text-[#5B732E]",
     alt: "bg-[#EAEFE0] text-[#5B732E]",
@@ -18,166 +23,179 @@ function KPICard({
   } as const;
   return (
     <div className={`rounded-2xl ${toneMap[tone]} p-5 shadow-sm`}>
-      <div className="text-xs font-bold tracking-wider uppercase opacity-80">{label}</div>
+      <div className="text-xs font-bold tracking-wider uppercase opacity-80">
+        {label}
+      </div>
       <div className="mt-2 text-3xl font-bold">{value}</div>
     </div>
   );
 }
 
+type EstadoFilter = "ACTIVO" | "INACTIVO" | "TODOS";
+
 export default function AssociatesApprovedPage() {
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
+  const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>("TODOS"); // 🔸 NUEVO
   const limit = 20;
 
-  // ✅ Obtener rol del usuario (mismo patrón que en otras páginas)
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
 
-  const { data, isLoading } = useAdminAssociatesList({ 
-    estado: undefined,
-    search, 
-    page, 
-    limit, 
-    sort: "createdAt:desc" 
+  // 🔸 Convertir filtro a boolean o undefined para el hook
+  const estadoParam = 
+    estadoFilter === "ACTIVO" ? true :
+    estadoFilter === "INACTIVO" ? false :
+    undefined;
+
+  const { data, isLoading } = useAdminAssociatesList({
+    estado: estadoParam, // 🔸 Pasar estado al hook
+    search,
+    page,
+    limit,
+    sort: "createdAt:desc",
   });
 
   const [editId, setEditId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
-  
+
   const { data: editDetail } = useAssociateDetail(editId);
-  const { data: viewDetail, isLoading: isLoadingDetail } = useAssociateDetail(viewId);
+  const { data: viewDetail, isLoading: isLoadingDetail } =
+    useAssociateDetail(viewId);
 
   const update = useUpdateAssociate();
 
+  // 🔸 Transformar datos para la tabla
+  const tableData: AssociateRow[] =
+    data?.items.map((asociado) => ({
+      idAsociado: asociado.idAsociado,
+      cedula: asociado.persona.cedula,
+      nombreCompleto: `${asociado.persona.nombre} ${asociado.persona.apellido1} ${asociado.persona.apellido2}`,
+      telefono: asociado.persona.telefono,
+      email: asociado.persona.email,
+      marcaGanado: asociado.marcaGanado ?? null,
+      estado: asociado.estado,
+      createdAt: asociado.createdAt,
+    })) ?? [];
+
+  // 🔸 Función para obtener el label del estado
   const getEstadoLabel = () => {
-    return "Todos";
+    switch (estadoFilter) {
+      case "ACTIVO":
+        return "ACTIVO";
+      case "INACTIVO":
+        return "INACTIVO";
+      default:
+        return "TODOS";
+    }
+  };
+
+  // 🔸 Manejar cambio de filtro y resetear página
+  const handleEstadoChange = (newEstado: EstadoFilter) => {
+    setEstadoFilter(newEstado);
+    setPage(1);
   };
 
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
-        
+        {/* 🔸 KPIs con Estado */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
           <KPICard label="Total Asociados" value={data?.total ?? 0} tone="base" />
-          <KPICard label="Página Actual" value={`${data?.page ?? 1} / ${data?.pages ?? 1}`} tone="alt" />
+          <KPICard
+            label="Página Actual"
+            value={`${data?.page ?? 1} / ${data?.pages ?? 1}`}
+            tone="alt"
+          />
+          <KPICard label="Estado" value={getEstadoLabel()} tone="gold" />
         </div>
 
-        
-
+        {/* 🔸 Filtros */}
         <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm mb-6">
           <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
-          
+
+          {/* Input de búsqueda */}
           <div className="mb-4">
             <input
               placeholder="Buscar por cédula, nombre, email..."
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] placeholder:text-gray-400 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
             />
           </div>
 
+          {/* 🔸 Botones de filtro por estado */}
           <div className="flex flex-wrap gap-2">
-          
+            <button
+              onClick={() => handleEstadoChange("ACTIVO")}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                estadoFilter === "ACTIVO"
+                  ? "bg-[#5B732E] text-white shadow-md"
+                  : "bg-white text-[#5B732E] border-2 border-[#EAEFE0] hover:bg-[#F8F9F3]"
+              }`}
+            >
+              ACTIVO
+            </button>
+            <button
+              onClick={() => handleEstadoChange("INACTIVO")}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                estadoFilter === "INACTIVO"
+                  ? "bg-[#5B732E] text-white shadow-md"
+                  : "bg-white text-[#5B732E] border-2 border-[#EAEFE0] hover:bg-[#F8F9F3]"
+              }`}
+            >
+              INACTIVO
+            </button>
+            <button
+              onClick={() => handleEstadoChange("TODOS")}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                estadoFilter === "TODOS"
+                  ? "bg-[#5B732E] text-white shadow-md"
+                  : "bg-white text-[#5B732E] border-2 border-[#EAEFE0] hover:bg-[#F8F9F3]"
+              }`}
+            >
+              TODOS
+            </button>
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="rounded-2xl bg-[#F8F9F3] p-8 text-center text-[#556B2F] font-medium">
-            Cargando...
+        {/* Tabla */}
+        <AssociatesTable
+          data={tableData}
+          isLoading={isLoading}
+          isReadOnly={isReadOnly}
+          onView={(id) => setViewId(id)}
+          onEdit={(id) => setEditId(id)}
+        />
+
+        {/* Paginación */}
+        <div className="flex justify-between items-center mt-6">
+          <span className="text-sm text-[#556B2F] font-medium">
+            {data?.total ?? 0} resultados — página {data?.page ?? 1} de{" "}
+            {data?.pages ?? 1}
+          </span>
+          <div className="flex gap-3">
+            <button
+              className="px-6 py-3 rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Anterior
+            </button>
+            <button
+              className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              disabled={(data?.pages ?? 1) <= page}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Siguiente
+            </button>
           </div>
-        ) : (
-          <>
-            <div className="rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
-              <div className="bg-[#EAEFE0] px-4 py-3">
-                <div className="grid grid-cols-8 gap-4 text-sm font-bold text-[#33361D]">
-                  <div>Cédula</div>
-                  <div>Nombre</div>
-                  <div>Teléfono</div>
-                  <div>Email</div>
-                  <div>Marca Ganado</div>
-                  <div>Estado</div>
-                  <div>Fecha</div>
-                  <div className="text-right">Acciones</div>
-                </div>
-              </div>
-              <div className="bg-white">
-                {(data?.items ?? []).map((asociado) => (
-                  <div
-                    key={asociado.idAsociado}
-                    className="grid grid-cols-8 gap-4 px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition"
-                  >
-                    <div className="font-medium">{asociado.persona.cedula}</div>
-                    <div className="font-medium">
-                      {`${asociado.persona.nombre} ${asociado.persona.apellido1} ${asociado.persona.apellido2}`}
-                    </div>
-                    <div>{asociado.persona.telefono}</div>
-                    <div className="truncate">{asociado.persona.email}</div>
-                    <div className="font-medium">{asociado.marcaGanado || "—"}</div>
-                    <div>
-                      <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
-                        asociado.estado 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-red-100 text-red-800"
-                      }`}>
-                        {asociado.estado ? "Activo" : "Inactivo"}
-                      </span>
-                    </div>
-                    <div>{new Date(asociado.createdAt).toLocaleDateString("es-CR")}</div>
-                    <div className="text-right flex gap-2 justify-end">
-                      <button
-                        onClick={() => setViewId(asociado.idAsociado)}
-                        className="px-3 py-1 rounded-lg border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition text-xs"
-                      >
-                        Ver
-                      </button>
-                      {/* ✅ DESHABILITAR BOTÓN EDITAR PARA JUNTA */}
-                      {!isReadOnly ? (
-                        <button
-                          onClick={() => setEditId(asociado.idAsociado)}
-                          className="px-3 py-1 rounded-lg bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition text-xs"
-                        >
-                          Editar
-                        </button>
-                      ) : (
-                        <span className="px-3 py-1 text-xs text-gray-500 italic">
-                          
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {(data?.items ?? []).length === 0 && (
-                  <div className="py-8 text-center text-gray-400 font-medium">
-                    Sin resultados
-                  </div>
-                )}
-              </div>
-            </div>
+        </div>
 
-            <div className="flex justify-between items-center mt-6">
-              <span className="text-sm text-[#556B2F] font-medium">
-                {data?.total ?? 0} resultados — página {data?.page ?? 1} de {data?.pages ?? 1}
-              </span>
-              <div className="flex gap-3">
-                <button
-                  className="px-6 py-3 rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  Anterior
-                </button>
-                <button
-                  className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                  disabled={(data?.pages ?? 1) <= page}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Siguiente
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-
+        {/* Modales */}
         <AssociateViewModal
           open={viewId != null}
           onClose={() => setViewId(null)}
@@ -185,7 +203,6 @@ export default function AssociatesApprovedPage() {
           isLoading={isLoadingDetail}
         />
 
-        {/* ✅ SOLO ADMIN puede editar */}
         {!isReadOnly && editId != null && editDetail && (
           <AssociateEditDrawer
             open={true}

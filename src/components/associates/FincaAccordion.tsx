@@ -1,36 +1,58 @@
 import { useState } from "react";
+import { 
+  Home, User, CheckCircle2, XCircle, Zap, Droplets, Sprout, 
+  Warehouse, Fence, Wrench, Route, Store, BarChart3
+} from "lucide-react";
 import {
-  useFincaHato,
-  useFincaForrajes,
-  useFincaFuentesAgua,
-  useFincaMetodosRiego,
-  useFincaActividades,
-  useFincaInfraestructura,
-  useFincaTiposCerca,
-  useFincaInfraestructuras,
-  useFincaOtrosEquipos,
-  useFincaRegistrosProductivos,
-  useFincaAccesos,
-  useFincaCanales,
+  useFincaHato, useFincaForrajes, useFincaFuentesAgua, useFincaMetodosRiego,
+  useFincaActividades, useFincaInfraestructura, useFincaTiposCerca,
+  useFincaInfraestructuras, useFincaOtrosEquipos, useFincaRegistrosProductivos,
+  useFincaAccesos, useFincaCanales,
 } from "../../hooks/associates";
 
 type Props = {
   finca: any;
   isFirst: boolean;
-  esPropietario: boolean; // ← Este prop ya no se usará directamente
+  esPropietario: boolean;
 };
+
+function Field({ label, value }: { label: string; value: any }) {
+  return (
+    <div>
+      <div className="text-xs font-semibold text-[#556B2F] uppercase mb-1">{label}</div>
+      <div className="text-sm text-[#33361D]">{value ?? "—"}</div>
+    </div>
+  );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg bg-white border border-[#EAEFE0] text-[#33361D]">
+      {children}
+    </span>
+  );
+}
+
+function ListItem({ children }: { children: React.ReactNode }) {
+  return <div className="rounded-lg border border-[#EAEFE0] bg-white px-4 py-3">{children}</div>;
+}
+
+function Section({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl bg-[#F8F9F3] p-5 border border-[#EAEFE0]">
+      <h4 className="text-sm font-bold text-[#5B732E] uppercase mb-4 flex items-center gap-2">
+        <Icon className="w-4 h-4" />
+        {title}
+      </h4>
+      {children}
+    </div>
+  );
+}
 
 export function FincaAccordion({ finca, isFirst }: Props) {
   const [isOpen, setIsOpen] = useState(isFirst);
 
-  // ✅ Calcular si realmente hay un propietario diferente
-  const tienePropietarioDiferente = Boolean(
-    finca?.propietario && 
-    finca?.propietario?.persona &&
-    finca?.propietario?.persona?.cedula
-  );
-  
-  // El asociado ES propietario si NO hay un propietario diferente
+  const tienePropietarioDiferente = Boolean(finca?.propietario?.persona?.cedula);
   const esPropietarioReal = !tienePropietarioDiferente;
 
   const { data: hato, isLoading: loadingHato } = useFincaHato(isOpen ? finca?.idFinca : null);
@@ -44,393 +66,287 @@ export function FincaAccordion({ finca, isFirst }: Props) {
   const { data: otrosEquipos = [], isLoading: loadingEquipos } = useFincaOtrosEquipos(isOpen ? finca?.idFinca : null);
   const { data: registrosProductivos, isLoading: loadingRegistros } = useFincaRegistrosProductivos(isOpen ? finca?.idFinca : null);
   const { data: accesos = [], isLoading: loadingAccesos } = useFincaAccesos(isOpen ? finca?.idFinca : null);
-  const { data: canales = [], isLoading: loadingCanales } = useFincaCanales(isOpen ? finca?.idFinca : null); 
+  const { data: canales = [], isLoading: loadingCanales } = useFincaCanales(isOpen ? finca?.idFinca : null);
 
   const corriente = finca?.corriente;
-  
-  const isLoadingAny = 
-    loadingHato || loadingForrajes || loadingFuentes || loadingMetodos || 
+  const isLoadingAny = loadingHato || loadingForrajes || loadingFuentes || loadingMetodos || 
     loadingActividades || loadingInfra || loadingTipos || loadingInfraestructuras || 
-    loadingEquipos || loadingRegistros || loadingAccesos || loadingCanales; 
-    
+    loadingEquipos || loadingRegistros || loadingAccesos || loadingCanales;
+
   return (
     <details
-      className="mb-4 rounded-xl border-2 border-[#EAEFE0] overflow-hidden"
+      className="mb-4 rounded-2xl border-2 border-[#EAEFE0] overflow-hidden bg-white"
       open={isFirst}
       onToggle={(e) => setIsOpen((e.target as HTMLDetailsElement).open)}
     >
-      <summary className="bg-[#EAEFE0] px-4 py-3 cursor-pointer font-bold text-[#33361D] hover:bg-[#d9e4cd] transition">
-        {finca?.nombre ?? "Finca sin nombre"} - {finca?.areaHa ?? "0"} ha
-        {finca?.geografia && ` - ${finca.geografia.provincia}, ${finca.geografia.canton}`}
+      <summary className="bg-[#EAEFE0] px-6 py-4 cursor-pointer font-bold text-[#33361D] hover:bg-[#d9e4cd] transition flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Home className="w-5 h-5 text-[#5B732E]" />
+          <span>
+            {finca?.nombre ?? "Finca sin nombre"} • {finca?.areaHa ?? "0"} ha
+            {finca?.geografia && ` • ${finca.geografia.provincia}, ${finca.geografia.canton}`}
+          </span>
+        </div>
       </summary>
 
-      <div className="p-4 bg-white space-y-4">
+      <div className="p-6 bg-white space-y-6">
         {isLoadingAny && (
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#5B732E]"></div>
-            <p className="mt-2 text-sm text-[#556B2F]">Cargando detalles...</p>
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-[#5B732E] border-t-transparent"></div>
+            <p className="mt-3 text-sm text-[#556B2F]">Cargando información...</p>
           </div>
         )}
 
         {!isLoadingAny && (
           <>
-            {/* Datos básicos */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-xl bg-[#F8F9F3] p-4">
-                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Nombre</div>
-                <div className="text-base text-[#33361D] font-medium">{finca?.nombre ?? "—"}</div>
-              </div>
-              <div className="rounded-xl bg-[#F8F9F3] p-4">
-                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Área (ha)</div>
-                <div className="text-base text-[#33361D] font-medium">{finca?.areaHa ?? "—"}</div>
-              </div>
-              <div className="rounded-xl bg-[#F8F9F3] p-4">
-                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de Plano</div>
-                <div className="text-base text-[#33361D] font-medium">{finca?.numeroPlano ?? "—"}</div>
-              </div>
-
-              {/* ✅ NUEVO: Mostrar si es propietario */}
-              <div className="rounded-xl bg-[#F8F9F3] p-4">
-                <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                  Es Propietario
-                </div>
-                <div className={`text-base font-semibold ${
-                  esPropietarioReal ? 'text-green-700' : 'text-amber-700'
-                }`}>
-                  {esPropietarioReal ? "Sí" : "No"}
-                </div>
-              </div>
-
-              {finca?.geografia && (
-                <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                  <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Ubicación</div>
-                  <div className="text-base text-[#33361D] font-medium">
-                    {finca.geografia.provincia}, {finca.geografia.canton}, {finca.geografia.distrito}
-                    {finca.geografia.caserio && `, ${finca.geografia.caserio}`}
+            {/* Información General */}
+            <Section title="Información General" icon={Home}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Field label="Nombre" value={finca?.nombre} />
+                <Field label="Área (ha)" value={finca?.areaHa} />
+                <Field label="Número de plano" value={finca?.numeroPlano} />
+                <div>
+                  <div className="text-xs font-semibold text-[#556B2F] uppercase mb-1">Propietario</div>
+                  <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-semibold ${
+                    esPropietarioReal ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
+                  }`}>
+                    {esPropietarioReal ? (
+                      <><CheckCircle2 className="w-3.5 h-3.5" /> Es el asociado</>
+                    ) : (
+                      <><User className="w-3.5 h-3.5" /> Diferente</>
+                    )}
                   </div>
+                </div>
+              </div>
+              {finca?.geografia && (
+                <div className="mt-4 pt-4 border-t border-[#EAEFE0]">
+                  <Field 
+                    label="Ubicación" 
+                    value={`${finca.geografia.provincia}, ${finca.geografia.canton}, ${finca.geografia.distrito}${finca.geografia.caserio ? `, ${finca.geografia.caserio}` : ''}`}
+                  />
                 </div>
               )}
-            </div>
+            </Section>
 
-            {/* ✅ Corriente Eléctrica */}
-            {corriente && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Corriente eléctrica en la finca</h5>
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="flex flex-wrap gap-2">
-                    {corriente?.publica && (
-                      <span className="px-3 py-1 text-sm font-semibold rounded-lg bg-white border-2 border-[#EAEFE0] text-[#33361D]">
-                        Pública
-                      </span>
-                    )}
-                    {corriente?.privada && (
-                      <span className="px-3 py-1 text-sm font-semibold rounded-lg bg-white border-2 border-[#EAEFE0] text-[#33361D]">
-                        Privada
-                      </span>
-                    )}
-                    {!corriente?.publica && !corriente?.privada && (
-                      <span className="text-sm text-[#33361D]">No hay</span>
-                    )}
-                  </div>
+            {/* Propietario diferente */}
+            {tienePropietarioDiferente && (
+              <div className="rounded-xl bg-[#FEF6E0] p-5 border border-[#F5E6C3]">
+                <h4 className="text-sm font-bold text-[#C19A3D] uppercase mb-4 flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Datos del Propietario
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Field 
+                    label="Nombre completo" 
+                    value={finca.propietario?.persona ? 
+                      `${finca.propietario.persona.nombre ?? ""} ${finca.propietario.persona.apellido1 ?? ""} ${finca.propietario.persona.apellido2 ?? ""}`.trim() 
+                      : "—"}
+                  />
+                  <Field label="Cédula" value={finca.propietario?.persona?.cedula} />
                 </div>
               </div>
             )}
 
-            {/* ✅ CORREGIDO: Mostrar propietario SOLO si NO es el asociado */}
-            {tienePropietarioDiferente && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Propietario de esta finca</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="rounded-xl bg-[#FEF6E0] p-4">
-                    <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Nombre completo</div>
-                    <div className="text-base text-[#33361D] font-medium">
-                      {finca.propietario?.persona ? 
-                        `${finca.propietario.persona.nombre ?? ""} ${finca.propietario.persona.apellido1 ?? ""} ${finca.propietario.persona.apellido2 ?? ""}`.trim() 
-                        : "—"}
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-[#FEF6E0] p-4">
-                    <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Cédula</div>
-                    <div className="text-base text-[#33361D] font-medium">
-                      {finca.propietario?.persona?.cedula ?? "—"}
-                    </div>
-                  </div>
+            {/* Corriente */}
+            {corriente && (corriente?.publica || corriente?.privada) && (
+              <Section title="Corriente Eléctrica" icon={Zap}>
+                <div className="flex flex-wrap gap-2">
+                  {corriente?.publica && <Chip>Pública</Chip>}
+                  {corriente?.privada && <Chip>Privada</Chip>}
                 </div>
-              </div>
+              </Section>
             )}
 
             {/* Registros Productivos */}
             {registrosProductivos && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Registros Productivos</h5>
+              <Section title="Registros Productivos" icon={BarChart3}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Reproductivos</div>
-                    <div className="text-base text-[#33361D] font-medium">
-                      {registrosProductivos?.reproductivos ? "Sí" : "No"}
+                  <div>
+                    <div className="text-xs font-semibold text-[#556B2F] uppercase mb-1">Reproductivos</div>
+                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-semibold ${
+                      registrosProductivos?.reproductivos ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-600'
+                    }`}>
+                      {registrosProductivos?.reproductivos ? (
+                        <><CheckCircle2 className="w-3.5 h-3.5" /> Sí</>
+                      ) : (
+                        <><XCircle className="w-3.5 h-3.5" /> No</>
+                      )}
                     </div>
                   </div>
-                  <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Costos productivos</div>
-                    <div className="text-base text-[#33361D] font-medium">
-                      {registrosProductivos?.costosProductivos ? "Sí" : "No"}
+                  <div>
+                    <div className="text-xs font-semibold text-[#556B2F] uppercase mb-1">Costos productivos</div>
+                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-semibold ${
+                      registrosProductivos?.costosProductivos ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-600'
+                    }`}>
+                      {registrosProductivos?.costosProductivos ? (
+                        <><CheckCircle2 className="w-3.5 h-3.5" /> Sí</>
+                      ) : (
+                        <><XCircle className="w-3.5 h-3.5" /> No</>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
+              </Section>
             )}
 
-            {/* Hato */}
-            {hato && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Hato</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Tipo de explotación</div>
-                    <div className="text-base text-[#33361D] font-medium">
-                      {hato?.tipoExplotacion ?? "—"}
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Total de ganado</div>
-                    <div className="text-base text-[#33361D] font-medium">
-                      {hato?.totalGanado ?? "—"}
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Raza predominante</div>
-                    <div className="text-base text-[#33361D] font-medium">
-                      {hato?.razaPredominante ?? "—"}
-                    </div>
-                  </div>
-
-                  {hato?.animales && Array.isArray(hato.animales) && hato.animales.length > 0 && (
-                    <div className="rounded-xl bg-[#F8F9F3] p-4 md:col-span-2">
-                      <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-2">Animales</div>
-                      <div className="space-y-2">
-                        {hato.animales.map((a: any, i: number) => (
-                          <div key={a?.idAnimal ?? i} className="flex flex-wrap items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2">
-                            <div className="text-sm font-semibold text-[#33361D]">{a?.nombre ?? "—"}</div>
-                            <div className="text-xs text-[#33361D]">Edad: {a?.edad ?? "—"}</div>
-                            <div className="text-xs text-[#33361D]">Cantidad: {a?.cantidad ?? "—"}</div>
+           {/* Hato */}
+          {hato && (
+            <Section title="Hato" icon={Sprout}>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Field label="Tipo de explotación" value={hato?.tipoExplotacion} />
+                  <Field label="Total de ganado" value={hato?.totalGanado} />
+                  <Field label="Raza predominante" value={hato?.razaPredominante} />
+                </div>
+                {hato?.animales && Array.isArray(hato.animales) && hato.animales.length > 0 && (
+                  <div className="pt-4 border-t border-[#EAEFE0]">
+                    <div className="text-xs font-semibold text-[#556B2F] uppercase mb-3">Detalle de animales</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {hato.animales.map((a: any, i: number) => (
+                        <ListItem key={a?.idAnimal ?? i}>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium text-[#33361D]">{a?.nombre ?? "—"}</span>
+                            <span className="text-[#556B2F]">Edad Aproximada: {a?.edad ?? "—"} • Cantidad: {a?.cantidad ?? "—"}</span>
                           </div>
-                        ))}
-                      </div>
+                        </ListItem>
+                      ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-            )}
+            </Section>
+          )}
 
             {/* Forrajes */}
             {Array.isArray(forrajes) && forrajes.length > 0 && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Forrajes</h5>
+              <Section title="Forrajes" icon={Sprout}>
                 <div className="space-y-2">
                   {forrajes.map((f: any, i: number) => (
-                    <div key={f?.idForraje ?? i} className="rounded-xl bg-[#F8F9F3] p-4">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Tipo</div>
-                          <div className="text-base text-[#33361D] font-medium">{f?.tipoForraje ?? "—"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Variedad</div>
-                          <div className="text-base text-[#33361D] font-medium">{f?.variedad ?? "—"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Hectáreas</div>
-                          <div className="text-base text-[#33361D] font-medium">{f?.hectareas ?? "—"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Utilización</div>
-                          <div className="text-base text-[#33361D] font-medium">{f?.utilizacion ?? "—"}</div>
-                        </div>
+                    <ListItem key={f?.idForraje ?? i}>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        <Field label="Tipo" value={f?.tipoForraje} />
+                        <Field label="Variedad" value={f?.variedad} />
+                        <Field label="Hectáreas" value={f?.hectareas} />
+                        <Field label="Utilización" value={f?.utilizacion} />
                       </div>
-                    </div>
+                    </ListItem>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Fuentes de Agua */}
-            {Array.isArray(fuentesAgua) && fuentesAgua.length > 0 && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Fuentes de agua</h5>
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="space-y-2">
-                    {fuentesAgua.map((fa: any, i: number) => (
-                      <div key={fa?.idFuenteAgua ?? i} className="rounded border border-[#EAEFE0] bg-white px-3 py-2">
-                        <div className="text-sm font-semibold text-[#33361D]">{fa?.nombre ?? "—"}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Métodos de Riego */}
-            {Array.isArray(metodosRiego) && metodosRiego.length > 0 && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Métodos de riego</h5>
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="space-y-2">
-                    {metodosRiego.map((mr: any, i: number) => (
-                      <div key={mr?.idMetodoRiego ?? i} className="rounded border border-[#EAEFE0] bg-white px-3 py-2">
-                        <div className="text-sm font-semibold text-[#33361D]">{mr?.nombre ?? "—"}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              </Section>
             )}
 
             {/* Actividades */}
             {Array.isArray(actividades) && actividades.length > 0 && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Actividades Agropecuarias</h5>
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="space-y-2">
-                    {actividades.map((ac: any, i: number) => (
-                      <div key={ac?.idActividad ?? i} className="rounded border border-[#EAEFE0] bg-white px-3 py-2">
-                        <div className="text-sm font-semibold text-[#33361D]">{ac?.nombre ?? "—"}</div>
-                      </div>
-                    ))}
-                  </div>
+              <Section title="Actividades Agropecuarias" icon={Sprout}>
+                <div className="flex flex-wrap gap-2">
+                  {actividades.map((ac: any, i: number) => (
+                    <Chip key={ac?.idActividad ?? i}>{ac?.nombre ?? "—"}</Chip>
+                  ))}
                 </div>
-              </div>
+              </Section>
+            )}
+
+            {/* Fuentes de agua */}
+            {Array.isArray(fuentesAgua) && fuentesAgua.length > 0 && (
+              <Section title="Fuentes de Agua" icon={Droplets}>
+                <div className="flex flex-wrap gap-2">
+                  {fuentesAgua.map((fa: any, i: number) => (
+                    <Chip key={fa?.idFuenteAgua ?? i}>{fa?.nombre ?? "—"}</Chip>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Métodos de riego */}
+            {Array.isArray(metodosRiego) && metodosRiego.length > 0 && (
+              <Section title="Métodos de Riego" icon={Droplets}>
+                <div className="flex flex-wrap gap-2">
+                  {metodosRiego.map((mr: any, i: number) => (
+                    <Chip key={mr?.idMetodoRiego ?? i}>{mr?.nombre ?? "—"}</Chip>
+                  ))}
+                </div>
+              </Section>
             )}
 
             {/* Infraestructura */}
             {infraestructura && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Infraestructura de Producción</h5>
+              <Section title="Infraestructura de Producción" icon={Warehouse}>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de aparatos</div>
-                    <div className="text-base text-[#33361D] font-medium">{infraestructura?.numeroAparatos ?? "—"}</div>
-                  </div>
-                  <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de bebederos</div>
-                    <div className="text-base text-[#33361D] font-medium">{infraestructura?.numeroBebederos ?? "—"}</div>
-                  </div>
-                  <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Número de saleros</div>
-                    <div className="text-base text-[#33361D] font-medium">{infraestructura?.numeroSaleros ?? "—"}</div>
-                  </div>
+                  <Field label="Aparatos" value={infraestructura?.numeroAparatos} />
+                  <Field label="Bebederos" value={infraestructura?.numeroBebederos} />
+                  <Field label="Saleros" value={infraestructura?.numeroSaleros} />
                 </div>
-              </div>
+              </Section>
             )}
 
-            {/* Tipos de Cerca */}
+            {/* Tipos de cerca */}
             {Array.isArray(tiposCerca) && tiposCerca.length > 0 && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Tipos de Cerca</h5>
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="flex flex-wrap gap-2">
-                    {tiposCerca.map((tc: any, i: number) => {
-                      const chips: string[] = [];
-                      if (tc?.tipoCerca?.viva) chips.push("Viva");
-                      if (tc?.tipoCerca?.electrica) chips.push("Eléctrica");
-                      if (tc?.tipoCerca?.pMuerto) chips.push("P. muerto");
-                      
-                      if (chips.length === 0) return null;
-                      
-                      return (
-                        <div key={tc?.id ?? i} className="flex flex-wrap gap-2">
-                          {chips.map((c, j) => (
-                            <span key={`${i}-${j}`} className="px-3 py-1 text-sm font-semibold rounded-lg bg-white border-2 border-[#EAEFE0] text-[#33361D]">
-                              {c}
-                            </span>
-                          ))}
-                        </div>
-                      );
-                    })}
-                  </div>
+              <Section title="Tipos de Cerca" icon={Fence}>
+                <div className="flex flex-wrap gap-2">
+                  {tiposCerca.map((tc: any, i: number) => {
+                    const chips: string[] = [];
+                    if (tc?.tipoCerca?.viva) chips.push("Viva");
+                    if (tc?.tipoCerca?.electrica) chips.push("Eléctrica");
+                    if (tc?.tipoCerca?.pMuerto) chips.push("P. muerto");
+                    return chips.map((c, j) => <Chip key={`${i}-${j}`}>{c}</Chip>);
+                  })}
                 </div>
-              </div>
+              </Section>
             )}
 
-            {/* Infraestructuras Disponibles */}
+            {/* Infraestructuras disponibles */}
             {Array.isArray(infraestructuras) && infraestructuras.length > 0 && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Infraestructuras Disponibles</h5>
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="space-y-2">
-                    {infraestructuras.map((il: any, i: number) => (
-                      <div key={il?.id ?? i} className="rounded border border-[#EAEFE0] bg-white p-3">
-                        <div className="text-sm font-semibold text-[#33361D]">
-                          {il?.infraestructura?.nombre ?? "—"}
-                        </div>
-                        {il?.infraestructura?.descripcion && (
-                          <div className="text-xs text-[#33361D] mt-1">
-                            {il.infraestructura.descripcion}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+              <Section title="Infraestructuras Disponibles" icon={Warehouse}>
+                <div className="space-y-2">
+                  {infraestructuras.map((il: any, i: number) => (
+                    <ListItem key={il?.id ?? i}>
+                      <div className="text-sm font-medium text-[#33361D]">{il?.infraestructura?.nombre ?? "—"}</div>
+                      {il?.infraestructura?.descripcion && (
+                        <div className="text-xs text-[#556B2F] mt-1">{il.infraestructura.descripcion}</div>
+                      )}
+                    </ListItem>
+                  ))}
                 </div>
-              </div>
+              </Section>
             )}
 
-            {/* Otros Equipos */}
+            {/* Otros equipos */}
             {Array.isArray(otrosEquipos) && otrosEquipos.length > 0 && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Otros Equipos</h5>
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="space-y-2">
-                    {otrosEquipos.map((oe: any, i: number) => (
-                      <div key={oe?.idFincaOtroEquipo ?? i} className="flex items-center justify-between gap-2 rounded border border-[#EAEFE0] bg-white px-3 py-2">
-                        <div className="text-sm font-semibold text-[#33361D]">
-                          {oe?.nombreEquipo ?? "—"}
-                        </div>
-                        <div className="text-xs text-[#33361D]">
-                          Cantidad: {oe?.cantidad ?? "—"}
-                        </div>
+              <Section title="Otros Equipos" icon={Wrench}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {otrosEquipos.map((oe: any, i: number) => (
+                    <ListItem key={oe?.idFincaOtroEquipo ?? i}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-[#33361D]">{oe?.nombreEquipo ?? "—"}</span>
+                        <span className="text-[#556B2F]">Cant: {oe?.cantidad ?? "—"}</span>
                       </div>
-                    ))}
-                  </div>
+                    </ListItem>
+                  ))}
                 </div>
-              </div>
+              </Section>
             )}
 
-             {Array.isArray(accesos) && accesos.length > 0 && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Vías de acceso</h5>
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="flex flex-wrap gap-2">
-                    {accesos.map((acceso: any, i: number) => (
-                      <span
-                        key={acceso?.idAcceso ?? i}
-                        className="px-3 py-1 text-sm font-semibold rounded-lg bg-white border-2 border-[#EAEFE0] text-[#33361D]"
-                      >
-                        {acceso?.nombre ?? "—"}
-                      </span>
-                    ))}
-                  </div>
+            {/* Vías de acceso */}
+            {Array.isArray(accesos) && accesos.length > 0 && (
+              <Section title="Vías de Acceso" icon={Route}>
+                <div className="flex flex-wrap gap-2">
+                  {accesos.map((acceso: any, i: number) => (
+                    <Chip key={acceso?.idAcceso ?? i}>{acceso?.nombre ?? "—"}</Chip>
+                  ))}
                 </div>
-              </div>
+              </Section>
             )}
 
+            {/* Canales */}
             {Array.isArray(canales) && canales.length > 0 && (
-              <div>
-                <h5 className="text-base font-bold text-[#33361D] mb-2">Canales de comercialización</h5>
-                <div className="rounded-xl bg-[#F8F9F3] p-4">
-                  <div className="flex flex-wrap gap-2">
-                    {canales.map((canal: any, i: number) => (
-                      <span
-                        key={canal?.idCanal ?? i}
-                        className="px-3 py-1 text-sm font-semibold rounded-lg bg-white border-2 border-[#EAEFE0] text-[#33361D]"
-                      >
-                        {canal?.nombre ?? "—"}
-                      </span>
-                    ))}
-                  </div>
+              <Section title="Canales de Comercialización" icon={Store}>
+                <div className="flex flex-wrap gap-2">
+                  {canales.map((canal: any, i: number) => (
+                    <Chip key={canal?.idCanal ?? i}>{canal?.nombre ?? "—"}</Chip>
+                  ))}
                 </div>
-              </div>
+              </Section>
             )}
-
           </>
         )}
       </div>
