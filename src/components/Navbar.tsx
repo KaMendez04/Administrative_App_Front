@@ -2,7 +2,8 @@ import { Menu, User } from "lucide-react";
 import React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { getCurrentUser, clearSession } from "../services/auth";
-import { showConfirmOutAlert } from "../utils/alerts"; 
+import { showConfirmOutAlert } from "../utils/alerts";
+import { NotificationDropdown } from "./Notification/NotificationDropdown";
 
 type Props = {
   isSidebarOpen: boolean;
@@ -31,7 +32,6 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
   const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
-  // Manejador actualizado para logout con confirmación
   const handleLogout = async () => {
     const confirmed = await showConfirmOutAlert(
       "Confirmar cierre de sesión",
@@ -78,37 +78,44 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
           <Menu className="w-6 h-6" />
         </button>
 
-        <div className="relative" ref={dropdownRef}>
-          <button
-            className="flex items-center gap-2 text-[#2E321B] hover:text-[#A3853D] transition"
-            onClick={toggleDropdown}
-          >
-            <User className="w-5 h-5" />
-            <span className="text-sm font-medium">{roleLabel}</span>
-          </button>
+        {/* Sección derecha con notificaciones y usuario */}
+        <div className="flex items-center gap-3">
+          {/* Dropdown de notificaciones */}
+          <NotificationDropdown />
 
-          {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg border border-gray-200 z-50">
-              <div className="py-2">
-                <div
-                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    navigate({ to: "/account/change-password" });
-                  }}
-                >
-                  Cambiar Contraseña
-                </div>
+          {/* Usuario dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              className="flex items-center gap-2 text-[#2E321B] hover:text-[#A3853D] transition"
+              onClick={toggleDropdown}
+            >
+              <User className="w-5 h-5" />
+              <span className="text-sm font-medium">{roleLabel}</span>
+            </button>
 
-                <div
-                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                  onClick={handleLogout}
-                >
-                  Cerrar Sesión
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg border border-gray-200 z-50">
+                <div className="py-2">
+                  <div
+                    className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      navigate({ to: "/account/change-password" });
+                    }}
+                  >
+                    Cambiar Contraseña
+                  </div>
+
+                  <div
+                    className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    Cerrar Sesión
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </nav>

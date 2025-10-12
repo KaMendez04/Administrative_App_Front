@@ -1,26 +1,28 @@
-import { useNavigate } from "@tanstack/react-router"
-import { JsonPrincipalType } from "../models/PrincipalType"
-import { getCurrentUser } from "../services/auth"   // 👈 trae el rol desde tu sesión
+import { useNavigate } from "@tanstack/react-router";
+import { JsonPrincipalType } from "../models/PrincipalType";
+import { getCurrentUser } from "../services/auth";
+import { useSolicitudesPolling } from "../hooks/notification/useSolicitudesPolling";
 
 export default function Principal() {
-  const modules = JsonPrincipalType
-  const navigate = useNavigate()
+  const modules = JsonPrincipalType;
+  const navigate = useNavigate();
 
-  // 👇 Rol actual
-  const role = getCurrentUser()?.role?.name?.toUpperCase()
-  const isAdmin = role === "ADMIN"
+  const role = getCurrentUser()?.role?.name?.toUpperCase();
+  const isAdmin = role === "ADMIN";
+
+  // Activar polling de solicitudes
+  useSolicitudesPolling();
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <main className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {modules.map((module, index) => {
-            const IconComponent = module.icon
+            const IconComponent = module.icon;
 
-            // Oculta card de "Gestión de contenido público" para JUNTA:
-            // Si ese card navega a cualquier ruta bajo /edition, no lo renderizamos
+            // Oculta card de "Gestión de contenido público" para JUNTA
             if (!isAdmin && typeof module.route === "string" && module.route.startsWith("/edition/principal")) {
-              return null
+              return null;
             }
 
             return (
@@ -52,10 +54,10 @@ export default function Principal() {
                   </button>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </main>
     </div>
-  )
+  );
 }

@@ -39,11 +39,6 @@ export const sidebarItems: SidebarItem[] = [
     icon: User,
   },
   {
-    title: "Usuarios",
-    href: "/users",
-    icon: Users,
-  },
-  {
     title: "Manuales",
     href: "/manuals",
     icon: Book,

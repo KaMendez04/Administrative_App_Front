@@ -2,6 +2,8 @@ import { Outlet } from '@tanstack/react-router'
 import { AppSidebar } from '../components/Sidebar'
 import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
+import { Toaster } from 'sonner'
+import { NotificationProvider } from '../components/Notification/NotificationContext'
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -17,10 +19,17 @@ export default function Home() {
   }, [])
 
   return (
-    <>
+    <NotificationProvider>
       <Navbar isSidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <AppSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} isMobile={isMobile} />
       <Outlet />
-    </>
+      
+      <Toaster 
+        position="top-right" 
+        expand={true}
+        richColors
+        closeButton
+      />
+    </NotificationProvider>
   )
 }
