@@ -23,7 +23,7 @@ export default function InitialPage() {
   const spendTotalDiff = spendTotalReal - spendTotalProjected
 
   return (
-    <div key={current?.id ?? "nofy"} className="min-h-screen">
+    <div key={current?.id ?? "nofy"} className="min-h-screen bg-[#f3f8ef]">
       <div className="mx-auto max-w-6xl p-4 md:p-8 bg-[#f3f8ef]" >
         <div className="rounded-2xl bg-white shadow-sm p-6 md:p-10">
           <div className="flex justify-end mb-6">
