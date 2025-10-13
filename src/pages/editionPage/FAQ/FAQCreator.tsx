@@ -19,7 +19,7 @@ export default function FAQCreator({ onSubmit }: any) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
       <input
         type="text"
         placeholder="Pregunta"

@@ -17,7 +17,7 @@ export default function EventEdition() {
   } = useEvents()
 
   return (
-    <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection />
 
@@ -29,13 +29,13 @@ export default function EventEdition() {
         </div>
 
         {/* Crear evento */}
-        <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow mb-12">
+        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow mb-12">
           <h2 className="text-2xl font-semibold mb-6">Agregar nuevo Evento</h2>
           <EventCreator onSubmit={handleCreate} />
         </div>
 
         {/* Editar evento */}
-        <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow">
+        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
           <h2 className="text-2xl font-semibold mb-6">Editar Evento Existente</h2>
           <EventEditor
             events={events}

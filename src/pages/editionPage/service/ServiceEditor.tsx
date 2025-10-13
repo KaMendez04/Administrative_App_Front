@@ -48,7 +48,7 @@ export default function ServicesInformativeEditor({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
       <select
         className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
         value={selectedId ?? ""}
@@ -59,7 +59,7 @@ export default function ServicesInformativeEditor({
       </select>
 
       {selected && (
-        <div className="space-y-4 border border-gray-300 p-6 rounded-xl">
+        <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-4">
               <div>

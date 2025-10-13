@@ -15,7 +15,7 @@ export default function FAQEdition() {
   } = useFaqManager()
 
   return (
-    <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection />
 
@@ -27,13 +27,13 @@ export default function FAQEdition() {
         </div>
 
         {/* Agregar nueva FAQ */}
-        <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow mb-12">
+        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow mb-12">
           <h2 className="text-2xl font-semibold mb-6">Agregar nueva Pregunta Frecuente</h2>
           <FAQCreator onSubmit={handleCreate} />
         </div>
 
         {/* Editar/eliminar FAQ existente */}
-        <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow">
+        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
           <h2 className="text-2xl font-semibold mb-6">Editar Pregunta Frecuente</h2>
           <FAQEditor
             faqs={faqs}

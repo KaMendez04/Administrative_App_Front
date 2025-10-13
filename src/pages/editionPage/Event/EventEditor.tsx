@@ -47,7 +47,7 @@ export default function EventEditor({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
       <select
         value={selectedEventId ?? ""}
         onChange={(e) => setSelectedEventId(e.target.value ? Number(e.target.value) : null)}

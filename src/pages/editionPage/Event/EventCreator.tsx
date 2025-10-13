@@ -20,7 +20,7 @@ export default function EventCreator({ onSubmit }: { onSubmit: (data: EventInput
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
       <div>
         <input
           type="text"

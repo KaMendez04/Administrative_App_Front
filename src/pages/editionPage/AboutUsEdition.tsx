@@ -38,7 +38,7 @@ export default function AboutUsEdition() {
   const leftVision  = Math.max(0, MAX - (vision?.length ?? 0))
 
   return (
-    <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection />
 
@@ -49,7 +49,7 @@ export default function AboutUsEdition() {
           </p>
         </div>
 
-        <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow">
+        <div className="bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-8 shadow">
           <h2 className="text-2xl font-semibold mb-6">{isEditing ? "Editar existente" : "Crear secciones"}</h2>
 
           {loading ? (

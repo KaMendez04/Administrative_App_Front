@@ -37,7 +37,7 @@ export function EditableBenefits({
   };
 
   return (
-    <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-5">
+    <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-5">
       <h2 className="text-2xl font-semibold">Editar Beneficio</h2>
 
       <select

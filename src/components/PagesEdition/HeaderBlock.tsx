@@ -39,7 +39,7 @@ export function HeaderBlock({
   };
 
   return (
-    <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-4">
+    <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-4">
       <h2 className="text-2xl font-semibold">Editar Encabezado</h2>
 
       <div>

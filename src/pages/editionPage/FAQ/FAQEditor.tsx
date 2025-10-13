@@ -48,7 +48,7 @@ export default function FAQEditor({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
       {/* Selector */}
       <select
         className="w-full border border-gray-300 rounded-md px-4 py-2"

@@ -22,7 +22,7 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
     }
   }
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
       <div>
         <input
           className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"

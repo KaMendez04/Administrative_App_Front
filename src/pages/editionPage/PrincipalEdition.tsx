@@ -49,7 +49,7 @@ function PrincipalEdition() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Navegación superior */}
         <NavbarEditionSection />
@@ -65,14 +65,14 @@ function PrincipalEdition() {
         </div>
 
         {/* Contenido */}
-        <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-8 shadow">
+        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-2">
               {isEditing ? "Editar existente" : "Crear registro"}
             </h2>
 
             {!isEditing && (
-              <div className="mt-3 p-3 bg-[#F5F7EC] border-l-4 border-[#708C3E] rounded-md">
+              <div className="mt-3 p-3 bg-[#FFFFFF] border-l-4 border-[#708C3E] rounded-md">
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold text-[#2E321B]">Título (fijo):</span>{" "}
                   <span className="italic text-[#475C1D]">{DEFAULT_TITLE}</span>

@@ -21,11 +21,11 @@ export default function AssociatesEdition() {
   } = useAssociatesEdition();
 
   return (
-    <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection/>
 
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 ">
           <h1 className="text-4xl font-bold mb-2">Edición de la Sección Sobre Asociados</h1>
           <p className="text-base text-[#475C1D]">
             Edita cada bloque y guarda desde sus propios botones.
@@ -44,7 +44,7 @@ export default function AssociatesEdition() {
         ) : (
           <>
             {/* Encabezado con botones locales */}
-            <div className="mb-12">
+            <div className="mb-12 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-8 shadow">
               <HeaderBlock
                 title={headerTitle}
                 desc={headerDescription}
@@ -59,7 +59,7 @@ export default function AssociatesEdition() {
             </div>
 
             {/* Beneficios con select + botones locales */}
-            <div className="mb-12">
+            <div className="mb-12 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-8 shadow">
               <EditableBenefits
                 items={benefits}
                 index={benefitIndex}
@@ -74,7 +74,7 @@ export default function AssociatesEdition() {
             </div>
 
             {/* Requisitos con select, agregar/eliminar + botones locales */}
-            <div className="mb-12">
+            <div className="mb-12 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-8 shadow">
               <EditableRequirements
                 items={requirements}
                 index={requirementIndex}

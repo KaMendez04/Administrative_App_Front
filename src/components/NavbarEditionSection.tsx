@@ -23,14 +23,14 @@ export default function NavbarEditionSection() {
         sticky top-16 w-full
         z-0                          /* ↓↓↓ MANDADO AL FONDO */
         bg-gradient-to-r from-slate-50/30 to-white/30
-        backdrop-blur-sm supports-[backdrop-filter]:bg-white/20
+        backdrop-blur-sm supports-[backdrop-filter]:bg-white/20 bg-[#f3f8ef]
       "
     >
-      <nav className="mx-8px max-w-7xl px-4 py-4 flex flex-col items-center ">
+      <nav className="mx-8px max-w-7xl px-4 py-4 flex flex-col items-center bg-[#f3f8ef] ">
         <div
           className="
-            rounded-2xl border border-white/40
-            bg-white/40 backdrop-blur-md
+            rounded-2xl border border-white/60
+            bg-white backdrop-blur-md
             shadow-sm shadow-slate-900/5
             p-2
             mb-5px

@@ -22,7 +22,7 @@ export default function VolunteersEdition() {
   } = useVolunteersEdition();
 
   return (
-    <div className="min-h-screen bg-white text-[#2E321B] py-16 px-4">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] py-16 px-4">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection/>
 
@@ -45,7 +45,7 @@ export default function VolunteersEdition() {
         ) : (
           <>
             {/* Encabezado con botones locales */}
-            <div className="mb-12">
+            <div className="mb-12 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
               <HeaderBlock
                 title={headerTitle}
                 desc={headerDescription}
@@ -60,7 +60,7 @@ export default function VolunteersEdition() {
             </div>
 
             {/* Beneficios con select + botones locales */}
-            <div className="mb-12">
+            <div className="mb-12 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
               <EditableBenefits
                 items={benefits}
                 index={benefitIndex}

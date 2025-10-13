@@ -41,7 +41,7 @@ export function EditableRequirements({
   };
 
   return (
-    <div className="bg-[#FAF9F5] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-4">
+    <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold">Requisitos</h2>
       </div>
