@@ -24,8 +24,7 @@ export default function BudgetSubnav() {
     exact ? pathname === path : pathname.startsWith(path)
 
   return (
-    <div className="sticky top-16 z-0 w-full bg-gradient-to-r from-slate-50/80 to-white/80 backdrop-blur-md border-b border-slate-200/40">
-      <nav className="mx-auto max-w-7xl px-4 py-4 flex flex-col items-center">
+<div className="sticky top-16 z-40 w-full bg-[#f3f8ef] from-slate-50/80 to-white/80 backdrop-blur-md border-b border-slate-200/40">      <nav className="mx-auto max-w-7xl px-4 py-4 flex flex-col items-center">
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg shadow-slate-900/5 p-2">
           <ul className="relative flex flex-wrap justify-center gap-1">
             {visibleItems.map((item) => {

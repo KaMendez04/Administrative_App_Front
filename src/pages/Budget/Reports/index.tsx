@@ -16,7 +16,7 @@ export default function Reports() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#f3f8ef]">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
         <div className="relative rounded-3xl bg-white shadow-[0_10px_25px_rgba(0,0,0,0.05)] ring-1 ring-gray-100 p-6 md:p-10">
           <nav className="mb-6 flex flex-wrap justify-center gap-6 relative">
