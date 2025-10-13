@@ -6,7 +6,7 @@ import {
   createColumnHelper,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Eye, CheckCircle, XCircle } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Download } from "lucide-react";
 import { useAdminSolicitudesList } from "../../hooks/associates/useAdminSolicitudesList";
 import { useAdminSolicitudDetail } from "../../hooks/associates/useAdminSolicitudDetail";
 import { useApproveSolicitud } from "../../hooks/associates/useApproveSolicitud";
@@ -14,6 +14,7 @@ import { useRejectSolicitud } from "../../hooks/associates/useRejectSolicitud";
 import { RejectDialog } from "../../components/associates/RejectDialog";
 import { SolicitudViewModal } from "../../components/associates/SolicitudViewModal";
 import { getCurrentUser } from "../../services/auth";
+import { useDownloadSolicitudPDF } from "../../hooks/associates/useDownloadSolicitudPDF";
 
 type SolicitudRow = {
   idSolicitud: number;
@@ -69,7 +70,7 @@ export default function AdminRequestsPage() {
 
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
-  
+   const downloadPDF = useDownloadSolicitudPDF();
   const { data: viewDetail, isLoading: isLoadingDetail } = useAdminSolicitudDetail(viewId ?? 0);
 
   const columnHelper = createColumnHelper<SolicitudRow>();
@@ -144,6 +145,28 @@ export default function AdminRequestsPage() {
             aria-label="Ver detalles de la solicitud"
           >
             <Eye className="w-5 h-5" />
+          </button>
+          {/* 🔸 Botón Descargar PDF */}
+          <button
+            onClick={() => {
+              // Primero obtener la data completa
+              const solicitudCompleta = data?.items.find(
+                s => s.idSolicitud === info.row.original.idSolicitud
+              );
+              
+              if (solicitudCompleta) {
+                downloadPDF.mutate({
+                  solicitud: solicitudCompleta,
+                  associate: solicitudCompleta.asociado,
+                  fincas: solicitudCompleta.asociado?.fincas || []
+                });
+              }
+            }}
+            disabled={downloadPDF.isPending}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#5B732E] border-2 border-[#5B732E] text-white hover:bg-[#556B2F] hover:border-[#556B2F] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Descargar PDF"
+          >
+            <Download className="w-4 h-4" />
           </button>
 
           {/* Botones Aprobar/Rechazar - solo si está PENDIENTE y no es read-only */}

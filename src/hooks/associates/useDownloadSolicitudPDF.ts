@@ -1,34 +1,47 @@
+// hooks/associates/useDownloadSolicitudPDF.ts
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import apiConfig from "../../services/apiConfig";
+import { generateSolicitudPDF } from "../../services/Associates/pdfGenerator";
+import { loadCompleteFincaData } from "../../utils/loadCompleteFincaData";
+
+type DownloadPDFParams = {
+  solicitud: any;
+  associate?: any;
+  fincas?: any[];
+};
 
 export function useDownloadSolicitudPDF() {
-  return useMutation<Blob, unknown, number>({
-    mutationFn: async (idSolicitud: number) => {
-      const response = await apiConfig.get(`/solicitudes/${idSolicitud}/pdf`, {
-        responseType: "blob",
-      });
-      return response.data as Blob;
+  return useMutation({
+    mutationFn: async ({ solicitud, associate, fincas }: DownloadPDFParams) => {
+      const fincasBasicas = fincas || solicitud.asociado?.fincas || [];
+      
+      // 🔸 Cargar info completa de cada finca
+      const fincasCompletas = await Promise.all(
+        fincasBasicas.map(async (finca: any) => {
+          const dataCompleta = await loadCompleteFincaData(finca.idFinca);
+          return {
+            ...finca,
+            ...dataCompleta,
+          };
+        })
+      );
+
+      // Generar PDF con data completa
+      const doc = generateSolicitudPDF(
+        solicitud,
+        associate || solicitud.asociado,
+        fincasCompletas
+      );
+
+      // Descargar
+      doc.save(`solicitud-${solicitud.idSolicitud}.pdf`);
     },
-    onSuccess: (blob: Blob, idSolicitud: number) => {
-      // Crear URL temporal del blob
-      const url = window.URL.createObjectURL(blob);
-      
-      // Crear link temporal y hacer click
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `solicitud-${idSolicitud}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      
-      // Limpiar
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
+    onSuccess: () => {
       toast.success("PDF descargado exitosamente");
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || "Error al descargar PDF";
+      console.error('Error generando PDF:', error);
+      const message = error.message || "Error al generar PDF";
       toast.error("Error", {
         description: message,
       });
