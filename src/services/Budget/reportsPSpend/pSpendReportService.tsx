@@ -1,9 +1,10 @@
 import apiConfig from "../../../services/apiConfig";
 import {
-  listDepartments as fetchDepartments,
-  listSpendTypes as fetchSpendTypes,
-  listSpendSubTypes as fetchSpendSubTypes,
-} from "../reportsSpend/catalogLookupService";
+  listDepartments,
+  listPSpendTypes,      // ✅ Importar de proyecciones
+  listPSpendSubTypes,   // ✅ Importar de proyecciones
+} from "../projectionSpendService";
+
 import type {
   Department,
   SpendType,
@@ -26,7 +27,6 @@ async function downloadBlob(url: string, filename: string) {
   const contentType = (headers["content-type"] as string) || "application/octet-stream";
   const disposition = headers["content-disposition"] as string | undefined;
 
-  // Try to extract filename from Content-Disposition
   let suggestedName = filename;
   if (disposition) {
     const matchStar = disposition.match(/filename\*=([^;]+)/i);
@@ -55,7 +55,6 @@ async function downloadBlob(url: string, filename: string) {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  // Revoke after a short delay to avoid potential race conditions in some browsers
   setTimeout(() => URL.revokeObjectURL(href), 1000);
 }
 
@@ -63,17 +62,34 @@ export const pSpendService = {
   downloadSpendCompareExcel,
   downloadPSpendListExcel,
 
-  // ===== Catálogos =====
+  // ===== Catálogos (CORREGIDOS) =====
   async listDepartments(): Promise<Department[]> {
-    return await fetchDepartments();
+    const result = await listDepartments();
+    return result.data ?? [];
   },
 
   async listSpendTypes(departmentId?: number): Promise<SpendType[]> {
-    return await fetchSpendTypes(departmentId);
+    if (!departmentId) return [];
+    const result = await listPSpendTypes(departmentId);
+    // Mapear al formato esperado
+    return (result.data ?? []).map(t => ({
+      id: t.id,
+      name: t.name,
+      departmentId: t.departmentId,
+      // Agregar campos opcionales si los necesitas
+    }));
   },
 
   async listSpendSubTypes(spendTypeId?: number): Promise<SpendSubType[]> {
-    return await fetchSpendSubTypes(spendTypeId);
+    if (!spendTypeId) return [];
+    const result = await listPSpendSubTypes(spendTypeId);
+    // Mapear al formato esperado
+    return (result.data ?? []).map(s => ({
+      id: s.id,
+      name: s.name,
+      pSpendTypeId: s.pSpendTypeId,
+      // Agregar campos opcionales si los necesitas
+    }));
   },
 
   async getSpendReport(params: SpendFilters): Promise<ReportSpend> {
@@ -81,22 +97,21 @@ export const pSpendService = {
     return data;
   },
 
-  // ===== PDF COMPARATIVO (real vs. proyectado) =====
+  // ===== PDF COMPARATIVO =====
   previewSpendComparePDF(filters: SpendFilters) {
     const base = (apiConfig.defaults.baseURL ?? "").replace(/\/$/, "");
     const qs = buildParams({ ...filters, preview: "true" });
-    // Abrimos en nueva pestaña
     window.open(`${base}/report-proj/spend/pdf?${qs}`, "_blank");
   },
 
   async downloadSpendComparePDF(filters: SpendFilters) {
     const base = (apiConfig.defaults.baseURL ?? "").replace(/\/$/, "");
-    const qs = buildParams({ ...filters }); // sin preview -> attachment
+    const qs = buildParams({ ...filters });
     const filename = `reporte-comparativo-egresos-${new Date().toISOString().slice(0, 10)}.pdf`;
     await downloadBlob(`${base}/report-proj/spend/pdf?${qs}`, filename);
   },
 
-  // ===== (Opcional) PDF de LISTADO PSpend (solo proyectados) =====
+  // ===== PDF LISTADO PSpend =====
   previewPSpendListPDF(filters: SpendFilters) {
     const base = (apiConfig.defaults.baseURL ?? "").replace(/\/$/, "");
     const qs = buildParams({ ...filters, preview: "true" });
@@ -110,6 +125,7 @@ export const pSpendService = {
     await downloadBlob(`${base}/report-proj/pspend/pdf?${qs}`, filename);
   },
 };
+
 // ===== EXCEL: Comparativo de Egresos =====
 async function downloadSpendCompareExcel(filters: SpendFilters) {
   const base = (apiConfig.defaults.baseURL ?? "").replace(/\/$/, "");
@@ -118,7 +134,7 @@ async function downloadSpendCompareExcel(filters: SpendFilters) {
   await downloadBlob(`${base}/report-proj/spend/excel?${qs}`, filename);
 }
 
-// ===== EXCEL: Listado de Gastos Proyectados (pSpend) =====
+// ===== EXCEL: Listado de Gastos Proyectados =====
 async function downloadPSpendListExcel(filters: SpendFilters) {
   const base = (apiConfig.defaults.baseURL ?? "").replace(/\/$/, "");
   const qs = buildParams({ ...filters });
