@@ -1,4 +1,5 @@
 import { showConfirmAlert, showSuccessAlert, showConfirmDeleteAlert } from "../../utils/alerts";
+import { CustomSelect } from "../CustomSelect";
 
 export function EditableRequirements({
   items, index, setIndex, limits,
@@ -15,7 +16,7 @@ export function EditableRequirements({
 }) {
   const current = index >= 0 ? items[index] : null;
 
-  // usa el valor actual para el contador (evita que quede “pegado”)
+  // usa el valor actual para el contador (evita que quede "pegado")
   const leftEdit = current ? limits.requirement - (current.text?.length ?? 0) : limits.requirement;
 
   const handleSaveClick = async () => {
@@ -40,22 +41,28 @@ export function EditableRequirements({
     if (confirmed) onRemove(index);
   };
 
+  // 👇 Transformar requisitos a opciones para el CustomSelect
+  const requirementOptions = [
+    { value: -1, label: "Selecciona un requisito" }, // Opción placeholder
+    ...items.map((r, i) => ({
+      value: i,
+      label: r.text.slice(0, 60)
+    }))
+  ];
+
   return (
     <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold">Requisitos</h2>
       </div>
 
-      <select
-        className="w-full border border-gray-300 rounded-md px-4 py-2"
+      {/* Selector - Reemplazado por CustomSelect */}
+      <CustomSelect
         value={index}
-        onChange={(e) => setIndex(Number(e.target.value))}
-      >
-        <option value={-1}>Selecciona un requisito</option>
-        {items.map((r, i) => (
-          <option key={i} value={i}>{r.text.slice(0, 60)}</option>
-        ))}
-      </select>
+        onChange={(value) => setIndex(Number(value))}
+        options={requirementOptions}
+        placeholder="Selecciona un requisito"
+      />
 
       {current && (
         <div className="border border-gray-300 rounded-xl p-4">
@@ -73,12 +80,12 @@ export function EditableRequirements({
       )}
 
       <div className="flex justify-end gap-3 pt-2">
-         <button
+        <button
           type="button"
           onClick={handleSaveClick}
           disabled={!canSave || saving}
-          className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50${
-            !canSave || saving ? "bg-gray-400" : "bg-[#708C3E] hover:bg-green-50"
+          className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50 ${
+            !canSave || saving ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
           {saving ? "Guardando…" : "Guardar"}
@@ -95,7 +102,7 @@ export function EditableRequirements({
           onClick={handleDeleteClick}
           className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 flex items-center gap-2 font-semibold"
         >
-           Eliminar
+          Eliminar
         </button>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { showSuccessAlert, showSuccessDeleteAlert, showConfirmDeleteAlert } from "../../../utils/alerts"
+import { CustomSelect } from "../../../components/CustomSelect"
 
 export default function FAQEditor({
   faqs,
@@ -47,23 +48,21 @@ export default function FAQEditor({
     }
   }
 
+  // 👇 Transformar FAQs a opciones para el CustomSelect
+  const faqOptions = faqs.map((faq: any) => ({
+    value: faq.id,
+    label: faq.question
+  }))
+
   return (
     <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-      {/* Selector */}
-      <select
-        className="w-full border border-gray-300 rounded-md px-4 py-2"
+      {/* Selector - Reemplazado por CustomSelect */}
+      <CustomSelect
         value={selectedFaqId ?? ""}
-        onChange={(e) => setSelectedFaqId(Number(e.target.value))}
-      >
-        <option value="" disabled>
-          Selecciona una pregunta para editar
-        </option>
-        {faqs.map((faq: any) => (
-          <option key={faq.id} value={faq.id}>
-            {faq.question}
-          </option>
-        ))}
-      </select>
+        onChange={(value) => setSelectedFaqId(Number(value))}
+        options={faqOptions}
+        placeholder="Selecciona una pregunta para editar"
+      />
 
       {/* Formulario */}
       {selectedFaq && (
@@ -74,7 +73,7 @@ export default function FAQEditor({
               type="text"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              maxLength={MAX_Q} /* límite 75 */
+              maxLength={MAX_Q}
               className="w-full border border-gray-300 rounded-md px-4 py-2"
             />
             <p className="mt-1 text-xs text-gray-500">
@@ -88,7 +87,7 @@ export default function FAQEditor({
               rows={4}
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              maxLength={MAX_A} /* límite 250 */
+              maxLength={MAX_A}
               className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none"
             />
             <p className="mt-1 text-xs text-gray-500">

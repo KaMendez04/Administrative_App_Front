@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { showSuccessAlert, showSuccessDeleteAlert, showConfirmDeleteAlert } from "../../../utils/alerts"
-
+import { CustomSelect } from "../../../components/CustomSelect"
 export default function EventEditor({
   events,
   selectedEventId,
@@ -45,23 +45,20 @@ export default function EventEditor({
       showSuccessDeleteAlert('Eliminación completada')
     }
   }
+  // Mapear eventos para el CustomSelect
+  const eventOptions = events.map((event: any) => ({
+    value: event.id,
+    label: event.title
+  }))
 
   return (
     <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-      <select
+      <CustomSelect
         value={selectedEventId ?? ""}
-        onChange={(e) => setSelectedEventId(e.target.value ? Number(e.target.value) : null)}
-        className="w-full border border-gray-300 rounded-md px-4 py-2"
-      >
-        <option value="" disabled>
-          Selecciona un evento para editar
-        </option>
-        {events.map((event: any) => (
-          <option key={event.id} value={event.id}>
-            {event.title}
-          </option>
-        ))}
-      </select>
+        onChange={(value) => setSelectedEventId(value ? Number(value) : null)}
+        options={eventOptions}
+        placeholder="Selecciona un evento para editar"
+      />
 
       {selectedEvent && (
         <div className="space-y-4 border border-gray-300 p-6 rounded-xl">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { showSuccessAlert, showSuccessDeleteAlert, showConfirmDeleteAlert } from "../../../utils/alerts"
+import { CustomSelect } from "../../../components/CustomSelect"
 
 export default function ServicesInformativeEditor({
   items,
@@ -47,16 +48,21 @@ export default function ServicesInformativeEditor({
     }
   }
 
+  // 👇 Transformar servicios a opciones para el CustomSelect
+  const serviceOptions = items.map((s: any) => ({
+    value: s.id,
+    label: s.title
+  }))
+
   return (
     <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-      <select
-        className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+      {/* Selector - Reemplazado por CustomSelect */}
+      <CustomSelect
         value={selectedId ?? ""}
-        onChange={(e) => setSelectedId(e.target.value ? Number(e.target.value) : null)}
-      >
-        <option value="" disabled>Selecciona un servicio</option>
-        {items.map((s:any) => <option key={s.id} value={s.id}>{s.title}</option>)}
-      </select>
+        onChange={(value) => setSelectedId(value ? Number(value) : null)}
+        options={serviceOptions}
+        placeholder="Selecciona un servicio"
+      />
 
       {selected && (
         <div className="space-y-4">

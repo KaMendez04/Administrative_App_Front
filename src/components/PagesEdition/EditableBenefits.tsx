@@ -1,5 +1,6 @@
 import { LucideIcon } from "../common/lucideIcon";
 import { showConfirmAlert, showSuccessAlert } from "../../utils/alerts";
+import { CustomSelect } from "../CustomSelect"; // 👈 Ajusta la ruta según tu estructura
 
 export function EditableBenefits({
   items, index, setIndex, limits,
@@ -36,19 +37,23 @@ export function EditableBenefits({
     if (confirmed) onCancel();
   };
 
+  // 👇 Transformar beneficios a opciones para el CustomSelect
+  const benefitOptions = items.map((it, i) => ({
+    value: i,
+    label: it.title || `Beneficio #${i + 1}`
+  }));
+
   return (
     <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-5">
       <h2 className="text-2xl font-semibold">Editar Beneficio</h2>
 
-      <select
-        className="w-full border border-gray-300 rounded-md px-4 py-2"
+      {/* Selector - Reemplazado por CustomSelect */}
+      <CustomSelect
         value={index}
-        onChange={(e) => setIndex(Number(e.target.value))}
-      >
-        {items.map((it, i) => (
-          <option key={i} value={i}>{it.title || `Beneficio #${i + 1}`}</option>
-        ))}
-      </select>
+        onChange={(value) => setIndex(Number(value))}
+        options={benefitOptions}
+        placeholder="Selecciona un beneficio"
+      />
 
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-white border flex items-center justify-center">
@@ -84,7 +89,7 @@ export function EditableBenefits({
         <button
           onClick={handleSaveClick}
           disabled={!canSave || saving}
-          className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50${!canSave || saving ? "bg-gray-400" : "bg-[#708C3E] hover:bg-green-50"}`}
+          className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50 ${!canSave || saving ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           {saving ? "Guardando…" : "Guardar"}
         </button>
