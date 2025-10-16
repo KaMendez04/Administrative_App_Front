@@ -41,7 +41,7 @@ import SpendReportPage from '../pages/Budget/Reports/SpendReportPage'
 import PSpends from '../pages/Budget/Reports/PSpends'
 import PIncomeProjectionsPage from '../pages/Budget/Reports/PIncome'
 import ExtraReportPage from '../pages/Budget/Reports/extraReportPage'
-import AssociatesSubnav from '../pages/Budget/Navbar/AssociatesSubnav'
+import AssociatesSubnav from '../pages/associates/AssociatesSubnav'
 import AssociatesApprovedPage from '../pages/associates/AssociatesApprovedPage'
 import AdminRequestsPage from '../pages/associates/AdminRequestPage'
 
