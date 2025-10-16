@@ -77,12 +77,12 @@ export function RequestsTable({
       size: 110,
       cell: (info) => (
         <span
-          className={`inline-block px-2 py-1 rounded-lg text-xs font-bold ${
+          className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold ${
             info.getValue() === "PENDIENTE"
               ? "bg-yellow-100 text-yellow-800"
               : info.getValue() === "APROBADO"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              ? "bg-[#E6EDC8] text-[#5A7018]"
+              : "bg-[#F7E9E6] text-[#8C3A33]"
           }`}
         >
           {info.getValue()}

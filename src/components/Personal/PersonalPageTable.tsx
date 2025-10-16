@@ -1,37 +1,96 @@
-// src/components/PersonalPageTable.tsx
-import { flexRender, type Table } from "@tanstack/react-table"
-import type { PersonalPageType } from "../../models/PersonalPageType"
+import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
+import { GenericTable } from "../GenericTable";
+import { ActionButtons } from "../ActionButtons";
+import type { PersonalPageType } from "../../models/PersonalPageType";
 
+type PersonalTableProps = {
+  data: PersonalPageType[];
+  isLoading: boolean;
+  isReadOnly: boolean;
+  onView: (item: PersonalPageType) => void;
+  onEdit: (item: PersonalPageType) => void;
+};
 
-interface PersonalPageTableProps {
-  table: Table<PersonalPageType>
-}
+export function PersonalTable({
+  data,
+  isLoading,
+  isReadOnly,
+  onView,
+  onEdit,
+}: PersonalTableProps) {
+  const columnHelper = createColumnHelper<PersonalPageType>();
 
-export function PersonalPageTable({ table }: PersonalPageTableProps) {
-  return (
-    <table className="min-w-full divide-y divide-gray-200 text-base">
-      <thead className="bg-[#EEF4D8] text-[#374321]">
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id} className="font-semibold text-center">
-            {headerGroup.headers.map((header) => (
-              <th key={header.id} className="px-5 py-4">
-                {flexRender(header.column.columnDef.header, header.getContext())}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody className="divide-y divide-[#f1f1f1] text-gray-800 text-center">
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id} className="hover:bg-[#F9FAF6] transition duration-200">
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} className="px-5 py-4">
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )
+  const columns: ColumnDef<PersonalPageType, any>[] = [
+    columnHelper.accessor("IDE", {
+      header: "Cédula",
+      size: 120,
+      cell: (info) => (
+        <div className="font-medium text-[#33361D]">{info.getValue()}</div>
+      ),
+    }),
+    columnHelper.accessor(
+      (row) => `${row.name} ${row.lastname1} ${row.lastname2}`,
+      {
+        id: "nombreCompleto",
+        header: "Nombre Completo",
+        size: 250,
+        cell: (info) => (
+          <div className="font-medium text-[#33361D] truncate" title={info.getValue()}>
+            {info.getValue()}
+          </div>
+        ),
+      }
+    ),
+    columnHelper.accessor("phone", {
+      header: "Teléfono",
+      size: 120,
+      cell: (info) => <div className="text-[#33361D]">{info.getValue()}</div>,
+    }),
+    columnHelper.accessor("email", {
+      header: "Email",
+      size: 180,
+      cell: (info) => (
+        <div className=" text-[#33361D] truncate" title={info.getValue()}>
+          {info.getValue()}
+        </div>
+      ),
+    }),
+    columnHelper.accessor("occupation", {
+      header: "Puesto",
+      size: 150,
+      cell: (info) => (
+        <div className="text-[#33361D]">{info.getValue()}</div>
+      ),
+    }),
+    columnHelper.accessor("isActive", {
+      header: "Estado",
+      size: 100,
+      cell: (info) => (
+        <span
+          className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold ${
+            info.getValue()
+              ? "bg-[#E6EDC8] text-[#5A7018]"
+              : "bg-[#F7E9E6] text-[#8C3A33]"
+          }`}
+        >
+          {info.getValue() ? "Activo" : "Inactivo"}
+        </span>
+      ),
+    }),
+    columnHelper.display({
+      id: "acciones",
+      header: () => <div className="text-center">Acciones</div>,
+      size: 150,
+      cell: (info) => (
+        <ActionButtons
+          onView={() => onView(info.row.original)}
+          onEdit={() => onEdit(info.row.original)}
+          showEdit={true}
+          isReadOnly={isReadOnly}
+        />
+      ),
+    }),
+  ];
+
+  return <GenericTable data={data} columns={columns} isLoading={isLoading} />;
 }

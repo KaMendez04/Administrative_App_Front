@@ -75,7 +75,7 @@ export function AssociatesTable({
       size: 90,
       cell: (info) => (
         <span
-          className={`inline-block justify-center items-center px-2 py-1 rounded-lg text-xs font-bold ${
+          className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold ${
             info.getValue()
               ? "bg-[#E6EDC8] text-[#5A7018]"
               : "bg-[#F7E9E6] text-[#8C3A33]"
