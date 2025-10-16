@@ -21,7 +21,7 @@ export default function AssociatesEdition() {
   } = useAssociatesEdition();
 
   return (
-    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] py-16 px-4">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B]">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection/>
 

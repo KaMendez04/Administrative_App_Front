@@ -75,7 +75,7 @@ export function GenericTable<T>({
                     <td
                       key={cell.id}
                       style={{ width: `${cell.column.getSize()}px` }}
-                      className="px-4 py-3 text-sm"
+                      className="px-4 text-center py-3 text-sm"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

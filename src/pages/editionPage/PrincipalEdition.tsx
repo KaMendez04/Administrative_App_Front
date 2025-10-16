@@ -5,8 +5,6 @@ import BackButton from "../../components/PagesEdition/BackButton"
 import { CharCounter } from "../../components/CharCounter"
 import { showSuccessAlert } from "../../utils/alerts"
 
-
-
 // Título por defecto para la creación (no editable)
 const DEFAULT_TITLE = "Asociación Cámara Ganaderos Hojancha"
 
@@ -49,7 +47,7 @@ function PrincipalEdition() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] py-16 px-4">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B]">
       <div className="max-w-5xl mx-auto">
         {/* Navegación superior */}
         <NavbarEditionSection />

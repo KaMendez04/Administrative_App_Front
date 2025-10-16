@@ -161,7 +161,14 @@ export default function BudgetExtraordinary() {
                 <button
                   type="button"
                   onClick={() => Form.reset()}
-                  className="rounded-xl border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  className="rounded-xl bg-white 
+                  border border-[#6B6B6B] px-4 py-2 
+                  text-[#6B6B6B] hover:bg-[#ECECEC]
+                  hover:text-[#4F4F4F]
+                  transition-colors
+                  disabled:cursor-not-allowed
+                  disabled:opacity-60
+                  disabled:hover:bg-white"
                 >
                   Cancelar
                 </button>
@@ -170,7 +177,16 @@ export default function BudgetExtraordinary() {
                     <button
                       type="submit"
                       disabled={!canSubmit || isSubmitting || createMutation.isPending}
-                      className="inline-flex items-center gap-2 rounded-xl bg-gray-600 px-4 py-2 font-medium text-white shadow hover:brightness-95 disabled:opacity-60"
+                      className="inline-flex items-center gap-2 
+                      rounded-xl bg-white px-4 py-2 
+                      font-medium text-[#6F8C1F]
+                      border border-[#6F8C1F]
+                      hover:bg-[#E6EDC8] 
+                      hover:text-[#5A7018]  
+                      transition-colors
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
+                      disabled:hover:bg-white"
                     >
                       <Plus className="h-5 w-5" />
                       {isSubmitting || createMutation.isPending ? "Guardando…" : "Registrar Movimiento Extraordinario"}

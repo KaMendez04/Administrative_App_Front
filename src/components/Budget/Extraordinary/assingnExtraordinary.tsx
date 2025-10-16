@@ -266,14 +266,39 @@ export default function AssignExtraordinaryCard({
           <div className="md:col-span-2 flex justify-end">
             <Form.Subscribe selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}>
               {({ canSubmit, isSubmitting }) => (
+                <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => Form.reset()}
+                  className="rounded-xl bg-white 
+                  border border-[#6B6B6B] px-4 py-2 
+                  text-[#6B6B6B] hover:bg-[#ECECEC]
+                  hover:text-[#4F4F4F]
+                  transition-colors
+                  disabled:cursor-not-allowed
+                  disabled:opacity-60
+                  disabled:hover:bg-white"
+                >
+                  Cancelar
+                </button>
                 <button
                   type="submit"
                   disabled={!canSubmit || isSubmitting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gray-600 px-4 py-2 font-medium text-white shadow hover:brightness-95 disabled:opacity-60"
-                >
+                  className="inline-flex items-center gap-2 
+                      rounded-xl bg-white px-4 py-2 
+                      font-medium text-[#6F8C1F]
+                      border border-[#6F8C1F]
+                      hover:bg-[#E6EDC8] 
+                      hover:text-[#5A7018]  
+                      transition-colors
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
+                      disabled:hover:bg-white"
+                    >
                   <ArrowRightLeft className="h-5 w-5" />
                   {isSubmitting ? "Asignando…" : "Asignar a ingreso"}
                 </button>
+                </div>
               )}
             </Form.Subscribe>
           </div>
