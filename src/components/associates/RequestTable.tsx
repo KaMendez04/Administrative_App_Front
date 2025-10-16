@@ -2,57 +2,68 @@ import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 import { GenericTable } from "../GenericTable";
 import { ActionButtons } from "../ActionButtons";
 
-export type AssociateRow = {
-  idAsociado: number;
-  cedula: string;
-  nombreCompleto: string;
-  telefono: string;
-  email: string;
-  marcaGanado: string | null;
-  estado: boolean;
+export type SolicitudRow = {
+  idSolicitud: number;
+  persona: {
+    cedula: string;
+    nombre: string;
+    apellido1: string;
+    apellido2: string;
+    telefono: string;
+    email: string;
+  };
+  estado: "PENDIENTE" | "APROBADO" | "RECHAZADO";
   createdAt: string;
 };
 
-type AssociatesTableProps = {
-  data: AssociateRow[];
+type RequestsTableProps = {
+  data: SolicitudRow[];
   isLoading: boolean;
   isReadOnly: boolean;
   onView: (id: number) => void;
-  onEdit: (id: number) => void;
+  onApprove: (id: number) => void;
+  onReject: (id: number) => void;
+  isApproving: boolean;
 };
 
-export function AssociatesTable({
+export function RequestsTable({
   data,
   isLoading,
   isReadOnly,
   onView,
-  onEdit,
-}: AssociatesTableProps) {
-  const columnHelper = createColumnHelper<AssociateRow>();
+  onApprove,
+  onReject,
+  isApproving,
+}: RequestsTableProps) {
+  const columnHelper = createColumnHelper<SolicitudRow>();
 
-  const columns: ColumnDef<AssociateRow, any>[] = [
-    columnHelper.accessor("cedula", {
+  const columns: ColumnDef<SolicitudRow, any>[] = [
+    columnHelper.accessor("persona.cedula", {
       header: "Cédula",
-      size: 100,
+      size: 120,
       cell: (info) => (
         <div className="font-medium text-[#33361D]">{info.getValue()}</div>
       ),
     }),
-    columnHelper.accessor("nombreCompleto", {
-      header: "Nombre",
-      size: 200,
-      cell: (info) => (
-        <div className="font-medium text-[#33361D] truncate" title={info.getValue()}>
-          {info.getValue()}
-        </div>
-      ),
-    }),
-    columnHelper.accessor("telefono", {
+    columnHelper.accessor(
+      (row) => `${row.persona.nombre} ${row.persona.apellido1} ${row.persona.apellido2}`,
+      {
+        id: "nombreCompleto",
+        header: "Nombre",
+        size: 200,
+        cell: (info) => (
+          <div className="font-medium text-[#33361D] truncate" title={info.getValue()}>
+            {info.getValue()}
+          </div>
+        ),
+      }
+    ),
+    columnHelper.accessor("persona.telefono", {
       header: "Teléfono",
       size: 100,
       cell: (info) => <div className="text-[#33361D]">{info.getValue()}</div>,
     }),
-    columnHelper.accessor("email", {
+    columnHelper.accessor("persona.email", {
       header: "Email",
       size: 180,
       cell: (info) => (
@@ -61,33 +72,26 @@ export function AssociatesTable({
         </div>
       ),
     }),
-    columnHelper.accessor("marcaGanado", {
-      header: "Marca Ganado",
-      size: 120,
-      cell: (info) => (
-        <div className="font-medium text-[#33361D]">
-          {info.getValue() || "—"}
-        </div>
-      ),
-    }),
     columnHelper.accessor("estado", {
       header: "Estado",
-      size: 90,
+      size: 110,
       cell: (info) => (
         <span
           className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold ${
-            info.getValue()
+            info.getValue() === "PENDIENTE"
+              ? "bg-yellow-100 text-yellow-800"
+              : info.getValue() === "APROBADO"
               ? "bg-[#E6EDC8] text-[#5A7018]"
               : "bg-[#F7E9E6] text-[#8C3A33]"
           }`}
         >
-          {info.getValue() ? "Activo" : "Inactivo"}
+          {info.getValue()}
         </span>
       ),
     }),
     columnHelper.accessor("createdAt", {
       header: "Fecha",
-      size: 100,
+      size: 110,
       cell: (info) => (
         <div className="text-[#33361D]">
           {new Date(info.getValue()).toLocaleDateString("es-CR")}
@@ -97,12 +101,14 @@ export function AssociatesTable({
     columnHelper.display({
       id: "acciones",
       header: () => <div className="text-center">Acciones</div>,
-      size: 150,
+      size: 160,
       cell: (info) => (
         <ActionButtons
-          onView={() => onView(info.row.original.idAsociado)}
-          onEdit={() => onEdit(info.row.original.idAsociado)}
-          showEdit={true}
+          onView={() => onView(info.row.original.idSolicitud)}
+          onApprove={() => onApprove(info.row.original.idSolicitud)}
+          onReject={() => onReject(info.row.original.idSolicitud)}
+          showApproveReject={info.row.original.estado === "PENDIENTE"}
+          isApproving={isApproving}
           isReadOnly={isReadOnly}
         />
       ),

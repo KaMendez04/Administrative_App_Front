@@ -19,18 +19,29 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
     </div>
   )
 
-  // Mostrar “—” si viene vacío / null
+  // Mostrar "—" si viene vacío / null
   const show = (v?: string | null) => (v && String(v).trim() !== "" ? v : "—")
 
+  // 🔸 Manejador para cerrar al hacer clic en el fondo
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Solo cerrar si el clic fue directamente en el backdrop, no en el contenido
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#FAF9F5] border border-[#E6E1D6] rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
+    <div 
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={handleBackdropClick} // 👈 Agregar esto
+    >
+      <div className="bg-[#FAF9F5] border border-[#E6E1D6] rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white/60 flex items-center justify-between">
+        <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-xl font-bold text-[#374321]">Información del personal</h2>
           <button
             onClick={onClose}
-            className="rounded-lg border border-[#E6E1D6] bg-white px-3 py-1.5 text-sm hover:bg-[#F4F1E7]"
+            className="rounded-lg border border-[#E6E1D6] bg-white px-3 py-1.5 text-sm hover:bg-[#F4F1E7] transition-colors"
           >
             Cerrar
           </button>
@@ -71,7 +82,6 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">{row("Puesto / ocupación", show(item.occupation))}</div>
               {row("Estado", item.isActive ? "Activo" : "Inactivo")}
-              {/* 👇 Nuevos campos visibles en “Ver info” */}
               {row("Fecha de inicio laboral", show(item.startWorkDate))}
               {row("Fecha de salida", show(item.endWorkDate))}
             </div>

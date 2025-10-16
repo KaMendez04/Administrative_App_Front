@@ -1,46 +1,41 @@
 // src/pages/PersonalPage.tsx
-import { useEffect, useMemo, useState } from "react"
-import { useReactTable, getCoreRowModel, getPaginationRowModel } from "@tanstack/react-table"
-import type { PersonalPageType } from "../models/PersonalPageType"
-import { usePersonalPageState } from "../hooks/Personal/usePersonalPageState"
-import { usePersonalPageColumns } from "../hooks/Personal/usePersonalPageColumns"
-import { PersonalPageHeader } from "../components/Personal/PersonalPageHeader"
-import { PersonalPageSearch } from "../components/Personal/PersonalPageSearch"
-import { PersonalPageTable } from "../components/Personal/PersonalPageTable"
-import { PersonalPagePagination } from "../components/Personal/PersonalPagePagination"
-import { PersonalPageInfoModal } from "../components/Personal/PersonalPageInfoModal"
-import { EditPersonalPageModal } from "../components/Personal/EditPersonalPageModal"
-import BackButton from "../components/Personal/BackButton"
-import { personalApi } from "../services/personalPageService"
-import { fetchCedulaData } from "../services/cedulaService"
-import { downloadPDFFromRows } from "../utils/exportUtils"
-import { getCurrentUser } from "../services/auth"
+import { useEffect, useMemo, useState } from "react";
+import { usePersonalPageState } from "../hooks/Personal/usePersonalPageState";
+import { PersonalPageHeader } from "../components/Personal/PersonalPageHeader";
+import { PersonalPageSearch } from "../components/Personal/PersonalPageSearch";
+import { PersonalPageInfoModal } from "../components/Personal/PersonalPageInfoModal";
+import { EditPersonalPageModal } from "../components/Personal/EditPersonalPageModal";
+import BackButton from "../components/Personal/BackButton";
+import { personalApi } from "../services/personalPageService";
+import { fetchCedulaData } from "../services/cedulaService";
+import { downloadPDFFromRows } from "../utils/exportUtils";
+import { getCurrentUser } from "../services/auth";
+import type { PersonalPageType } from "../models/PersonalPageType";
+import { PersonalTable } from "../components/Personal/PersonalPageTable";
 
 // ===== API -> UI (incluye fechas laborales) =====
 function mapApiToUi(p: any): PersonalPageType {
   return {
-    IdUser: p.IdUser ?? p.id ?? 0,   // ajusta si tu API devuelve otro nombre
+    IdUser: p.IdUser ?? p.id ?? 0,
     IDE: p.IDE,
     name: p.name,
     lastname1: p.lastname1,
     lastname2: p.lastname2,
-    birthDate: p.birthDate,          // 'YYYY-MM-DD'
+    birthDate: p.birthDate,
     phone: p.phone,
     email: p.email,
     direction: p.direction,
     occupation: p.occupation,
     isActive: !!p.isActive,
-    // 👇 claves nuevas para que el modal se prellene
     startWorkDate: p.startWorkDate ?? "",
     endWorkDate: p.endWorkDate ?? null,
-  }
+  };
 }
-// =================================================
 
 export default function PersonalPage() {
-  const [items, setItems] = useState<PersonalPageType[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [items, setItems] = useState<PersonalPageType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     search,
@@ -52,71 +47,58 @@ export default function PersonalPage() {
     newPersonalPage,
     setNewPersonalPage,
     openNewPersonalPage,
-  } = usePersonalPageState()
+  } = usePersonalPageState();
 
   // Rol (solo JUNTA es read-only)
-  const role = getCurrentUser()?.role?.name?.toUpperCase()
-  const isReadOnly = role === "JUNTA"
+  const role = getCurrentUser()?.role?.name?.toUpperCase();
+  const isReadOnly = role === "JUNTA";
 
   async function load() {
     try {
-      const data = await personalApi.list()
-      setItems(data.map(mapApiToUi)) // 👈 asegura fechas en UI
-      setError(null)
+      const data = await personalApi.list();
+      setItems(data.map(mapApiToUi));
+      setError(null);
     } catch (e: any) {
-      setError(e?.message ?? "Error al cargar el personal")
+      setError(e?.message ?? "Error al cargar el personal");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    load()
-  }, [])
+    load();
+  }, []);
 
   const filtered = useMemo(() => {
     return items.filter((s: any) =>
-      `${s.name} ${s.lastname1} ${s.lastname2} ${s.IDE}`.toLowerCase().includes(search.toLowerCase())
-    )
-  }, [search, items])
-
-  const columns = usePersonalPageColumns({
-    onView: (item) => setSelectedPersonalPage(item),
-    onEdit: (item) => {
-      if (!isReadOnly) setEditPersonalPage(item)
-    },
-  })
+      `${s.name} ${s.lastname1} ${s.lastname2} ${s.IDE}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [search, items]);
 
   // Columnas para PDF
   const pdfColumns = [
-    { header: "Nombre",           field: "name",       width: 100 },
-    { header: "Primer Apellido",  field: "lastname1",  width: 110 },
-    { header: "Segundo Apellido", field: "lastname2",  width: 110 },
-    { header: "Cédula",           field: "IDE",        width: 100 },
-    { header: "Teléfono",         field: "phone",      width: 100 },
-    { header: "Puesto",           field: "occupation", width: 120 },
-    { header: "Email",            field: "email",      width: 170 },
-  ]
+    { header: "Nombre", field: "name", width: 100 },
+    { header: "Primer Apellido", field: "lastname1", width: 110 },
+    { header: "Segundo Apellido", field: "lastname2", width: 110 },
+    { header: "Cédula", field: "IDE", width: 100 },
+    { header: "Teléfono", field: "phone", width: 100 },
+    { header: "Puesto", field: "occupation", width: 120 },
+    { header: "Email", field: "email", width: 170 },
+  ];
 
-  const table = useReactTable({
-    data: filtered,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageIndex: 0, pageSize: 6 } },
-  })
-
-  const lookupCedula = (id: string) => fetchCedulaData(id)
+  const lookupCedula = (id: string) => fetchCedulaData(id);
 
   const handleExportPDF = () => {
     downloadPDFFromRows("personal_filtrado.pdf", filtered as any[], pdfColumns, {
       title: "Cámara de Ganaderos — Personal",
       filterText: search.trim() || "Sin filtro",
-    })
-  }
+    });
+  };
 
-  if (loading) return <div>Cargando…</div>
-  if (error) return <div>Error: {error}</div>
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Cargando…</div>;
+  if (error) return <div className="min-h-screen flex items-center justify-center text-red-600">Error: {error}</div>;
 
   return (
     <div className="min-h-screen w-full bg-[#FAF9F5] px-6 py-10 relative">
@@ -137,12 +119,21 @@ export default function PersonalPage() {
           </button>
         </div>
 
-        <div className="overflow-x-auto bg-white rounded-2xl shadow">
-          <PersonalPageTable table={table} />
-        </div>
+        {/* Tabla Reutilizable */}
+        <PersonalTable
+          data={filtered}
+          isLoading={false}
+          isReadOnly={isReadOnly}
+          onView={setSelectedPersonalPage}
+          onEdit={(item) => {
+            if (!isReadOnly) setEditPersonalPage(item);
+          }}
+        />
 
-        <div className="mt-6">
-          <PersonalPagePagination table={table} />
+        <div className="mt-6 flex justify-between items-center">
+          <div className="text-sm text-[#556B2F] font-medium">
+            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+          </div>
           <BackButton />
         </div>
       </div>
@@ -175,5 +166,5 @@ export default function PersonalPage() {
         />
       )}
     </div>
-  )
+  );
 }
