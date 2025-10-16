@@ -49,3 +49,22 @@ export function downloadIncomePdf(blob: Blob, filename?: string) {
   a.click();
   window.URL.revokeObjectURL(url);
 }
+
+export async function fetchIncomeExcel(
+  resolved: { start?: string; end?: string; departmentId?: number; incomeTypeId?: number; incomeSubTypeId?: number }
+): Promise<Blob> {
+  const { data } = await api.get<Blob>("/report/income/excel", {
+    params: resolved,
+    responseType: "blob" as const,
+  });
+  return data;
+}
+
+export function downloadIncomeExcel(blob: Blob, filename?: string) {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename ?? `reporte-ingresos-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}

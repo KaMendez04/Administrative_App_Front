@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchExtraFull } from "../../../services/Budget/reportsExtra/extraReportService";
+import { downloadExtraExcel } from "../../../services/Budget/extraordinary/ExtraordinaryService";
 
 export function useExtraReport(filters:{start?:string;end?:string;name?:string}|null){
   return useQuery({ 
@@ -60,4 +61,11 @@ export default function ExtraTable({rows,loading}:{rows:any[];loading?:boolean})
       </table>
     </div>
   );
+}
+export function useExtraReportExcel() {
+  return useMutation<unknown, Error, {start?:string;end?:string;name?:string}>({
+    mutationFn: async (filters) => {
+      downloadExtraExcel(filters);
+    },
+  });
 }

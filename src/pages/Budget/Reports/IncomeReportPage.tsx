@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useIncomeReport, useIncomeReportPDF } from "../../../hooks/Budget/reports/useIncomeReport";
+import { useIncomeReport, useIncomeReportExcel, useIncomeReportPDF } from "../../../hooks/Budget/reports/useIncomeReport";
 
 const crc = (n: number) =>
   new Intl.NumberFormat("es-CR", {
@@ -17,7 +17,7 @@ export default function IncomeReportPage() {
 
   const { data, isFetching, isLoading } = useIncomeReport(submitted);
   const { mutateAsync: generateIncomePDF, isPending: isPdfGenerating } = useIncomeReportPDF();
-
+ const { mutateAsync: generateIncomeExcel, isPending: isExcelGenerating } = useIncomeReportExcel(); 
   const rows = data?.rows ?? [];
   const totals: any = data?.totals ?? {};
   const [isDownloading, setIsDownloading] = useState(false);
@@ -52,6 +52,12 @@ export default function IncomeReportPage() {
       setTimeout(() => setIsDownloading(false), 1200);
     }
   };
+
+    const handleDownloadExcel = async () => {
+    if (!submitted) return alert("Primero aplica los filtros antes de descargar el Excel");
+    await generateIncomeExcel(submitted ?? {});
+  };
+
 
   return (
     <div className="min-h-screen ">
@@ -153,6 +159,13 @@ export default function IncomeReportPage() {
                 >
                   {isDownloading || isPdfGenerating ? "Descargando…" : "Descargar PDF"}
                 </button>
+                <button
+                onClick={handleDownloadExcel}
+                disabled={isExcelGenerating}
+                className="px-5 py-3 rounded-xl border-2 border-[#2d6a4f] text-white bg-[#376a2d] font-semibold hover:bg-[#3c5c35] transition disabled:opacity-60"
+              >
+                {isExcelGenerating ? "Generando…" : "Descargar Excel"}
+              </button>
               </div>
             </div>
           </div>

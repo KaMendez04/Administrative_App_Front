@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useExtraReport } from "../../../hooks/Budget/reports/useExtraReport";
+import { useExtraReport, useExtraReportExcel } from "../../../hooks/Budget/reports/useExtraReport";
 import ExtraTable from "../../../components/Budget/Reports/extraTable";
 import { downloadExtraReportPDF, previewExtraReportPDF } from "../../../services/Budget/reportsExtra/extraReportService";
 
@@ -15,6 +15,7 @@ export default function ExtraReportPage(){
   const {data,isFetching,isLoading}=useExtraReport(submitted);
   const rows = data?.rows ?? [];
   const totals = data?.totals ?? {count:0,totalAmount:0,totalUsed:0,totalRemaining:0};
+  const excelMutation = useExtraReportExcel(); 
 
   const apply=()=>setSubmitted({ start: start||undefined, end: end||undefined, name: name||undefined });
   const clearFilters = ()=>{ setStart(""); setEnd(""); setName(""); setSubmitted({}); };
@@ -29,6 +30,11 @@ export default function ExtraReportPage(){
   const handlePreviewPDF = () => {
     if (!submitted) return alert('Primero aplica los filtros antes de ver el PDF');
     previewExtraReportPDF(submitted);
+  };
+
+   const handleDownloadExcel = async () => {
+    if (!submitted) return alert('Primero aplica los filtros antes de descargar el Excel');
+    await excelMutation.mutateAsync(submitted);
   };
 
   return (
@@ -120,6 +126,13 @@ export default function ExtraReportPage(){
                   className="px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm"
                 >
                   {isDownloading ? "Descargando…" : "Descargar PDF"}
+                </button>
+                <button
+                  onClick={handleDownloadExcel}
+                  disabled={excelMutation.isPending}
+                  className="px-5 py-3 rounded-xl border-2 border-[#2d6a4f] text-white bg-[#376a2d] font-semibold hover:bg-[#3c5c35] transition disabled:opacity-60"
+                >
+                  {excelMutation.isPending ? "Generando…" : "Descargar Excel"}
                 </button>
               </div>
             </div>

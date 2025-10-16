@@ -53,3 +53,30 @@ export async function assignExtraordinary(dto: AssignExtraordinaryDto) {
   const { data } = await apiConfig.post("/extraordinary/assign-to-income", dto);
   return data;
 }
+
+export async function fetchExtraExcel(filters: {
+  start?: string;
+  end?: string;
+  name?: string;
+}): Promise<Blob> {
+  const { data } = await apiConfig.get<Blob>("/report-extra/download/excel", {
+    params: filters,
+    responseType: "blob" as const,
+  });
+  return data;
+}
+
+export function downloadExtraExcel(filters: {
+  start?: string;
+  end?: string;
+  name?: string;
+}) {
+  fetchExtraExcel(filters).then((blob) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `reporte-extraordinarios-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  });
+}

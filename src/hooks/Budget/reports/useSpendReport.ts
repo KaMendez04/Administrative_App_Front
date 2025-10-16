@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { resolveDepartmentIdByName, resolveSpendSubTypeIdByName, resolveSpendTypeIdByName } from "../../../services/Budget/reportsSpend/catalogLookupService";
 import { useMutation } from "@tanstack/react-query";
-import { fetchSpendPDF, downloadSpendPdf, fetchSpendFull } from "../../../services/Budget/reportsSpend/spendReportService";
+import { fetchSpendPDF, downloadSpendPdf, fetchSpendFull, downloadSpendExcel, fetchSpendExcel } from "../../../services/Budget/reportsSpend/spendReportService";
 import type { SpendSummary, SpendTableRow } from "../../../models/Budget/reports/spend";
 
 export type SpendReportNameFilters = {
@@ -145,6 +145,26 @@ export function useSpendReport(filters: SpendReportNameFilters | null) {
       };
 
       return { rows: normRows, totals: finalTotals };
+    },
+  });
+}
+export function useSpendReportExcel() {
+  return useMutation<unknown, Error, SpendReportNameFilters>({
+    mutationFn: async (filters) => {
+      const departmentId = await resolveDepartmentIdByName(filters?.departmentName);
+      const spendTypeId = await resolveSpendTypeIdByName(filters?.spendTypeName, departmentId);
+      const spendSubTypeId = await resolveSpendSubTypeIdByName(filters?.spendSubTypeName, spendTypeId);
+
+      const resolved = {
+        start: filters.start || undefined,
+        end: filters.end || undefined,
+        departmentId,
+        spendTypeId,
+        spendSubTypeId,
+      };
+
+      const excelBlob = await fetchSpendExcel(resolved as any);
+      downloadSpendExcel(excelBlob);
     },
   });
 }

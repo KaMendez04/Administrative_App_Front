@@ -1,6 +1,6 @@
 import { useState } from "react"; 
 
-import { useSpendReport, useSpendReportPDF, type SpendReportNameFilters } 
+import { useSpendReport, useSpendReportExcel, useSpendReportPDF, type SpendReportNameFilters } 
   from "../../../hooks/Budget/reports/useSpendReport"; 
 
 import SpendTable from "../../../components/Budget/Reports/spendTable";
@@ -24,6 +24,7 @@ export default function SpendReportPage() {
   const { data, isFetching, isLoading } = useSpendReport(submitted);
   const pdfMutation = useSpendReportPDF();
   const [isDownloading, setIsDownloading] = useState(false);
+  const excelMutation = useSpendReportExcel()
 
   const rows = data?.rows ?? [];
   const totals: any = data?.totals ?? {};
@@ -61,6 +62,11 @@ export default function SpendReportPage() {
     } finally {
       setTimeout(() => setIsDownloading(false), 1200);
     }
+  };
+
+    const handleDownloadExcel = async () => {
+    if (!submitted) return alert("Primero aplica los filtros antes de descargar el Excel");
+    await excelMutation.mutateAsync(submitted);
   };
 
   return (
@@ -188,6 +194,13 @@ export default function SpendReportPage() {
                 {isDownloading || pdfMutation.isPending ? "Descargando…" : "Descargar PDF"}
               </button>
 
+               <button
+                onClick={handleDownloadExcel}
+                disabled={excelMutation.isPending}
+                className="px-5 py-3 rounded-xl border-2 border-[#2d6a4f] text-white bg-[#376a2d] font-semibold hover:bg-[#3c5c35] transition disabled:opacity-60"
+              >
+                {excelMutation.isPending ? "Generando…" : "Descargar Excel"}
+              </button>
             </div>
           </div>
         </div>

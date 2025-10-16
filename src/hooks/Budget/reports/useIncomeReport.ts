@@ -8,6 +8,8 @@ import {
   fetchIncomeFull,
   fetchIncomePDF,
   downloadIncomePdf,
+  downloadIncomeExcel,
+  fetchIncomeExcel,
 } from "../../../services/Budget/reportIncome/incomeReportService";
 
 // filtros por NOMBRE (como en Spend)
@@ -132,6 +134,26 @@ export function useIncomeReportPDF() {
         return;
       }
       downloadIncomePdf(blob);
+    },
+  });
+}
+
+export function useIncomeReportExcel() {
+  return useMutation<unknown, Error, IncomeReportNameFilters>({
+    mutationFn: async (filters) => {
+      const departmentId = await resolveDepartmentIdByName(filters?.departmentName);
+      const incomeTypeId = await resolveIncomeTypeIdByName(filters?.incomeTypeName, departmentId);
+      const incomeSubTypeId = await resolveIncomeSubTypeIdByName(filters?.incomeSubTypeName, incomeTypeId);
+
+      const blob = await fetchIncomeExcel({
+        start: filters?.start || undefined,
+        end: filters?.end || undefined,
+        departmentId,
+        incomeTypeId,
+        incomeSubTypeId,
+      });
+
+      downloadIncomeExcel(blob);
     },
   });
 }
