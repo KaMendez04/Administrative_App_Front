@@ -22,7 +22,7 @@ import EventEdition from '../pages/editionPage/EventEdition'
 import ServicesEdition from '../pages/editionPage/ServicesEdition'
 import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
-import VolunteersPage from '../pages/VolunteersPage'
+import VolunteersPage from '../pages/volunteers/VolunteersSubnav'
 import ManualPage from '../pages/ManualPage'
 import ChangePasswordPage from '../pages/ChangePasswordPage'
 import BudgetSubnav from '../pages/Budget/Navbar/BudgetSubnav'
@@ -44,6 +44,9 @@ import ExtraReportPage from '../pages/Budget/Reports/extraReportPage'
 import AssociatesSubnav from '../pages/associates/AssociatesSubnav'
 import AssociatesApprovedPage from '../pages/associates/AssociatesApprovedPage'
 import AdminRequestsPage from '../pages/associates/AdminRequestPage'
+import VolunteersSubnav from '../pages/volunteers/VolunteersSubnav'
+import VolunteersApprovedPage from '../pages/volunteers/VolunteersApprovedPage'
+import VolunteersRequestPage from '../pages/volunteers/VolunteersRequestPage'
 
 
 function requireRole(allowed: "ADMIN" | "JUNTA") {
@@ -333,6 +336,52 @@ const associatesApprovedRoute = new Route({
   component: AssociatesApprovedPage,
 })
 
+
+// Layout para Volunteers con subnav
+const volunteersLayoutRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/volunteers",
+  component: () => (
+    <>
+      <VolunteersSubnav />
+      <Outlet />
+    </>
+  ),
+})
+
+// Componente que redirige automáticamente a /requests
+function VolunteersIndexRedirect() {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    navigate({ to: '/volunteers/requests', replace: true });
+  }, [navigate]);
+
+  return null;
+}
+  
+// Ruta index: /volunteers (redirige a /volunteers/requests)
+const volunteersIndexRoute = new Route({
+  getParentRoute: () => volunteersLayoutRoute,
+  path: "/",
+  component: VolunteersIndexRedirect,
+});
+
+// Ruta: /volunteers/requests
+const volunteersRequestsRoute = new Route({
+  getParentRoute: () => volunteersLayoutRoute,
+  path: "/requests",
+  component: VolunteersRequestPage,
+})
+
+// Ruta: /volunteers/approved
+const volunteersApprovedRoute = new Route({
+  getParentRoute: () => volunteersLayoutRoute,
+  path: "/approved",
+  component: VolunteersApprovedPage,
+})
+
+
 // Fallback: si alguna ruta no existe, redirige a "/Principal"
 function RedirectHome() {
   const navigate = useNavigate()
@@ -390,6 +439,11 @@ const routeTree = rootRoute.addChildren([
       associatesRequestsRoute,
       associatesApprovedRoute,
       associatesIndexRoute,
+      volunteersLayoutRoute,
+      volunteersRequestsRoute,
+      volunteersApprovedRoute,
+      volunteersIndexRoute,
+
     ]),
 
     staffManagement,
