@@ -1,4 +1,6 @@
+// CatalogModal.tsx
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Plus } from "lucide-react";
 import {
   useDepartments,
@@ -9,6 +11,7 @@ import {
   useCreateIncomeType,
   useCreateIncomeSubType,
 } from "../../../hooks/Budget/income/useIncomeMutation";
+import { CustomSelect } from "../../CustomSelect";
 
 type Props = {
   open: boolean;
@@ -24,6 +27,31 @@ export default function CatalogModal({
   defaultDepartmentId,
   defaultIncomeTypeId,
 }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  // SSR-safe: espera a que exista document
+  useEffect(() => setMounted(true), []);
+
+  // Bloqueo de scroll mientras el modal está abierto
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  // Cerrar con ESC
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
   const [departmentId, setDepartmentId] = useState<number | "">("");
   const [typeId, setTypeId] = useState<number | "">("");
 
@@ -34,7 +62,9 @@ export default function CatalogModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const dept = useDepartments();
-  const types = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
+  const types = useIncomeTypes(
+    typeof departmentId === "number" ? departmentId : undefined
+  );
 
   const departmentOptions = useMemo(
     () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
@@ -45,7 +75,7 @@ export default function CatalogModal({
     [types.data]
   );
 
-  // ✅ al abrir: sin autoselección (o con defaults si vienen)
+  // al abrir: limpiar + defaults
   useEffect(() => {
     if (!open) return;
     setErrors({});
@@ -62,7 +92,7 @@ export default function CatalogModal({
     }
   }, [open, defaultDepartmentId, defaultIncomeTypeId]);
 
-  // ✅ cascada
+  // cascada
   useEffect(() => {
     setTypeId("");
     setNewSubType("");
@@ -84,18 +114,25 @@ export default function CatalogModal({
     try {
       const created = await mCreateDept.mutate({ name: newDepartment.trim() });
       setNewDepartment("");
-      // autoselecciona el nuevo si la mutación devuelve id
       const id = (created as any)?.id;
       if (id) setDepartmentId(id);
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el departamento" }));
+      setErrors((e) => ({
+        ...e,
+        api: err?.message ?? "No se pudo crear el departamento",
+      }));
     }
   }
 
   async function handleCreateType() {
     setErrors((e) => ({ ...e, type: "", api: "" }));
-    if (!newType.trim()) return setErrors((e) => ({ ...e, type: "Escribe el nombre del tipo" }));
-    if (!departmentId) return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
+    if (!newType.trim())
+      return setErrors((e) => ({ ...e, type: "Escribe el nombre del tipo" }));
+    if (!departmentId)
+      return setErrors((e) => ({
+        ...e,
+        departmentId: "Selecciona un departamento",
+      }));
 
     try {
       const created = await mCreateType.mutate({
@@ -106,31 +143,66 @@ export default function CatalogModal({
       const id = (created as any)?.id;
       if (id) setTypeId(id);
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el tipo" }));
+      setErrors((e) => ({
+        ...e,
+        api: err?.message ?? "No se pudo crear el tipo",
+      }));
     }
   }
 
   async function handleCreateSubType() {
     setErrors((e) => ({ ...e, subType: "", api: "" }));
-    if (!newSubType.trim()) return setErrors((e) => ({ ...e, subType: "Escribe el nombre del subtipo" }));
-    if (!typeId) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
+    if (!newSubType.trim())
+      return setErrors((e) => ({
+        ...e,
+        subType: "Escribe el nombre del subtipo",
+      }));
+    if (!typeId)
+      return setErrors((e) => ({
+        ...e,
+        typeId: "Selecciona un tipo",
+      }));
 
     try {
-      await mCreateSub.mutate({ name: newSubType.trim(), incomeTypeId: Number(typeId) });
+      await mCreateSub.mutate({
+        name: newSubType.trim(),
+        incomeTypeId: Number(typeId),
+      });
       setNewSubType("");
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el subtipo" }));
+      setErrors((e) => ({
+        ...e,
+        api: err?.message ?? "No se pudo crear el subtipo",
+      }));
     }
   }
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
-      <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100">
+  const modalUI = (
+    <div
+      className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Catálogo de ingresos"
+    >
+      {/* Backdrop (clic para cerrar) */}
+      <div
+        className="absolute inset-0 bg-black/30"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      {/* Contenido */}
+      <div className="relative z-[1001] w-full max-w-3xl rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100">
         <div className="flex items-center justify-between border-b p-4 md:p-5">
-          <h2 className="text-lg font-semibold text-gray-900">Catálogo de Ingresos</h2>
-          <button onClick={onClose} className="rounded-full p-2 text-gray-600 hover:bg-gray-100" aria-label="Cerrar">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Catálogo de Ingresos
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+            aria-label="Cerrar"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -138,18 +210,18 @@ export default function CatalogModal({
         <div className="grid gap-6 p-4 md:p-6">
           {/* Departamento */}
           <section className="grid gap-2">
-            <label className="text-sm font-medium text-gray-800">Departamento</label>
+            <label className="text-sm font-medium text-gray-800">
+              Departamento
+            </label>
             <div className="flex flex-col gap-2 md:flex-row">
-              <select
-                className="flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
-                value={departmentId}
-                onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : "")}
-              >
-                <option value="">Seleccione…</option>
-                {departmentOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={departmentId}
+                  onChange={(value) => setDepartmentId(value ? Number(value) : "")}
+                  options={departmentOptions}
+                  placeholder="Seleccione…"
+                />
+              </div>
 
               <div className="flex w-full gap-2 md:w-auto">
                 <input
@@ -168,25 +240,29 @@ export default function CatalogModal({
                 </button>
               </div>
             </div>
-            {errors.departmentId && <p className="text-xs text-red-600">{errors.departmentId}</p>}
+            {errors.departmentId && (
+              <p className="text-xs text-red-600">{errors.departmentId}</p>
+            )}
             {errors.dept && <p className="text-xs text-red-600">{errors.dept}</p>}
           </section>
 
           {/* Tipo */}
           <section className="grid gap-2">
-            <label className="text-sm font-medium text-gray-800">Tipo de Ingresos</label>
+            <label className="text-sm font-medium text-gray-800">
+              Tipo de Ingresos
+            </label>
             <div className="flex flex-col gap-2 md:flex-row">
-              <select
-                className="flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100 disabled:cursor-not-allowed"
-                value={typeId}
-                onChange={(e) => setTypeId(e.target.value ? Number(e.target.value) : "")}
-                disabled={!departmentId}
-              >
-                <option value="">{!departmentId ? "Seleccione un departamento…" : "Seleccione…"}</option>
-                {typeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={typeId}
+                  onChange={(value) => setTypeId(value ? Number(value) : "")}
+                  options={typeOptions}
+                  placeholder={
+                    !departmentId ? "Seleccione un departamento…" : "Seleccione…"
+                  }
+                  disabled={!departmentId}
+                />
+              </div>
 
               <div className="flex w-full gap-2 md:w-auto">
                 <input
@@ -206,7 +282,9 @@ export default function CatalogModal({
                 </button>
               </div>
             </div>
-            {errors.typeId && <p className="text-xs text-red-600">{errors.typeId}</p>}
+            {errors.typeId && (
+              <p className="text-xs text-red-600">{errors.typeId}</p>
+            )}
             {errors.type && <p className="text-xs text-red-600">{errors.type}</p>}
           </section>
 
@@ -230,16 +308,24 @@ export default function CatalogModal({
                 <Plus className="h-4 w-4" /> Agregar
               </button>
             </div>
-            {errors.subType && <p className="text-xs text-red-600">{errors.subType}</p>}
+            {errors.subType && (
+              <p className="text-xs text-red-600">{errors.subType}</p>
+            )}
           </section>
         </div>
 
         <div className="flex items-center justify-end gap-3 border-t p-4 md:p-5">
-          <button onClick={onClose} className="rounded-xl border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-50">
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-50"
+          >
             Salir
           </button>
         </div>
       </div>
     </div>
   );
+
+  // Montaje en portal
+  return mounted ? createPortal(modalUI, document.body) : null;
 }

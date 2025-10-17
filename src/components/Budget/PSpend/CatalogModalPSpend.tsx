@@ -6,6 +6,7 @@ import {
   useCreatePSpendType,
   useCreatePSpendSubType,
 } from "../../../hooks/Budget/pSpend/usePSpendMutation";
+import { CustomSelect } from "../../CustomSelect";
 
 type Props = {
   open: boolean;
@@ -75,11 +76,9 @@ export default function CatalogModalPSpend({
       return setErrors((e) => ({ ...e, dept: "Escribe el nombre del departamento" }));
     }
     try {
-      await mCreateDept.mutate({ name: newDepartment.trim() });
+      const created = await mCreateDept.mutate({ name: newDepartment.trim() });
       setNewDepartment("");
-      // Si necesitas autoseleccionar el creado:
-      // const created = await mCreateDept.mutateAsync({ name: newDepartment.trim() });
-      // setDepartmentId(created.id);
+      setDepartmentId(created.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el departamento" }));
     }
@@ -99,9 +98,8 @@ export default function CatalogModalPSpend({
         departmentId: Number(departmentId),
       });
       setNewType("");
-      // Para autoseleccionar:
-      // const created = await mCreateType.mutateAsync({ name: newType.trim(), departmentId: Number(departmentId) });
-      // setTypeId(created.id);
+      const created = await mCreateType.mutate({ name: newType.trim(), departmentId: Number(departmentId) });
+      setTypeId(created.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el tipo (proyección)" }));
     }
@@ -149,18 +147,15 @@ export default function CatalogModalPSpend({
           <section className="grid gap-2">
             <label className="text-sm font-medium text-gray-800">Departamento</label>
             <div className="flex flex-col gap-2 md:flex-row">
-              <select
-                className="flex-1 rounded-xl border border-gray-200 px-3 py-2"
-                value={departmentId}
-                onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : "")}
-              >
-                <option value="">Seleccione…</option>
-                {departmentOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={departmentId}
+                  onChange={(value) => setDepartmentId(value ? Number(value) : "")}
+                  options={departmentOptions}
+                  placeholder="Seleccione…"
+                  zIndex={60} 
+                />
+              </div>
 
               <div className="flex w-full gap-2 md:w-auto">
                 <input
@@ -187,21 +182,16 @@ export default function CatalogModalPSpend({
           <section className="grid gap-2">
             <label className="text-sm font-medium text-gray-800">Tipo (Proyección)</label>
             <div className="flex flex-col gap-2 md:flex-row">
-              <select
-                className="flex-1 rounded-xl border border-gray-200 px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                value={typeId}
-                onChange={(e) => setTypeId(e.target.value ? Number(e.target.value) : "")}
-                disabled={!departmentId}
-              >
-                <option value="">
-                  {!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
-                </option>
-                {typeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={typeId}
+                  onChange={(value) => setTypeId(value ? Number(value) : "")}
+                  options={typeOptions}
+                  placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
+                  disabled={!departmentId}
+                  zIndex={60}
+                />
+              </div>
 
               <div className="flex w-full gap-2 md:w-auto">
                 <input

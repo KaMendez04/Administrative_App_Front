@@ -3,6 +3,7 @@ import { X, Plus } from "lucide-react";
 import { useDepartments, usePIncomeTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
 import { useCreateDepartment, useCreateIncomeSubType, useCreateIncomeType } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
 import type { PIncomeType } from "../../../models/Budget/incomeProjectionType";
+import { CustomSelect } from "../../CustomSelect";
 
 type Props = {
   open: boolean;
@@ -83,8 +84,7 @@ export default function CatalogModal({
     try {
       const created = await mCreateDept.mutate({ name: newDepartment.trim() });
       setNewDepartment("");
-      if ((created as any)?.id) setDepartmentId((created as any).id); // autoselecciono el nuevo
-      // dept.refetch?.()
+      if ((created as any)?.id) setDepartmentId((created as any).id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el departamento" }));
     }
@@ -156,18 +156,15 @@ export default function CatalogModal({
           <section className="grid gap-2">
             <label className="text-sm font-medium text-gray-800">Departamento</label>
             <div className="flex flex-col gap-2 md:flex-row">
-              <select
-                className="flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
-                value={departmentId}
-                onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : "")}
-              >
-                <option value="">Seleccione…</option>
-                {departmentOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={departmentId}
+                  onChange={(value) => setDepartmentId(value ? Number(value) : "")}
+                  options={departmentOptions}
+                  placeholder="Seleccione…"
+                  zIndex={60} 
+                />
+              </div>
 
               <div className="flex w-full gap-2 md:w-auto">
                 <input
@@ -196,19 +193,16 @@ export default function CatalogModal({
           <section className="grid gap-2">
             <label className="text-sm font-medium text-gray-800">Tipo de ingreso</label>
             <div className="flex flex-col gap-2 md:flex-row">
-              <select
-                className="flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100 disabled:cursor-not-allowed"
-                value={typeId}
-                onChange={(e) => setTypeId(e.target.value ? Number(e.target.value) : "")}
-                disabled={!departmentId}
-              >
-                <option value="">{!departmentId ? "Seleccione un departamento…" : "Seleccione…"}</option>
-                {typeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={typeId}
+                  onChange={(value) => setTypeId(value ? Number(value) : "")}
+                  options={typeOptions}
+                  placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
+                  disabled={!departmentId}
+                  zIndex={60}
+                />
+              </div>
 
               <div className="flex w-full gap-2 md:w-auto">
                 <input

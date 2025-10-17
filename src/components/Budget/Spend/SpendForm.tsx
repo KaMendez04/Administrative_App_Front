@@ -4,6 +4,7 @@ import { useDepartments, useSpendSubTypes, useSpendTypes } from "../../../hooks/
 import { useCreateSpendEntry } from "../../../hooks/Budget/spend/useSpendMutation";
 import type { CreateSpendDTO } from "../../../models/Budget/SpendType";
 import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
+import { CustomSelect } from "../../CustomSelect"; 
 
 type Props = {
   onSuccess?: (createdId: number) => void;
@@ -46,7 +47,7 @@ export default function SpendForm({ onSuccess, disabled }: Props) {
     [subTypes.data]
   );
 
-  // ✅ Cascada sin autoselección
+
   useEffect(() => {
     setTypeId("");
     setSubTypeId("");
@@ -89,51 +90,39 @@ export default function SpendForm({ onSuccess, disabled }: Props) {
       {/* Departamento */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Departamento</label>
-        <select
-          className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
+        <CustomSelect
           value={departmentId}
-          onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : "")}
+          onChange={(value) => setDepartmentId(value ? Number(value) : "")}
+          options={departmentOptions}
+          placeholder="Seleccione…"
           disabled={disabled}
-        >
-          <option value="">Seleccione…</option>
-          {departmentOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        />
         {errors.departmentId && <p className="text-xs text-red-600">{errors.departmentId}</p>}
       </div>
 
       {/* Tipo */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Tipo</label>
-        <select
-          className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100 disabled:cursor-not-allowed"
+        <CustomSelect
           value={typeId}
-          onChange={(e) => setTypeId(e.target.value ? Number(e.target.value) : "")}
+          onChange={(value) => setTypeId(value ? Number(value) : "")}
+          options={typeOptions}
+          placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
           disabled={!departmentId || disabled}
-        >
-          <option value="">{!departmentId ? "Seleccione un departamento…" : "Seleccione…"}</option>
-          {typeOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        />
         {errors.typeId && <p className="text-xs text-red-600">{errors.typeId}</p>}
       </div>
 
       {/* Subtipo */}
       <div className="flex flex-col gap-1">
         <label className="text-sm text-gray-700">Subtipo</label>
-        <select
-          className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100 disabled:cursor-not-allowed"
+        <CustomSelect
           value={subTypeId}
-          onChange={(e) => setSubTypeId(e.target.value ? Number(e.target.value) : "")}
+          onChange={(value) => setSubTypeId(value ? Number(value) : "")}
+          options={subTypeOptions}
+          placeholder={!typeId ? "Seleccione un tipo…" : "Seleccione…"}
           disabled={!typeId || disabled}
-        >
-          <option value="">{!typeId ? "Seleccione un tipo…" : "Seleccione…"}</option>
-          {subTypeOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        />
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
 
@@ -182,7 +171,7 @@ export default function SpendForm({ onSuccess, disabled }: Props) {
           amount <= 0 ||
           !date
         }
-        className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+  className="inline-flex items-center justify-center rounded-full bg-[#708C3E] p-3 text-white shadow hover:opacity-90 disabled:opacity-50 -mt-1"
       >
         <Plus className="h-4 w-4" />
         Registrar egreso

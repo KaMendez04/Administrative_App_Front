@@ -1,3 +1,4 @@
+// CustomSelect.tsx
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/react'
 import { Check, ChevronDown } from 'lucide-react'
 
@@ -12,6 +13,7 @@ type CustomSelectProps = {
   options: Option[]
   placeholder?: string
   disabled?: boolean
+  zIndex?: number 
 }
 
 export function CustomSelect({
@@ -19,7 +21,8 @@ export function CustomSelect({
   onChange,
   options,
   placeholder = "Selecciona una opción",
-  disabled = false
+  disabled = false,
+  zIndex = 10 // 👈 Valor por defecto
 }: CustomSelectProps) {
   const selected = options.find(opt => opt.value === value)
 
@@ -28,7 +31,6 @@ export function CustomSelect({
       <Listbox value={value} onChange={onChange} disabled={disabled}>
         {({ open }) => (
           <>
-            {/* Botón principal */}
             <ListboxButton 
               className="relative w-full cursor-pointer rounded-xl bg-white py-3 pl-4 pr-10 text-left border border-[#E6E1D6] shadow-sm hover:border-[#5B732E] focus:outline-none focus:ring-2 focus:ring-[#5B732E]/20 focus:border-[#5B732E] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -43,13 +45,11 @@ export function CustomSelect({
               </span>
             </ListboxButton>
 
-            {/* Dropdown - con Portal */}
             <ListboxOptions
-            anchor="bottom start"
-            portal={true}
-            modal={false}
-            className="z-10 mt-2 w-[var(--button-width)] max-h-60 overflow-auto rounded-xl bg-white py-2 shadow-xl border border-[#E6E1D6] focus:outline-none [--anchor-gap:0.5rem]"
-          >
+              modal={false}
+              className="absolute mt-2 w-full max-h-60 overflow-auto rounded-xl bg-white py-2 shadow-xl border border-[#E6E1D6] focus:outline-none"
+              style={{ zIndex }} // 👈 Usa el z-index dinámico
+            >
               {options.map((option) => (
                 <ListboxOption
                   key={option.value}

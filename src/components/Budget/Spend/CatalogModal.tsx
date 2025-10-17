@@ -9,6 +9,7 @@ import {
   useCreateSpendType,
   useCreateSpendSubType,
 } from "../../../hooks/Budget/spend/useSpendMutation";
+import { CustomSelect } from "../../CustomSelect"; // 👈 Ajusta la ruta según tu estructura
 
 type Props = {
   open: boolean;
@@ -138,7 +139,7 @@ export default function CatalogModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 p-4"> {/* 👈 z-[100] */}
       <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100">
         <div className="flex items-center justify-between border-b p-4 md:p-5">
           <h2 className="text-lg font-semibold text-gray-900">Catálogo de Egresos</h2>
@@ -156,18 +157,15 @@ export default function CatalogModal({
           <section className="grid gap-2">
             <label className="text-sm font-medium text-gray-800">Departamento</label>
             <div className="flex flex-col gap-2 md:flex-row">
-              <select
-                className="flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
-                value={departmentId}
-                onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : "")}
-              >
-                <option value="">Seleccione…</option>
-                {departmentOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={departmentId}
+                  onChange={(value) => setDepartmentId(value ? Number(value) : "")}
+                  options={departmentOptions}
+                  placeholder="Seleccione…"
+                  zIndex={110} // 👈 Mayor que z-[100] del modal
+                />
+              </div>
 
               <div className="flex w-full gap-2 md:w-auto">
                 <input
@@ -196,19 +194,16 @@ export default function CatalogModal({
           <section className="grid gap-2">
             <label className="text-sm font-medium text-gray-800">Tipo de egreso</label>
             <div className="flex flex-col gap-2 md:flex-row">
-              <select
-                className="flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100 disabled:cursor-not-allowed"
-                value={typeId}
-                onChange={(e) => setTypeId(e.target.value ? Number(e.target.value) : "")}
-                disabled={!departmentId}
-              >
-                <option value="">{!departmentId ? "Seleccione un departamento…" : "Seleccione…"}</option>
-                {typeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={typeId}
+                  onChange={(value) => setTypeId(value ? Number(value) : "")}
+                  options={typeOptions}
+                  placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
+                  disabled={!departmentId}
+                  zIndex={110} // 👈 Mayor que z-[100] del modal
+                />
+              </div>
 
               <div className="flex w-full gap-2 md:w-auto">
                 <input
