@@ -25,6 +25,7 @@ const crc = (n: number) =>
 // ======= Componente =======
 export default function PSpendProjectionsPage() {
   // ------- filtros (simples en local como en tu ejemplo) -------
+  const [submitted, setSubmitted] = useState<any>({});
   const [start, setStart] = useState<string | undefined>();
   const [end, setEnd] = useState<string | undefined>();
   const [departmentId, setDepartmentId] = useState<number | undefined>();
@@ -81,8 +82,8 @@ export default function PSpendProjectionsPage() {
 
   // ------- reporte (comparativo egresos) -------
   const { data: reportData, isFetching: reportLoading, refetch } = useQuery({
-    queryKey: ["pSpendCompareReport", filters],
-    queryFn: () => pSpendService.getSpendReport(filters),
+    queryKey: ["pSpendCompareReport", submitted],
+    queryFn: () => pSpendService.getSpendReport(submitted),
   });
   const rows = ensureArray<any>(reportData?.rows);
   const totals =
@@ -93,13 +94,20 @@ export default function PSpendProjectionsPage() {
   const [forceTextEnd, setForceTextEnd] = useState(!end);
 
   // ------- acciones -------
-  const apply = () => refetch();
+  const apply = () => setSubmitted({
+  start: start || undefined,
+  end: end || undefined,
+  departmentId: departmentId || undefined,
+  spendTypeId: spendTypeId || undefined,
+  spendSubTypeId: spendSubTypeId || undefined,
+});
   const clear = () => {
     setStart(undefined);
     setEnd(undefined);
     setDepartmentId(undefined);
     setSpendTypeId(undefined);
     setSpendSubTypeId(undefined);
+    setSubmitted({});
   };
 
   const handlePreviewPDF = () => pSpendService.previewSpendComparePDF(filters);

@@ -21,7 +21,7 @@ export default function SpendReportPage() {
   const [search, setSearch] = useState("");
   const [submitted, setSubmitted] = useState<SpendReportNameFilters | null>({});
 
-  const { data, isFetching, isLoading } = useSpendReport(submitted);
+  const { data, isFetching, isLoading, refetch } = useSpendReport(submitted);
   const pdfMutation = useSpendReportPDF();
   const [isDownloading, setIsDownloading] = useState(false);
   const excelMutation = useSpendReportExcel()
@@ -37,6 +37,7 @@ export default function SpendReportPage() {
       spendTypeName: search || typeName || undefined,
       spendSubTypeName: search || subTypeName || undefined,
     });
+    refetch();
   };
 
   const clearFilters = () => {
@@ -46,7 +47,7 @@ export default function SpendReportPage() {
     setTypeName("");
     setSubTypeName("");
     setSearch("");
-    setSubmitted({});
+    setSubmitted(null);
   };
 
   const handlePreviewPDF = async () => {

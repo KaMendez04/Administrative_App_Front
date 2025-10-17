@@ -48,6 +48,7 @@ export default function PIncomeProjectionsPage() {
     setIncomeSubTypeId,
   } = useIncomeReportFilters();
 
+  const [submitted, setSubmitted] = useState<any>({});
   // ⚠️ Forzamos la carga de departamentos con clave única y refetch en mount
   const { data: departmentsData = [] } = useQuery({
     queryKey: ["pIncomeDepartments"],           // clave única (no colisiona con otros)
@@ -63,7 +64,7 @@ export default function PIncomeProjectionsPage() {
   const incomeTypes = ensureArray<any>(incomeTypesData);
 
   // reporte
-  const reportQuery = useIncomeReport(filters);
+  const reportQuery = useIncomeReport(submitted);
   const rows = ensureArray<any>(reportQuery.data?.rows);
   const totals =
     reportQuery.data?.totals ?? { real: 0, projected: 0, difference: 0 };
@@ -73,13 +74,20 @@ export default function PIncomeProjectionsPage() {
   const [forceTextEnd, setForceTextEnd] = useState(!end);
 
   // ------- acciones -------
-  const apply = () => reportQuery.refetch();
+const apply = () => setSubmitted({
+  start: start || undefined,
+  end: end || undefined,
+  departmentId: departmentId || undefined,
+  incomeTypeId: incomeTypeId || undefined,
+  incomeSubTypeId: undefined,
+});
   const clear = () => {
     setStart(undefined);
     setEnd(undefined);
     setDepartmentId(undefined);
     setIncomeTypeId(undefined);
     setIncomeSubTypeId(undefined);
+    setSubmitted({});
   };
 
   const handlePreviewPDF = () => previewIncomeReportPDF(filters);
