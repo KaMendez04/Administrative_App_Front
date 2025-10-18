@@ -59,16 +59,6 @@ export default function VolunteersRequestPage() {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-[#33361D]">
-            Solicitudes de Voluntariado
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Gestiona las solicitudes de voluntarios individuales y organizaciones
-          </p>
-        </div>
-
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
           <KPICard
