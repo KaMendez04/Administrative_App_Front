@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { listVolunteerSolicitudes } from "../../services/Volunteers/volunteerService";
-import type { VolunteerListParams } from "../../schemas/volunteerSchemas";
+import type { VolunteerListParams } from "../../../schemas/volunteerSchemas";
+import { listVolunteerSolicitudes } from "../../../services/Volunteers/volunteerService";
 
 export function useVolunteerSolicitudesList(params: VolunteerListParams) {
   

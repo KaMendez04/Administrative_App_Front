@@ -1,15 +1,22 @@
-import { useState } from "react";
-import { useVolunteersApprovedList } from "../../hooks/Volunteers/useVolunteersApprovedList";
-import { useVolunteerApprovedDetail } from "../../hooks/Volunteers/useVolunteerApprovedDetail";
-import { VolunteersApprovedTable } from "../../components/volunteers/VolunteersApprovedTable";
-import { VolunteerViewModal } from "../../components/volunteers/VolunteerViewModal";
+import { useState, useMemo } from "react";
+import { useVolunteersApprovedList } from "../../hooks/Volunteers/individual/useVolunteersApprovedList";
+import { useOrganizationsApprovedList } from "../../hooks/Volunteers/organizations/useOrganizationsApprovedList";
+import { useOrganizationDetail } from "../../hooks/Volunteers/organizations/useOrganizationDetail";
 import { StatusFilters } from "../../components/StatusFilters";
+import { getCurrentUser } from "../../services/auth";
+import { ApprovedVolunteerViewModal } from "../../components/volunteers/ApprovedVolunteerViewModal";
+import { UnifiedVolunteersTable, type UnifiedVolunteerRow } from "../../components/volunteers/UnifiedVolunteersTable";
+import { useVolunteerApprovedDetail } from "../../hooks/Volunteers/individual/useVolunteerApprovedDetail";
 
 function KPICard({
   label,
   value,
   tone = "base",
-}: { label: string; value: string | number; tone?: "base" | "alt" | "gold" }) {
+}: {
+  label: string;
+  value: string | number;
+  tone?: "base" | "alt" | "gold";
+}) {
   const toneMap = {
     base: "bg-[#F8F9F3] text-[#5B732E]",
     alt: "bg-[#EAEFE0] text-[#5B732E]",
@@ -25,48 +32,99 @@ function KPICard({
   );
 }
 
+type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
+
 export default function VolunteersApprovedPage() {
-  // ✅ Usar string para compatibilidad con StatusFilters
-  const [status, setStatus] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
+  const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>("ACTIVO");
+  const [editId, setEditId] = useState<{ id: number; tipo: "INDIVIDUAL" | "ORGANIZACION" } | null>(null);
+  const [viewId, setViewId] = useState<{ id: number; tipo: "INDIVIDUAL" | "ORGANIZACION" } | null>(null);
   const limit = 20;
 
-  // ✅ Convertir el status string a boolean para el backend
-  const getIsActiveParam = () => {
-    if (status === "ACTIVO") return true;
-    if (status === "INACTIVO") return false;
-    return undefined; // Todos
-  };
+  const role = getCurrentUser()?.role?.name?.toUpperCase();
+  const isReadOnly = role === "JUNTA";
 
-  const { data, isLoading } = useVolunteersApprovedList({
-    isActive: getIsActiveParam(),
+  const isActiveParam =
+    estadoFilter === "ACTIVO" ? true :
+    estadoFilter === "INACTIVO" ? false :
+    undefined;
+
+  // Fetch de ambos tipos
+  const { data: volunteersData, isLoading: isLoadingVolunteers } = useVolunteersApprovedList({
+    isActive: isActiveParam,
     search,
-    page,
-    limit,
+    page: 1,
+    limit: 100,
     sort: "createdAt:desc",
   });
 
-  const getEstadoLabel = () => {
-    if (status === "ACTIVO") return "Activos";
-    if (status === "INACTIVO") return "Inactivos";
-    return "Todos";
-  };
+  const { data: organizationsData, isLoading: isLoadingOrganizations } = useOrganizationsApprovedList({
+    isActive: isActiveParam,
+    search,
+    page: 1,
+    limit: 100,
+    sort: "createdAt:desc",
+  });
 
-  const [viewId, setViewId] = useState<number | null>(null);
-  const { data: viewDetail, isLoading: isLoadingDetail } =
-    useVolunteerApprovedDetail(viewId ?? 0);
+  // Fetch de detalles según el tipo
+  const { data: volunteerDetail, isLoading: isLoadingVolunteerDetail } = useVolunteerApprovedDetail(
+    viewId?.tipo === "INDIVIDUAL" ? viewId.id : 0
+  );
+
+  const { data: organizationDetail, isLoading: isLoadingOrganizationDetail } = useOrganizationDetail(
+    viewId?.tipo === "ORGANIZACION" ? viewId.id : null
+  );
+
+  // Combinar y unificar datos
+  const unifiedData = useMemo(() => {
+    const volunteers: UnifiedVolunteerRow[] = (volunteersData?.items || []).map((v) => ({
+      id: v.idVoluntario,
+      tipo: "INDIVIDUAL" as const,
+      identificacion: v.persona.cedula,
+      nombreCompleto: `${v.persona.nombre} ${v.persona.apellido1} ${v.persona.apellido2}`,
+      telefono: v.persona.telefono,
+      email: v.persona.email,
+      estado: v.isActive ?? false,
+      original: v,
+    }));
+
+    const organizations: UnifiedVolunteerRow[] = (organizationsData?.items || []).map((o) => ({
+      id: o.idOrganizacion,
+      tipo: "ORGANIZACION" as const,
+      identificacion: o.cedulaJuridica,
+      nombreCompleto: o.nombre,
+      telefono: o.telefono,
+      email: o.email,
+      estado: o.isActive ?? false,
+      original: o,
+    }));
+
+    return [...volunteers, ...organizations].sort((a, b) =>
+      b.original.createdAt.localeCompare(a.original.createdAt)
+    );
+  }, [volunteersData, organizationsData]);
+
+  // Paginación local
+  const paginatedData = useMemo(() => {
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    return unifiedData.slice(start, end);
+  }, [unifiedData, page, limit]);
+
+  const totalPages = Math.ceil(unifiedData.length / limit);
+  const isLoading = isLoadingVolunteers || isLoadingOrganizations;
 
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
         {/* Filtros y KPIs lado a lado */}
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-1">
-          {/* ✅ Filtros usando el componente genérico */}
+          {/* Filtros a la izquierda */}
           <StatusFilters
-            status={status}
+            status={estadoFilter}
             onStatusChange={(newStatus) => {
-              setStatus(newStatus);
+              setEstadoFilter(newStatus as EstadoFilter);
               setPage(1);
             }}
             search={search}
@@ -74,8 +132,7 @@ export default function VolunteersApprovedPage() {
               setSearch(newSearch);
               setPage(1);
             }}
-            searchPlaceholder="Buscar por cédula, nombre o email..."
-            statusOptions={["ACTIVO", "INACTIVO"]} // ✅ Opciones específicas para voluntarios
+            statusOptions={["ACTIVO", "INACTIVO"]}
             showAllOption={true}
           />
 
@@ -83,69 +140,77 @@ export default function VolunteersApprovedPage() {
           <div className="flex flex-col gap-2">
             <KPICard
               label="Total Voluntarios"
-              value={data?.total ?? 0}
+              value={unifiedData.length}
               tone="base"
             />
-            <KPICard label="Estado" value={getEstadoLabel()} tone="gold" />
+            <KPICard
+              label="Estado"
+              value={
+                estadoFilter === "ACTIVO"
+                  ? "Activo"
+                  : estadoFilter === "INACTIVO"
+                  ? "Inactivo"
+                  : "Todos"
+              }
+              tone="gold"
+            />
           </div>
         </div>
 
-        {/* Tabla */}
-        <VolunteersApprovedTable
-          data={data?.items ?? []}
+        {/* Tabla Unificada */}
+        <UnifiedVolunteersTable
+          data={paginatedData}
           isLoading={isLoading}
-          onView={setViewId}
-          onEdit={(id) => console.log("Edit:", id)}
+          isReadOnly={isReadOnly}
+          onView={(id, tipo) => setViewId({ id, tipo })}
+          onEdit={(id, tipo) => setEditId({ id, tipo })}
         />
 
         {/* Paginación */}
-        {!isLoading && (
-          <div className="flex justify-between items-center mt-6">
-            <span className="text-sm text-[#556B2F] font-medium">
-              {data?.total ?? 0} resultados — página {data?.page ?? 1} de{" "}
-              {data?.pages ?? 1}
-            </span>
-            <div className="flex gap-3">
-              <button
-                className="px-6 py-3 rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                Anterior
-              </button>
-              <button
-                className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                disabled={(data?.pages ?? 1) <= page}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Siguiente
-              </button>
-            </div>
+        <div className="flex justify-between items-center mt-6">
+          <span className="text-sm text-[#556B2F] font-medium">
+            {unifiedData.length} resultados — página {page} de {totalPages || 1}
+          </span>
+          <div className="flex gap-3">
+            <button
+              className="px-3 py-1 rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Anterior
+            </button>
+            <button
+              className="px-3 py-1 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              disabled={totalPages <= page}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Siguiente
+            </button>
           </div>
+        </div>
+
+        {/* Modal de visualización dinámico */}
+        {viewId && viewId.tipo === "INDIVIDUAL" && (
+          <ApprovedVolunteerViewModal
+            open={true}
+            onClose={() => setViewId(null)}
+            data={volunteerDetail || null}
+            tipo="INDIVIDUAL"
+            isLoading={isLoadingVolunteerDetail}
+          />
         )}
 
-        {/* Modal de visualización */}
-        <VolunteerViewModal
-          open={viewId != null}
-          onClose={() => setViewId(null)}
-          solicitud={
-            viewDetail
-              ? {
-                  idSolicitudVoluntariado: 0,
-                  tipoSolicitante: "INDIVIDUAL",
-                  voluntario: viewDetail,
-                  organizacion: null,
-                  fechaSolicitud: viewDetail.createdAt,
-                  estado: "APROBADO",
-                  fechaResolucion: null,
-                  motivo: null,
-                  createdAt: viewDetail.createdAt,
-                  updatedAt: viewDetail.updatedAt,
-                }
-              : null
-          }
-          isLoading={isLoadingDetail}
-        />
+        {viewId && viewId.tipo === "ORGANIZACION" && (
+          <ApprovedVolunteerViewModal
+            open={true}
+            onClose={() => setViewId(null)}
+            data={organizationDetail || null}
+            tipo="ORGANIZACION"
+            isLoading={isLoadingOrganizationDetail}
+          />
+        )}
+
+        {/* TODO: Modal de edición */}
       </div>
     </div>
   );

@@ -122,6 +122,7 @@ export const OrganizacionLightSchema = z.object({
   telefono: z.string(),
   email: z.string().email(),
   tipoOrganizacion: z.string().optional(),
+  isActive: z.boolean().optional().default(false),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
@@ -135,6 +136,7 @@ export const OrganizacionSchema = z.object({
   telefono: z.string(),
   email: z.string().email(),
   tipoOrganizacion: z.string(),
+  isActive: z.boolean().optional().default(false), 
   representantes: z.array(RepresentanteSchema).optional(),
   razonesSociales: z.array(RazonSocialSchema).optional(),
   areasInteres: z.array(AreaInteresSchema).optional(),
@@ -144,6 +146,26 @@ export const OrganizacionSchema = z.object({
 });
 
 export type Organizacion = z.infer<typeof OrganizacionSchema>;
+
+export interface OrganizacionApprovedListParams {
+  isActive?: boolean;
+  search?: string;
+  page: number;
+  limit: number;
+  sort?: string;
+}
+
+export const OrganizacionApprovedListResponseSchema = z.object({
+  items: z.array(OrganizacionSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  pages: z.number(),
+});
+
+export type OrganizacionApprovedListResponse = z.infer<
+  typeof OrganizacionApprovedListResponseSchema
+>;
 
 // ============= SOLICITUD VOLUNTARIADO (para listado) =============
 export const SolicitudVoluntariadoListItemSchema = z.object({

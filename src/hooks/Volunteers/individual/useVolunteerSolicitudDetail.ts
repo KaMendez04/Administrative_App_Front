@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getVolunteerSolicitud } from "../../services/Volunteers/volunteerService";
+import { getVolunteerSolicitud } from "../../../services/Volunteers/volunteerService";
 
 export function useVolunteerSolicitudDetail(id: number | null) {
   return useQuery({

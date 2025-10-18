@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toggleVolunteerStatus } from "../../services/Volunteers/volunteerApprovedService";
+import { toggleVolunteerStatus } from "../../../services/Volunteers/volunteerApprovedService";
 import { toast } from "sonner";
 
 export function useToggleVolunteerStatus() {

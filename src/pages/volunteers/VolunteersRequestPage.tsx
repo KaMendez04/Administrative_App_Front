@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useVolunteerSolicitudesList } from "../../hooks/Volunteers/useVolunteerSolicitudesList";
-import { useVolunteerSolicitudDetail } from "../../hooks/Volunteers/useVolunteerSolicitudDetail";
-import { useApproveVolunteerSolicitud } from "../../hooks/Volunteers/useApproveVolunteerSolicitud";
-import { useRejectVolunteerSolicitud } from "../../hooks/Volunteers/useRejectVolunteerSolicitud";
+import { useVolunteerSolicitudesList } from "../../hooks/Volunteers/individual/useVolunteerSolicitudesList";
+import { useApproveVolunteerSolicitud } from "../../hooks/Volunteers/individual/useApproveVolunteerSolicitud";
+import { useRejectVolunteerSolicitud } from "../../hooks/Volunteers/individual/useRejectVolunteerSolicitud";
+import { useVolunteerSolicitudDetail } from "../../hooks/Volunteers/individual/useVolunteerSolicitudDetail";
 import { getCurrentUser } from "../../services/auth";
 import { VolunteerRequestsTable } from "../../components/volunteers/VolunteerRequestsTable";
 import { VolunteerViewModal } from "../../components/volunteers/VolunteerViewModal";

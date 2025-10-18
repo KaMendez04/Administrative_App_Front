@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getVolunteerApproved } from "../../services/Volunteers/volunteerApprovedService";
+import { getVolunteerApproved } from "../../../services/Volunteers/volunteerApprovedService";
 
 export function useVolunteerApprovedDetail(id: number) {
   return useQuery({
