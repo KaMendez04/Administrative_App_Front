@@ -2,20 +2,14 @@ import { useIncomeReport } from "../hooks/Budget/reports/useIncomeReport"
 import { useSpendReport } from "../hooks/Budget/reports/useSpendReport"
 import { useExtraReport } from "../hooks/Budget/reports/useExtraReport"
 import { crc } from "../utils/crcDateUtil"
-import { InfoSection } from "../hooks/dashboard/infoSection"
-import { MetricCard } from "../hooks/dashboard/metricCard"
-import { BarChartSection } from "../hooks/dashboard/barChartSection"
-import { PieChartSection } from "../hooks/dashboard/pieChartSection"
-
+import { BarChartSection } from "../components/dashboard/barChartSection"
+import { PieChartSection } from "../components/dashboard/pieChartSection"
+import { ModuleSummarySection } from "../components/dashboard/ModuleSummarySection"
 
 const COLORS = ["#6B8E3D", "#8BA84E", "#A5C46D", "#C19A3D", "#D4B55A", "#E8C77D"]
 
 // Función auxiliar para calcular cambios
-function calculateChange(
-  current: number,
-  previous: number,
-  hasPrevData: boolean
-) {
+function calculateChange(current: number, previous: number, hasPrevData: boolean) {
   if (!hasPrevData) {
     return { pctStr: "0", isPositive: false, isZero: false, noPreviousData: true }
   }
@@ -106,7 +100,7 @@ export default function DashboardPage() {
     egresos:
       (spendData?.totals?.byDepartment ?? []).find(
         (s: any) =>
-          (s.department || s.departmentName || s.name) === (dept.department || dept.departmentName || dept.name)
+          (s.department || s.departmentName || s.name) === (dept.department || dept.departmentName || dept.name),
       )?.total ?? 0,
   }))
 
@@ -117,59 +111,14 @@ export default function DashboardPage() {
   }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F8F9F3] via-[#F3F4EE] to-[#EEF0E8]">
-      <div className="mx-auto max-w-7xl p-6 md:p-10">
-        <InfoSection />
+    <div className="min-h-screen bg-[#F5F5F0]">
+      <div className="mx-auto max-w-7xl p-6 md:p-10 space-y-8">
+        <ModuleSummarySection currentBalance={balance} />
 
-        {/* Tarjetas de Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <MetricCard
-            title="Total Ingresos"
-            value={crc(totalIncome)}
-            change={incomeChange}
-            color="#6B8E3D"
-            isLoading={isLoading}
-          />
-
-          <MetricCard
-            title="Total Egresos"
-            value={crc(totalSpend)}
-            change={spendChange}
-            color="#C19A3D"
-            isLoading={isLoading}
-          />
-
-          <MetricCard
-            title="Balance Neto"
-            value={crc(balance)}
-            change={balanceChange}
-            color={balance >= 0 ? "#6B8E3D" : "#C19A3D"}
-            isBalance={true}
-            balanceValue={balance}
-            isLoading={isLoading}
-          />
-
-          <MetricCard
-            title="Extraordinarios"
-            value={crc(extraRemaining)}
-            change={extraChange}
-            color="#D4B55A"
-          />
-        </div>
-
-        {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <BarChartSection
-            data={barChartData}
-            isLoading={isLoading}
-            formatCurrency={crc}
-          />
+          <BarChartSection data={barChartData} isLoading={isLoading} formatCurrency={crc} />
 
-          <PieChartSection
-            data={pieChartData}
-            isLoading={isLoading}
-            formatCurrency={crc}
-          />
+          <PieChartSection data={pieChartData} isLoading={isLoading} formatCurrency={crc} />
         </div>
       </div>
     </div>

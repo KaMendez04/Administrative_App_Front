@@ -121,3 +121,8 @@ export const personalApi = {
     await apiConfig.delete(`${"/personal"}/${id}`);
   },
 };
+
+export async function listPersonalPages(): Promise<PersonalPageType[]> {
+  const { data } = await apiConfig.get<PersonalPageType[]>("/personal");
+  return data;
+}

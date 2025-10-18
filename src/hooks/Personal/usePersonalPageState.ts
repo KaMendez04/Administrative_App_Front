@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react"
 import { PersonalPageInitialState, type PersonalPageType } from "../../models/PersonalPageType"
+import apiConfig from "../../services/apiConfig"
 
 
 // Mapea el objeto de la UI (birthdate) al payload de API (birthDate) para CREATE
@@ -33,6 +34,7 @@ export function toUpdateApiPayload(p: Partial<PersonalPageType>): Partial<Person
   if (p.occupation !== undefined) out.occupation = p.occupation
   return out
 }
+
 
 export function usePersonalPageState() {
   const [search, setSearch] = useState("")
