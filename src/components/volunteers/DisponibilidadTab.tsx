@@ -12,6 +12,26 @@ export function DisponibilidadTab({
   const borderColor =
     tipoSolicitante === "INDIVIDUAL" ? "border-[#5B732E]" : "border-[#8C3A33]";
 
+  // ✅ Función para capitalizar primera letra
+  const capitalizarPalabra = (palabra: string): string => {
+    return palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase();
+  };
+
+  // ✅ Función helper para formatear arrays con capitalización
+  const formatearLista = (valor: any, capitalizar = false): string => {
+    if (!valor) return "No especificado";
+    if (Array.isArray(valor)) {
+      if (valor.length === 0) return "No especificado";
+      
+      const items = capitalizar 
+        ? valor.map(item => capitalizarPalabra(String(item)))
+        : valor;
+      
+      return items.join(", ");
+    }
+    return capitalizar ? capitalizarPalabra(String(valor)) : String(valor);
+  };
+
   if (!disponibilidades || disponibilidades.length === 0) {
     return (
       <div className="text-center py-12">
@@ -42,7 +62,7 @@ export function DisponibilidadTab({
                   Días
                 </div>
                 <div className="text-base text-[#33361D] font-medium">
-                  {disp.dias}
+                  {formatearLista(disp.dias)}
                 </div>
               </div>
               <div>
@@ -50,7 +70,7 @@ export function DisponibilidadTab({
                   Horario
                 </div>
                 <div className="text-base text-[#33361D] font-medium">
-                  {disp.horario}
+                  {formatearLista(disp.horarios, true)}
                 </div>
               </div>
               <div>
