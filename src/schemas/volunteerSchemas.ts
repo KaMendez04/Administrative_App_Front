@@ -21,8 +21,8 @@ export const AreaInteresSchema = z.object({
   idAreaInteres: z.number(),
   nombreArea: z.string(),
   tipoEntidad: z.string().optional(),
-  idVoluntario: z.number().nullable().optional(), // ✅ Agregado .optional()
-  idOrganizacion: z.number().nullable().optional(), // ✅ Agregado .optional()
+  idVoluntario: z.number().nullable().optional(), 
+  idOrganizacion: z.number().nullable().optional(), 
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -35,8 +35,8 @@ export const DisponibilidadSchema = z.object({
   tipoEntidad: z.string(),
   fechaInicio: z.string(),
   fechaFin: z.string(),
-  dias: z.string().nullable().optional().default(""), // ✅ Permitir null
-  horario: z.string().nullable().optional().default(""), // ✅ Permitir null
+  dias: z.union([z.string(), z.array(z.string())]).nullable().optional(),
+  horarios: z.union([z.string(), z.array(z.string())]).nullable().optional(),
   idVoluntario: z.number().nullable().optional(),
   idOrganizacion: z.number().nullable().optional(),
   createdAt: z.string(),
@@ -61,6 +61,11 @@ export const VoluntarioIndividualLightSchema = z.object({
   habilidades: z.string().optional(),
   experiencia: z.string().optional(),
   nacionalidad: z.string().optional(),
+  isActive: z.boolean().optional().default(false), 
+  cvUrl: z.string().nullable().optional(), 
+  cartaUrl: z.string().nullable().optional(), 
+  areasInteres: z.array(AreaInteresSchema).optional(),
+  disponibilidades: z.array(DisponibilidadSchema).optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
@@ -72,7 +77,7 @@ export const VoluntarioIndividualSchema = z.object({
   habilidades: z.string(),
   experiencia: z.string(),
   nacionalidad: z.string(),
-  isActive: z.boolean().optional().default(false), // ✅ Con default
+  isActive: z.boolean().optional().default(false), 
   cvUrl: z.string().nullable().optional(),
   cartaUrl: z.string().nullable().optional(),
   areasInteres: z.array(AreaInteresSchema).optional().default([]),
@@ -88,7 +93,7 @@ export const RepresentanteSchema = z.object({
   idRepresentante: z.number(),
   persona: PersonaSchema,
   cargo: z.string(),
-  idOrganizacion: z.number().optional(), // ✅ Agregado .optional()
+  idOrganizacion: z.number().optional(), 
   createdAt: z.string(),
   updatedAt: z.string(),
 
@@ -100,7 +105,7 @@ export type Representante = z.infer<typeof RepresentanteSchema>;
 export const RazonSocialSchema = z.object({
   idRazonSocial: z.number(),
   razonSocial: z.string(),
-  idOrganizacion: z.number().optional(), // ✅ Agregado .optional()
+  idOrganizacion: z.number().optional(), 
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -150,6 +155,10 @@ export const SolicitudVoluntariadoListItemSchema = z.object({
   estado: z.enum(["PENDIENTE", "APROBADO", "RECHAZADO"]),
   fechaResolucion: z.string().nullable().optional(),
   motivo: z.string().nullable().optional(),
+  formData: z.any().nullable().optional(), 
+  cvUrlTemp: z.string().nullable().optional(), 
+  cedulaUrlTemp: z.string().nullable().optional(), 
+  cartaUrlTemp: z.string().nullable().optional(), 
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -164,6 +173,10 @@ export const SolicitudVoluntariadoSchema = z.object({
   estado: z.enum(["PENDIENTE", "APROBADO", "RECHAZADO"]),
   fechaResolucion: z.string().nullable().optional(),
   motivo: z.string().nullable().optional(),
+  formData: z.any().nullable().optional(), 
+  cvUrlTemp: z.string().nullable().optional(), 
+  cedulaUrlTemp: z.string().nullable().optional(), 
+  cartaUrlTemp: z.string().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

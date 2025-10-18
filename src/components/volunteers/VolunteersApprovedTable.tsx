@@ -11,6 +11,15 @@ type VolunteersApprovedTableProps = {
   onEdit: (id: number) => void;
 };
 
+export type VolunteerApprovedRow = {
+  idVoluntario: number;
+  cedula: string;
+  nombreCompleto: string;
+  telefono: string;
+  email: string;
+  estado: boolean;
+}
+
 export function VolunteersApprovedTable({
   data,
   isLoading,

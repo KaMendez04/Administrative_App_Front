@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useVolunteersApprovedList } from "../../hooks/Volunteers/useVolunteersApprovedList";
 import { useVolunteerApprovedDetail } from "../../hooks/Volunteers/useVolunteerApprovedDetail";
-import { useToggleVolunteerStatus } from "../../hooks/Volunteers/useToggleVolunteerStatus";
 import { VolunteersApprovedTable } from "../../components/volunteers/VolunteersApprovedTable";
 import { VolunteerViewModal } from "../../components/volunteers/VolunteerViewModal";
-import { Search } from "lucide-react";
+import { StatusFilters } from "../../components/StatusFilters";
 
 function KPICard({
   label,
@@ -17,31 +16,42 @@ function KPICard({
     gold: "bg-[#FEF6E0] text-[#C19A3D]",
   } as const;
   return (
-    <div className={`rounded-2xl ${toneMap[tone]} p-5 shadow-sm`}>
+    <div className={`rounded-2xl ${toneMap[tone]} p-3.5 shadow-sm`}>
       <div className="text-xs font-bold tracking-wider uppercase opacity-80">
         {label}
       </div>
-      <div className="mt-2 text-3xl font-bold">{value}</div>
+      <div className="mt-1.5 text-2xl font-bold">{value}</div>
     </div>
   );
 }
 
-
 export default function VolunteersApprovedPage() {
-  const [isActive, setIsActive] = useState<boolean | undefined>(undefined);
+  // ✅ Usar string para compatibilidad con StatusFilters
+  const [status, setStatus] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const limit = 20;
 
+  // ✅ Convertir el status string a boolean para el backend
+  const getIsActiveParam = () => {
+    if (status === "ACTIVO") return true;
+    if (status === "INACTIVO") return false;
+    return undefined; // Todos
+  };
+
   const { data, isLoading } = useVolunteersApprovedList({
-    isActive,
+    isActive: getIsActiveParam(),
     search,
     page,
     limit,
     sort: "createdAt:desc",
   });
 
-  const toggleStatus = useToggleVolunteerStatus();
+  const getEstadoLabel = () => {
+    if (status === "ACTIVO") return "Activos";
+    if (status === "INACTIVO") return "Inactivos";
+    return "Todos";
+  };
 
   const [viewId, setViewId] = useState<number | null>(null);
   const { data: viewDetail, isLoading: isLoadingDetail } =
@@ -50,98 +60,42 @@ export default function VolunteersApprovedPage() {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
-        {/* KPIs y Filtros lado a lado */}
-<div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-6">
-  {/* Filtros a la izquierda */}
-  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-    <div className="flex flex-row md:flex-row lg:flex-col gap-4">
-      {/* Búsqueda */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Buscar por cédula, nombre o email..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B732E] focus:outline-none transition"
-        />
-      </div>
+        {/* Filtros y KPIs lado a lado */}
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-1">
+          {/* ✅ Filtros usando el componente genérico */}
+          <StatusFilters
+            status={status}
+            onStatusChange={(newStatus) => {
+              setStatus(newStatus);
+              setPage(1);
+            }}
+            search={search}
+            onSearchChange={(newSearch) => {
+              setSearch(newSearch);
+              setPage(1);
+            }}
+            searchPlaceholder="Buscar por cédula, nombre o email..."
+            statusOptions={["ACTIVO", "INACTIVO"]} // ✅ Opciones específicas para voluntarios
+            showAllOption={true}
+          />
 
-      {/* Filtro por estado */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => {
-            setIsActive(undefined);
-            setPage(1);
-          }}
-          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition ${
-            isActive === undefined
-              ? "bg-[#5B732E] text-white shadow-md"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-        >
-          Todos
-        </button>
-        <button
-          onClick={() => {
-            setIsActive(true);
-            setPage(1);
-          }}
-          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition ${
-            isActive === true
-              ? "bg-[#5B732E] text-white shadow-md"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-        >
-          Activos
-        </button>
-        <button
-          onClick={() => {
-            setIsActive(false);
-            setPage(1);
-          }}
-          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition ${
-            isActive === false
-              ? "bg-[#5B732E] text-white shadow-md"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-        >
-          Inactivos
-        </button>
-      </div>
-    </div>
-  </div>
+          {/* KPIs a la derecha en columna */}
+          <div className="flex flex-col gap-2">
+            <KPICard
+              label="Total Voluntarios"
+              value={data?.total ?? 0}
+              tone="base"
+            />
+            <KPICard label="Estado" value={getEstadoLabel()} tone="gold" />
+          </div>
+        </div>
 
-  {/* KPIs a la derecha en columna */}
-  <div className="flex flex-col gap-4">
-    <KPICard
-      label="Total Voluntarios"
-      value={data?.total ?? 0}
-      tone="base"
-    />
-    <KPICard
-      label="Estado"
-      value={
-        isActive === undefined
-          ? "Todos"
-          : isActive
-          ? "Activos"
-          : "Inactivos"
-      }
-      tone="gold"
-    />
-  </div>
-</div>
         {/* Tabla */}
         <VolunteersApprovedTable
           data={data?.items ?? []}
           isLoading={isLoading}
           onView={setViewId}
-          onToggleStatus={(id) => toggleStatus.mutate(id)}
-          isTogglingStatus={toggleStatus.isPending}
+          onEdit={(id) => console.log("Edit:", id)}
         />
 
         {/* Paginación */}
