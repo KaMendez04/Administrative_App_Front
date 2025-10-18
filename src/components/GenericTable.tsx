@@ -35,14 +35,14 @@ export function GenericTable<T>({
     <div className="rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full" style={{ tableLayout: "fixed" }}>
-          <thead className="bg-[#EAEFE0]">
+          <thead className="bg-[#F8F9F3]">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     style={{ width: `${header.getSize()}px` }}
-                    className="px-4 py-3 text-sm font-bold text-[#33361D]"
+                    className="px-4 py-3 text-xs font-bold text-[#5B732E] uppercase tracking-wider text-center"
                   >
                     {header.isPlaceholder
                       ? null

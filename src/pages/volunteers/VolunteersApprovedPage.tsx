@@ -26,6 +26,7 @@ function KPICard({
   );
 }
 
+
 export default function VolunteersApprovedPage() {
   const [isActive, setIsActive] = useState<boolean | undefined>(undefined);
   const [search, setSearch] = useState<string>("");
@@ -49,104 +50,91 @@ export default function VolunteersApprovedPage() {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-[#33361D]">
-            Voluntarios Individuales Aprobados
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Gestiona los voluntarios activos e inactivos
-          </p>
-        </div>
+        {/* KPIs y Filtros lado a lado */}
+<div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-6">
+  {/* Filtros a la izquierda */}
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+    <div className="flex flex-row md:flex-row lg:flex-col gap-4">
+      {/* Búsqueda */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Buscar por cédula, nombre o email..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B732E] focus:outline-none transition"
+        />
+      </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-          <KPICard
-            label="Total Voluntarios"
-            value={data?.total ?? 0}
-            tone="base"
-          />
-          <KPICard
-            label="Página Actual"
-            value={`${data?.page ?? 1} / ${data?.pages ?? 1}`}
-            tone="alt"
-          />
-          <KPICard
-            label="Estado"
-            value={
-              isActive === undefined
-                ? "Todos"
-                : isActive
-                ? "Activos"
-                : "Inactivos"
-            }
-            tone="gold"
-          />
-        </div>
+      {/* Filtro por estado */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => {
+            setIsActive(undefined);
+            setPage(1);
+          }}
+          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition ${
+            isActive === undefined
+              ? "bg-[#5B732E] text-white shadow-md"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Todos
+        </button>
+        <button
+          onClick={() => {
+            setIsActive(true);
+            setPage(1);
+          }}
+          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition ${
+            isActive === true
+              ? "bg-[#5B732E] text-white shadow-md"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Activos
+        </button>
+        <button
+          onClick={() => {
+            setIsActive(false);
+            setPage(1);
+          }}
+          className={`flex-1 px-4 py-3 rounded-xl font-semibold transition ${
+            isActive === false
+              ? "bg-[#5B732E] text-white shadow-md"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Inactivos
+        </button>
+      </div>
+    </div>
+  </div>
 
-        {/* Filtros */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Búsqueda */}
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar por cédula, nombre o email..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B732E] focus:outline-none transition"
-              />
-            </div>
-
-            {/* Filtro por estado */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setIsActive(undefined);
-                  setPage(1);
-                }}
-                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition ${
-                  isActive === undefined
-                    ? "bg-[#5B732E] text-white shadow-md"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                Todos
-              </button>
-              <button
-                onClick={() => {
-                  setIsActive(true);
-                  setPage(1);
-                }}
-                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition ${
-                  isActive === true
-                    ? "bg-[#5B732E] text-white shadow-md"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                Activos
-              </button>
-              <button
-                onClick={() => {
-                  setIsActive(false);
-                  setPage(1);
-                }}
-                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition ${
-                  isActive === false
-                    ? "bg-[#5B732E] text-white shadow-md"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                Inactivos
-              </button>
-            </div>
-          </div>
-        </div>
-
+  {/* KPIs a la derecha en columna */}
+  <div className="flex flex-col gap-4">
+    <KPICard
+      label="Total Voluntarios"
+      value={data?.total ?? 0}
+      tone="base"
+    />
+    <KPICard
+      label="Estado"
+      value={
+        isActive === undefined
+          ? "Todos"
+          : isActive
+          ? "Activos"
+          : "Inactivos"
+      }
+      tone="gold"
+    />
+  </div>
+</div>
         {/* Tabla */}
         <VolunteersApprovedTable
           data={data?.items ?? []}
