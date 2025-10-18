@@ -35,15 +35,23 @@ export const DisponibilidadSchema = z.object({
   tipoEntidad: z.string(),
   fechaInicio: z.string(),
   fechaFin: z.string(),
-  dias: z.string(),
-  horario: z.string(),
-  idVoluntario: z.number().nullable().optional(), // ✅ Agregado .optional()
-  idOrganizacion: z.number().nullable().optional(), // ✅ Agregado .optional()
+  dias: z.string().nullable().optional().default(""), // ✅ Permitir null
+  horario: z.string().nullable().optional().default(""), // ✅ Permitir null
+  idVoluntario: z.number().nullable().optional(),
+  idOrganizacion: z.number().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
 export type Disponibilidad = z.infer<typeof DisponibilidadSchema>;
+
+// ============= SOLICITUD (versión mínima para relación) =============
+export const SolicitudMinimalSchema = z.object({
+  idSolicitudVoluntariado: z.number(),
+  estado: z.enum(["PENDIENTE", "APROBADO", "RECHAZADO"]),
+  fechaSolicitud: z.string(),
+  fechaResolucion: z.string().nullable().optional(),
+}).optional();
 
 // ============= VOLUNTARIO INDIVIDUAL (versión ligera para listado) =============
 export const VoluntarioIndividualLightSchema = z.object({
@@ -64,8 +72,11 @@ export const VoluntarioIndividualSchema = z.object({
   habilidades: z.string(),
   experiencia: z.string(),
   nacionalidad: z.string(),
-  areasInteres: z.array(AreaInteresSchema).optional(),
-  disponibilidades: z.array(DisponibilidadSchema).optional(),
+  isActive: z.boolean().optional().default(false), // ✅ Con default
+  cvUrl: z.string().nullable().optional(),
+  cartaUrl: z.string().nullable().optional(),
+  areasInteres: z.array(AreaInteresSchema).optional().default([]),
+  disponibilidades: z.array(DisponibilidadSchema).optional().default([]),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -80,6 +91,7 @@ export const RepresentanteSchema = z.object({
   idOrganizacion: z.number().optional(), // ✅ Agregado .optional()
   createdAt: z.string(),
   updatedAt: z.string(),
+
 });
 
 export type Representante = z.infer<typeof RepresentanteSchema>;
@@ -247,3 +259,25 @@ export interface CreateSolicitudVoluntariadoValues {
   disponibilidades?: CreateDisponibilidadValues[];
   areasInteres?: CreateAreaInteresValues[];
 }
+
+// ============= PARÁMETROS PARA VOLUNTARIOS APROBADOS =============
+export interface VolunteerApprovedListParams {
+  isActive?: boolean;
+  search?: string;
+  page: number;
+  limit: number;
+  sort?: string;
+}
+
+// ============= RESPUESTA DE LISTADO DE VOLUNTARIOS APROBADOS =============
+export const VolunteerApprovedListResponseSchema = z.object({
+  items: z.array(VoluntarioIndividualSchema),
+  total: z.number(),
+  page: z.number(),
+    limit: z.number(),
+  pages: z.number(),
+});
+
+export type VolunteerApprovedListResponse = z.infer<
+  typeof VolunteerApprovedListResponseSchema
+>;

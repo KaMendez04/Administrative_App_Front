@@ -16,8 +16,7 @@ export async function createVolunteerSolicitud(
   return SolicitudVoluntariadoSchema.parse(response.data);
 }
 
-// ✅ Listado de solicitudes (con paginación y filtros)
-// ✅ Listado de solicitudes (con paginación y filtros)
+
 export async function listVolunteerSolicitudes(
   params: VolunteerListParams
 ): Promise<SolicitudVoluntariadoListResponse> {
