@@ -173,7 +173,7 @@ export type SolicitudVoluntariadoListResponse = z.infer<
 
 // ============= PARÁMETROS DE LISTADO =============
 export interface VolunteerListParams {
-  status?: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  estado?: "PENDIENTE" | "APROBADO" | "RECHAZADO";
   search?: string;
   page: number;
   limit: number;

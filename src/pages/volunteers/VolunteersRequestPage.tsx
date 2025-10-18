@@ -7,6 +7,7 @@ import { getCurrentUser } from "../../services/auth";
 import { VolunteerRequestsTable } from "../../components/volunteers/VolunteerRequestsTable";
 import { VolunteerViewModal } from "../../components/volunteers/VolunteerViewModal";
 import { RejectDialog } from "../../components/associates/RejectDialog";
+import { StatusFilters } from "../../components/StatusFilters";
 
 
 function KPICard({
@@ -41,7 +42,7 @@ export default function VolunteersRequestPage() {
   const isReadOnly = role === "JUNTA";
 
   const { data, isLoading } = useVolunteerSolicitudesList({
-    status,
+    estado: status,
     search,
     page,
     limit,
@@ -74,54 +75,19 @@ export default function VolunteersRequestPage() {
           <KPICard label="Estado" value={status || "Todos"} tone="gold" />
         </div>
 
-        {/* Filtros */}
-        <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm mb-6">
-          <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
-
-          <div className="mb-4">
-            <input
-              placeholder="Buscar por cédula, nombre, email..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] placeholder:text-gray-400 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
-            />
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {["PENDIENTE", "APROBADO", "RECHAZADO"].map((s) => (
-              <button
-                key={s}
-                onClick={() => {
-                  setStatus(s as any);
-                  setPage(1);
-                }}
-                className={`px-4 py-2 rounded-xl font-semibold transition ${
-                  status === s
-                    ? "bg-[#5B732E] text-white shadow-sm"
-                    : "border-2 border-[#EAEFE0] text-[#33361D] hover:bg-[#EAEFE0]"
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-            <button
-              onClick={() => {
-                setStatus(undefined);
-                setPage(1);
-              }}
-              className={`px-4 py-2 rounded-xl font-semibold transition ${
-                !status
-                  ? "bg-[#5B732E] text-white shadow-sm"
-                  : "border-2 border-[#EAEFE0] text-[#33361D] hover:bg-[#EAEFE0]"
-              }`}
-            >
-              Todos
-            </button>
-          </div>
-        </div>
+         {/* Filtros */}
+        <StatusFilters
+          status={status}
+          onStatusChange={(newStatus) => {
+            setStatus(newStatus as any);
+            setPage(1);
+          }}
+          search={search}
+          onSearchChange={(newSearch) => {
+            setSearch(newSearch);
+            setPage(1);
+          }}
+        />
 
         {/* Tabla de Solicitudes */}
         <VolunteerRequestsTable

@@ -3,10 +3,13 @@ import { listVolunteerSolicitudes } from "../../services/Volunteers/volunteerSer
 import type { VolunteerListParams } from "../../schemas/volunteerSchemas";
 
 export function useVolunteerSolicitudesList(params: VolunteerListParams) {
+  
   return useQuery({
     queryKey: ["volunteer-solicitudes", params],
-    queryFn: () => listVolunteerSolicitudes(params),
+    queryFn: () => {
+      return listVolunteerSolicitudes(params);
+    },
     placeholderData: keepPreviousData,
-    staleTime: 60_000, // 1 minuto
+    staleTime: 60_000,
   });
 }

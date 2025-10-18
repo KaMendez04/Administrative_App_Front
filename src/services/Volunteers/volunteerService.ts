@@ -17,22 +17,24 @@ export async function createVolunteerSolicitud(
 }
 
 // ✅ Listado de solicitudes (con paginación y filtros)
+// ✅ Listado de solicitudes (con paginación y filtros)
 export async function listVolunteerSolicitudes(
   params: VolunteerListParams
 ): Promise<SolicitudVoluntariadoListResponse> {
+  
   const queryParams: any = {
     page: params.page,
     limit: params.limit,
   };
 
-  if (params.status) queryParams.estado = params.status;
+  if (params.estado) queryParams.estado = params.estado;
   if (params.search) queryParams.search = params.search;
   if (params.sort) queryParams.sort = params.sort;
+
 
   const response = await apiConfig.get("/solicitudes-voluntariado", {
     params: queryParams,
   });
-
   const parsed = SolicitudVoluntariadoListResponseSchema.safeParse(
     response.data
   );
