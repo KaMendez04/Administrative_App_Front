@@ -7,30 +7,7 @@ import { useAssociateDetail } from "../../hooks/associates/useAdminAssociateDeta
 import { getCurrentUser } from "../../services/auth";
 import { AssociatesTable, type AssociateRow } from "../../components/associates/associatesTable";
 import { StatusFilters } from "../../components/StatusFilters";
-
-function KPICard({
-  label,
-  value,
-  tone = "base",
-}: {
-  label: string;
-  value: string | number;
-  tone?: "base" | "alt" | "gold";
-}) {
-  const toneMap = {
-    base: "bg-[#F8F9F3] text-[#5B732E]",
-    alt: "bg-[#EAEFE0] text-[#5B732E]",
-    gold: "bg-[#FEF6E0] text-[#C19A3D]",
-  } as const;
-  return (
-    <div className={`rounded-2xl ${toneMap[tone]} p-5 shadow-sm`}>
-      <div className="text-xs font-bold tracking-wider uppercase opacity-80">
-        {label}
-      </div>
-      <div className="mt-2 text-3xl font-bold">{value}</div>
-    </div>
-  );
-}
+import { KPICard } from "../../components/KPICard";
 
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
@@ -82,20 +59,9 @@ export default function AssociatesApprovedPage() {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
-        {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-          <KPICard label="Total Asociados" value={data?.total ?? 0} tone="base" />
-          <KPICard
-            label="Página Actual"
-            value={`${data?.page ?? 1} / ${data?.pages ?? 1}`}
-            tone="alt"
-          />
-          <KPICard 
-            label="Estado" 
-            value={estadoFilter === "ACTIVO" ? "Activo" : estadoFilter === "INACTIVO" ? "Inactivo" : "Todos"} 
-            tone="gold" 
-          />
-        </div>
+        {/* Filtros y KPIs lado a lado */}
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-1">
+       
 
         {/* Filtros */}
         <StatusFilters
@@ -112,6 +78,18 @@ export default function AssociatesApprovedPage() {
           statusOptions={["ACTIVO", "INACTIVO"]}
           showAllOption={true}
         />
+
+          {/* KPIs a la derecha en columna */}
+          <div className="flex flex-col gap-2">
+            <KPICard
+              label="Total Solicitudes"
+              value={data?.total ?? 0}
+              tone="base"
+            />
+            <KPICard label="Estado" value={status || "Todos"} tone="gold" />
+          </div>
+        </div>
+
 
         {/* Tabla */}
         <AssociatesTable

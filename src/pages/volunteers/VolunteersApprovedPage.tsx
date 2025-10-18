@@ -3,34 +3,13 @@ import { useVolunteersApprovedList } from "../../hooks/Volunteers/individual/use
 import { useOrganizationsApprovedList } from "../../hooks/Volunteers/organizations/useOrganizationsApprovedList";
 import { useOrganizationDetail } from "../../hooks/Volunteers/organizations/useOrganizationDetail";
 import { StatusFilters } from "../../components/StatusFilters";
+import { KPICard } from "../../components/KPICard";
 import { getCurrentUser } from "../../services/auth";
 import { ApprovedVolunteerViewModal } from "../../components/volunteers/ApprovedVolunteerViewModal";
 import { UnifiedVolunteersTable, type UnifiedVolunteerRow } from "../../components/volunteers/UnifiedVolunteersTable";
 import { useVolunteerApprovedDetail } from "../../hooks/Volunteers/individual/useVolunteerApprovedDetail";
-
-function KPICard({
-  label,
-  value,
-  tone = "base",
-}: {
-  label: string;
-  value: string | number;
-  tone?: "base" | "alt" | "gold";
-}) {
-  const toneMap = {
-    base: "bg-[#F8F9F3] text-[#5B732E]",
-    alt: "bg-[#EAEFE0] text-[#5B732E]",
-    gold: "bg-[#FEF6E0] text-[#C19A3D]",
-  } as const;
-  return (
-    <div className={`rounded-2xl ${toneMap[tone]} p-3.5 shadow-sm`}>
-      <div className="text-xs font-bold tracking-wider uppercase opacity-80">
-        {label}
-      </div>
-      <div className="mt-1.5 text-2xl font-bold">{value}</div>
-    </div>
-  );
-}
+import { EditOrganizationModal } from "../../components/volunteers/organizations/EditOrganizationModal";
+import { EditVolunteerIndividualModal } from "../../components/volunteers/EditVolunteerIndividualModal";
 
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
@@ -51,7 +30,7 @@ export default function VolunteersApprovedPage() {
     undefined;
 
   // Fetch de ambos tipos
-  const { data: volunteersData, isLoading: isLoadingVolunteers } = useVolunteersApprovedList({
+  const { data: volunteersData, isLoading: isLoadingVolunteers, refetch: refetchVolunteers } = useVolunteersApprovedList({
     isActive: isActiveParam,
     search,
     page: 1,
@@ -59,7 +38,7 @@ export default function VolunteersApprovedPage() {
     sort: "createdAt:desc",
   });
 
-  const { data: organizationsData, isLoading: isLoadingOrganizations } = useOrganizationsApprovedList({
+  const { data: organizationsData, isLoading: isLoadingOrganizations, refetch: refetchOrganizations } = useOrganizationsApprovedList({
     isActive: isActiveParam,
     search,
     page: 1,
@@ -74,6 +53,16 @@ export default function VolunteersApprovedPage() {
 
   const { data: organizationDetail, isLoading: isLoadingOrganizationDetail } = useOrganizationDetail(
     viewId?.tipo === "ORGANIZACION" ? viewId.id : null
+  );
+
+  // Fetch para edición
+  const { data: volunteerEditDetail } = useVolunteerApprovedDetail(
+    editId?.tipo === "INDIVIDUAL" ? editId.id : 0
+  );
+
+  // ✅ Fetch para edición de organización
+  const { data: organizationEditDetail } = useOrganizationDetail(
+    editId?.tipo === "ORGANIZACION" ? editId.id : null
   );
 
   // Combinar y unificar datos
@@ -114,6 +103,12 @@ export default function VolunteersApprovedPage() {
 
   const totalPages = Math.ceil(unifiedData.length / limit);
   const isLoading = isLoadingVolunteers || isLoadingOrganizations;
+
+  // Handler para refrescar datos después de editar
+  const handleSaved = () => {
+    refetchVolunteers();
+    refetchOrganizations();
+  };
 
   return (
     <div className="min-h-screen">
@@ -210,7 +205,23 @@ export default function VolunteersApprovedPage() {
           />
         )}
 
-        {/* TODO: Modal de edición */}
+        {/* Modal de edición para INDIVIDUAL */}
+        {!isReadOnly && editId?.tipo === "INDIVIDUAL" && volunteerEditDetail && (
+          <EditVolunteerIndividualModal
+            voluntario={volunteerEditDetail}
+            onClose={() => setEditId(null)}
+            onSaved={handleSaved}
+          />
+        )}
+
+        {/* Modal de edición para ORGANIZACION */}
+        {!isReadOnly && editId?.tipo === "ORGANIZACION" && organizationEditDetail && (
+          <EditOrganizationModal
+            organizacion={organizationEditDetail}
+            onClose={() => setEditId(null)}
+            onSaved={handleSaved}
+          />
+        )}
       </div>
     </div>
   );

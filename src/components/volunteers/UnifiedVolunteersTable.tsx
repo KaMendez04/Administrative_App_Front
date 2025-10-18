@@ -38,10 +38,10 @@ export function UnifiedVolunteersTable({
       size: 110,
       cell: (info) => (
         <span
-          className={`px-2 py-1 rounded-lg text-xs font-bold ${
+            className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold uppercase ${
             info.getValue() === "INDIVIDUAL"
-              ? "bg-[#E6EDC8] text-[#5A7018]"
-              : "bg-[#F7E9E6] text-[#8C3A33]"
+              ? "bg-[#D4E8E0] text-[#2D5F4F]"
+              : "bg-[#F5E6C5] text-[#8B6C2E]"
           }`}
         >
           {info.getValue() === "INDIVIDUAL" ? "Individual" : "Organización"}

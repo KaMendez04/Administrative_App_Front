@@ -8,26 +8,7 @@ import { SolicitudViewModal } from "../../components/associates/SolicitudViewMod
 import { getCurrentUser } from "../../services/auth";
 import { RequestsTable } from "../../components/associates/RequestTable";
 import { StatusFilters } from "../../components/StatusFilters";
-
-function KPICard({
-  label,
-  value,
-  tone = "base",
-}: { label: string; value: string | number; tone?: "base" | "alt" | "gold" }) {
-  const toneMap = {
-    base: "bg-[#F8F9F3] text-[#5B732E]",
-    alt: "bg-[#EAEFE0] text-[#5B732E]",
-    gold: "bg-[#FEF6E0] text-[#C19A3D]",
-  } as const;
-  return (
-    <div className={`rounded-2xl ${toneMap[tone]} p-5 shadow-sm`}>
-      <div className="text-xs font-bold tracking-wider uppercase opacity-80">
-        {label}
-      </div>
-      <div className="mt-2 text-3xl font-bold">{value}</div>
-    </div>
-  );
-}
+import { KPICard } from "../../components/KPICard";
 
 export default function AdminRequestsPage() {
   const [status, setStatus] = useState<"PENDIENTE" | "APROBADO" | "RECHAZADO" | undefined>("PENDIENTE");
@@ -57,30 +38,32 @@ export default function AdminRequestsPage() {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
-        {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-          <KPICard label="Total Solicitudes" value={data?.total ?? 0} tone="base" />
-          <KPICard
-            label="Página Actual"
-            value={`${data?.page ?? 1} / ${data?.pages ?? 1}`}
-            tone="alt"
+        {/* Filtros y KPIs lado a lado */}
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-1">
+          {/* Filtros a la izquierda */}
+          <StatusFilters
+            status={status}
+            onStatusChange={(newStatus) => {
+              setStatus(newStatus as any);
+              setPage(1);
+            }}
+            search={search}
+            onSearchChange={(newSearch) => {
+              setSearch(newSearch);
+              setPage(1);
+            }}
           />
-          <KPICard label="Estado" value={status || "Todos"} tone="gold" />
-        </div>
 
-        {/* Filtros */}
-        <StatusFilters
-          status={status}
-          onStatusChange={(newStatus) => {
-            setStatus(newStatus as any);
-            setPage(1);
-          }}
-          search={search}
-          onSearchChange={(newSearch) => {
-            setSearch(newSearch);
-            setPage(1);
-          }}
-        />
+          {/* KPIs a la derecha en columna */}
+          <div className="flex flex-col gap-2">
+            <KPICard
+              label="Total Solicitudes"
+              value={data?.total ?? 0}
+              tone="base"
+            />
+            <KPICard label="Estado" value={status || "Todos"} tone="gold" />
+          </div>
+        </div>
 
         {/* Tabla de Solicitudes */}
         <RequestsTable

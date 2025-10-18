@@ -5,6 +5,7 @@ import {
   type VolunteerApprovedListResponse,
   type VolunteerApprovedListParams,
 } from "../../schemas/volunteerSchemas";
+import type { UpdateVoluntarioIndividualValues } from "../../models/volunteers/UpdateVolunteerDto";
 
 // Listado de voluntarios aprobados con paginación
 export async function listVolunteersApproved(
@@ -48,4 +49,13 @@ export async function toggleVolunteerStatus(
 export async function getVolunteersStats() {
   const response = await apiConfig.get("/voluntarios-individuales/stats");
   return response.data;
+}
+
+// Actualizar voluntario
+export async function updateVolunteerIndividual(
+  id: number,
+  data: Partial<UpdateVoluntarioIndividualValues>
+): Promise<VoluntarioIndividual> {
+  const response = await apiConfig.patch(`/voluntarios-individuales/${id}`, data);
+  return VoluntarioIndividualSchema.parse(response.data);
 }
