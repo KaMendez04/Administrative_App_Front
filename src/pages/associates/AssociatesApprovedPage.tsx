@@ -6,6 +6,7 @@ import { useAdminAssociatesList } from "../../hooks/associates/useAdminAssociate
 import { useAssociateDetail } from "../../hooks/associates/useAdminAssociateDetail";
 import { getCurrentUser } from "../../services/auth";
 import { AssociatesTable, type AssociateRow } from "../../components/associates/associatesTable";
+import { StatusFilters } from "../../components/StatusFilters";
 
 function KPICard({
   label,
@@ -31,25 +32,25 @@ function KPICard({
   );
 }
 
-type EstadoFilter = "ACTIVO" | "INACTIVO" | "TODOS";
+type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
 export default function AssociatesApprovedPage() {
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
-  const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>("TODOS"); // 🔸 NUEVO
+  const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>("ACTIVO");
   const limit = 20;
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
 
-  // 🔸 Convertir filtro a boolean o undefined para el hook
-  const estadoParam = 
+  // Convertir filtro a boolean o undefined para el hook
+  const estadoParam =
     estadoFilter === "ACTIVO" ? true :
     estadoFilter === "INACTIVO" ? false :
     undefined;
 
   const { data, isLoading } = useAdminAssociatesList({
-    estado: estadoParam, // 🔸 Pasar estado al hook
+    estado: estadoParam,
     search,
     page,
     limit,
@@ -65,7 +66,7 @@ export default function AssociatesApprovedPage() {
 
   const update = useUpdateAssociate();
 
-  // 🔸 Transformar datos para la tabla
+  // Transformar datos para la tabla
   const tableData: AssociateRow[] =
     data?.items.map((asociado) => ({
       idAsociado: asociado.idAsociado,
@@ -78,28 +79,10 @@ export default function AssociatesApprovedPage() {
       createdAt: asociado.createdAt,
     })) ?? [];
 
-  // 🔸 Función para obtener el label del estado
-  const getEstadoLabel = () => {
-    switch (estadoFilter) {
-      case "ACTIVO":
-        return "ACTIVO";
-      case "INACTIVO":
-        return "INACTIVO";
-      default:
-        return "TODOS";
-    }
-  };
-
-  // 🔸 Manejar cambio de filtro y resetear página
-  const handleEstadoChange = (newEstado: EstadoFilter) => {
-    setEstadoFilter(newEstado);
-    setPage(1);
-  };
-
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
-        {/* 🔸 KPIs con Estado */}
+        {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
           <KPICard label="Total Asociados" value={data?.total ?? 0} tone="base" />
           <KPICard
@@ -107,60 +90,28 @@ export default function AssociatesApprovedPage() {
             value={`${data?.page ?? 1} / ${data?.pages ?? 1}`}
             tone="alt"
           />
-          <KPICard label="Estado" value={getEstadoLabel()} tone="gold" />
+          <KPICard 
+            label="Estado" 
+            value={estadoFilter === "ACTIVO" ? "Activo" : estadoFilter === "INACTIVO" ? "Inactivo" : "Todos"} 
+            tone="gold" 
+          />
         </div>
 
-        {/* 🔸 Filtros */}
-        <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm mb-6">
-          <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
-
-          {/* Input de búsqueda */}
-          <div className="mb-4">
-            <input
-              placeholder="Buscar por cédula, nombre, email..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] placeholder:text-gray-400 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
-            />
-          </div>
-
-          {/* 🔸 Botones de filtro por estado */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => handleEstadoChange("ACTIVO")}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
-                estadoFilter === "ACTIVO"
-                  ? "bg-[#5B732E] text-white shadow-md"
-                  : "bg-white text-[#5B732E] border-2 border-[#EAEFE0] hover:bg-[#F8F9F3]"
-              }`}
-            >
-              ACTIVO
-            </button>
-            <button
-              onClick={() => handleEstadoChange("INACTIVO")}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
-                estadoFilter === "INACTIVO"
-                  ? "bg-[#5B732E] text-white shadow-md"
-                  : "bg-white text-[#5B732E] border-2 border-[#EAEFE0] hover:bg-[#F8F9F3]"
-              }`}
-            >
-              INACTIVO
-            </button>
-            <button
-              onClick={() => handleEstadoChange("TODOS")}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
-                estadoFilter === "TODOS"
-                  ? "bg-[#5B732E] text-white shadow-md"
-                  : "bg-white text-[#5B732E] border-2 border-[#EAEFE0] hover:bg-[#F8F9F3]"
-              }`}
-            >
-              TODOS
-            </button>
-          </div>
-        </div>
+        {/* Filtros */}
+        <StatusFilters
+          status={estadoFilter}
+          onStatusChange={(newStatus) => {
+            setEstadoFilter(newStatus as EstadoFilter);
+            setPage(1);
+          }}
+          search={search}
+          onSearchChange={(newSearch) => {
+            setSearch(newSearch);
+            setPage(1);
+          }}
+          statusOptions={["ACTIVO", "INACTIVO"]}
+          showAllOption={true}
+        />
 
         {/* Tabla */}
         <AssociatesTable
@@ -179,14 +130,14 @@ export default function AssociatesApprovedPage() {
           </span>
           <div className="flex gap-3">
             <button
-              className="px-6 py-3 rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
               Anterior
             </button>
             <button
-              className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="px-3 py-1 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               disabled={(data?.pages ?? 1) <= page}
               onClick={() => setPage((p) => p + 1)}
             >
