@@ -1,10 +1,18 @@
 import { useQuery } from "@tanstack/react-query"
 import { listAssociates } from "../../services/adminAssociatesService"
 import { listPersonalPages } from "../../services/personalPageService"
+import { listVolunteersApproved } from "../../services/Volunteers/volunteerApprovedService"
 
+// ✅ Configuración centralizada de refresh
+const REFRESH_CONFIG = {
+  refetchInterval: 30000, // 30 segundos
+  refetchIntervalInBackground: false,
+  staleTime: 20000, // 20 segundos
+  retry: 1,
+}
 
 /**
- * Hook para asociados - USA SERVICIO REAL
+ * Hook para asociados - CON AUTO-REFRESH
  */
 export function useAssociatesCount() {
   return useQuery({
@@ -13,23 +21,18 @@ export function useAssociatesCount() {
       try {
         const response = await listAssociates({ page: 1, limit: 1, estado: true })
         
-        // Ajusta según la estructura de tu respuesta de asociados
-        // Si retorna { total: number }, úsalo primero (paginado)
         if (typeof response?.total === 'number') {
           return response.total
         }
         
-        // Si retorna { items: [...] } (paginado)
         if (response?.items && Array.isArray(response.items)) {
           return response.items.length
         }
         
-        // Si retorna directamente un array
         if (Array.isArray(response)) {
           return response.filter((a: any) => a.isActive !== false).length
         }
         
-        // Si retorna { data: [...] }
         if ((response as any)?.data && Array.isArray((response as any).data)) {
           return (response as any).data.filter((a: any) => a.isActive !== false).length
         }
@@ -40,14 +43,13 @@ export function useAssociatesCount() {
         return 0
       }
     },
-    staleTime: 5 * 60 * 1000, // Cache por 5 minutos
+    ...REFRESH_CONFIG,
     placeholderData: 0,
   })
 }
 
 /**
- * Hook para personal - USA SERVICIO REAL si existe
- * Si no existe, comenta este hook y usa el valor estático abajo
+ * Hook para personal - CON AUTO-REFRESH
  */
 export function usePersonalCount() {
   return useQuery({
@@ -63,20 +65,59 @@ export function usePersonalCount() {
         return 0
       }
     },
-    staleTime: 5 * 60 * 1000,
+    ...REFRESH_CONFIG,
     placeholderData: 0,
   })
 }
 
 /**
- * Hook combinado - Mezcla servicios reales con valores estáticos
+ * Hook para voluntarios aprobados - CON AUTO-REFRESH
+ */
+export function useVolunteersCount() {
+  return useQuery({
+    queryKey: ["dashboard", "volunteersCount"],
+    queryFn: async () => {
+      try {
+        const response = await listVolunteersApproved({
+          page: 1,
+          limit: 1,
+          isActive: true,
+        })
+        
+        if (typeof response?.total === 'number') {
+          return response.total
+        }
+        
+        if (response?.items && Array.isArray(response.items)) {
+          return response.items.length
+        }
+        
+        if (Array.isArray(response)) {
+          return response.filter((v: any) => v.isActive !== false).length
+        }
+        
+        if ((response as any)?.data && Array.isArray((response as any).data)) {
+          return (response as any).data.filter((v: any) => v.isActive !== false).length
+        }
+        
+        return 0
+      } catch (error) {
+        console.error("Error fetching volunteers count:", error)
+        return 0
+      }
+    },
+    ...REFRESH_CONFIG,
+    placeholderData: 0,
+  })
+}
+
+/**
+ * Hook combinado - Todos los contadores con auto-refresh
  */
 export function useModuleCounts() {
-  // Asociados: servicio real
-  const associatesQ = useAssociatesCount()
-  
-  // Personal: servicio real (si existe, sino comenta y usa valor estático)
   const personalQ = usePersonalCount()
+  const associatesQ = useAssociatesCount()
+  const volunteersQ = useVolunteersCount()
   
   return {
     personal: {
@@ -89,11 +130,10 @@ export function useModuleCounts() {
       isLoading: associatesQ.isLoading,
       error: associatesQ.error,
     },
-    // Voluntarios: valor estático (en desarrollo)
     volunteers: {
-      count: 15, // ← Valor quemado, cámbialo cuando quieras
-      isLoading: false,
-      error: null,
+      count: volunteersQ.data ?? 0,
+      isLoading: volunteersQ.isLoading,
+      error: volunteersQ.error,
     },
   }
 }

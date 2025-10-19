@@ -5,6 +5,9 @@ import { crc } from "../utils/crcDateUtil"
 import { BarChartSection } from "../components/dashboard/barChartSection"
 import { PieChartSection } from "../components/dashboard/pieChartSection"
 import { ModuleSummarySection } from "../components/dashboard/ModuleSummarySection"
+import { useAssociatesSolicitudesPolling } from "../hooks/notification/useAssociatesSolicitudesPolling"
+import { useInitial } from "../hooks/Budget/useInitial"
+import { useState } from "react"
 
 const COLORS = ["#6B8E3D", "#8BA84E", "#A5C46D", "#C19A3D", "#D4B55A", "#E8C77D"]
 
@@ -38,7 +41,47 @@ function calculateChange(current: number, previous: number, hasPrevData: boolean
   }
 }
 
+// ✅ NUEVA FUNCIÓN: Combina ingresos y egresos por departamento
+function combineIncomeAndSpendByDepartment(
+  incomeDepts: any[] = [],
+  spendDepts: any[] = []
+) {
+  const deptMap = new Map<string, { ingresos: number; egresos: number }>();
+
+  // Agregar TODOS los ingresos
+  incomeDepts.forEach((dept) => {
+    const name = dept.department || dept.departmentName || dept.name || "Sin Departamento";
+    if (!deptMap.has(name)) {
+      deptMap.set(name, { ingresos: 0, egresos: 0 });
+    }
+    deptMap.get(name)!.ingresos += dept.total || 0;
+  });
+
+  // Agregar TODOS los egresos
+  spendDepts.forEach((dept) => {
+    const name = dept.department || dept.departmentName || dept.name || "Sin Departamento";
+    if (!deptMap.has(name)) {
+      deptMap.set(name, { ingresos: 0, egresos: 0 });
+    }
+    deptMap.get(name)!.egresos += dept.total || 0;
+  });
+
+  // Convertir a array y ordenar
+  return Array.from(deptMap.entries())
+    .map(([name, values]) => ({
+      name,
+      ingresos: values.ingresos,
+      egresos: values.egresos
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export default function DashboardPage() {
+  useAssociatesSolicitudesPolling()
+
+  const [range, setRange] = useState({ startDate: '', endDate: '' });
+  useInitial(range);
+  
   // Período actual: últimos 30 días
   const today = new Date()
   const thirtyDaysAgo = new Date(today)
@@ -93,16 +136,11 @@ export default function DashboardPage() {
 
   const isLoading = loadingIncome || loadingSpend
 
-  // Preparar datos para gráficos
-  const barChartData = (incomeData?.totals?.byDepartment ?? []).map((dept: any) => ({
-    name: dept.department || dept.departmentName || dept.name,
-    ingresos: dept.total,
-    egresos:
-      (spendData?.totals?.byDepartment ?? []).find(
-        (s: any) =>
-          (s.department || s.departmentName || s.name) === (dept.department || dept.departmentName || dept.name),
-      )?.total ?? 0,
-  }))
+  // ✅ CORREGIDO: Ahora combina TODOS los departamentos
+  const barChartData = combineIncomeAndSpendByDepartment(
+    incomeData?.totals?.byDepartment ?? [],
+    spendData?.totals?.byDepartment ?? []
+  );
 
   const pieChartData = (incomeData?.totals?.byDepartment ?? []).map((dept: any, index: number) => ({
     name: dept.department || dept.departmentName || dept.name,
@@ -116,7 +154,11 @@ export default function DashboardPage() {
         <ModuleSummarySection currentBalance={balance} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <BarChartSection data={barChartData} isLoading={isLoading} formatCurrency={crc} />
+          <BarChartSection 
+            data={barChartData}
+            isLoading={isLoading}
+            formatCurrency={crc}
+          />
 
           <PieChartSection data={pieChartData} isLoading={isLoading} formatCurrency={crc} />
         </div>

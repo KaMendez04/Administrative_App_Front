@@ -4,6 +4,8 @@ import { useModuleCounts } from "../../hooks/dashboard/useModuleCounts"
 import { crc } from "../../utils/crcDateUtil"
 import { ModuleCard } from "./moduleCard"
 import type { FiscalYear } from "../../hooks/Budget/useFiscalYear"
+import { useAssociatesSolicitudesPolling } from "../../hooks/notification/useAssociatesSolicitudesPolling"
+import { useVolunteerSolicitudesPolling } from "../../hooks/notification/useVolunteerSolicitudesPolling"
 
 interface ModuleSummarySectionProps {
   currentBalance?: number
@@ -14,8 +16,12 @@ export function ModuleSummarySection({ currentBalance = 0, fiscalYear }: ModuleS
   const role = getCurrentUser()?.role?.name?.toUpperCase()
   const isAdmin = role === "ADMIN"
 
-  // Obtener los contadores
+  // Obtener los contadores de personal y asociados aprobados
   const counts = useModuleCounts()
+  
+  // ✅ Obtener contadores de solicitudes pendientes
+  const { pendingCount: pendingAssociates } = useAssociatesSolicitudesPolling()
+  const { pendingCount: pendingVolunteers } = useVolunteerSolicitudesPolling()
 
   const modules = [
     // Solo mostrar para ADMIN
@@ -41,21 +47,27 @@ export function ModuleSummarySection({ currentBalance = 0, fiscalYear }: ModuleS
     },
     {
       title: "Asociados",
-      description: "Gestión de Miembros",
+      description: pendingAssociates > 0 
+        ? `${pendingAssociates} solicitud${pendingAssociates > 1 ? 'es' : ''} pendiente${pendingAssociates > 1 ? 's' : ''}`
+        : "Gestión de Miembros",
       subtitle: counts.associates.count,
       icon: UserCheck,
       primaryAction: "Gestión",
       route: "/associates",
       isLoading: counts.associates.isLoading,
+      badge: pendingAssociates > 0 ? pendingAssociates : undefined,
     },
     {
       title: "Voluntarios",
-      description: "Gestión de Voluntarios",
+      description: pendingVolunteers > 0
+        ? `${pendingVolunteers} solicitud${pendingVolunteers > 1 ? 'es' : ''} pendiente${pendingVolunteers > 1 ? 's' : ''}`
+        : "Gestión de Voluntarios",
       subtitle: counts.volunteers.count,
       icon: Users,
       primaryAction: "Gestión",
       route: "/volunteers",
       isLoading: counts.volunteers.isLoading,
+      badge: pendingVolunteers > 0 ? pendingVolunteers : undefined,
     },
     {
       title: fiscalYear ? `Presupuesto ${fiscalYear.year}` : "Presupuesto",

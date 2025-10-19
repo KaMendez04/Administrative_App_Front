@@ -83,6 +83,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }
 
   const addNotification = (notification: AddNotificationType) => {
+    console.log("🔔 Agregando notificación:", notification)
+    
     const newNotification: Notification = {
       id: `${Date.now()}-${Math.random()}`,
       title: notification.title,
@@ -92,8 +94,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       read: false,
     }
 
-    setNotifications((prev) => [newNotification, ...prev])
+    setNotifications((prev) => {
+      console.log("📋 Notificaciones previas:", prev.length)
+      console.log("📋 Nuevas notificaciones:", [...prev, newNotification].length)
+      return [newNotification, ...prev]
+    })
 
+    console.log("🔔 Mostrando toast...")
+    
     toast.custom(
       () => (
         <div className="bg-white rounded-lg shadow-lg border-l-4 border-[#5B732E] p-3 flex items-start gap-3 min-w-[320px]">
@@ -109,6 +117,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         position: "top-right",
       },
     )
+    
+    console.log("✅ Toast mostrado")
   }
 
   const markAsRead = (id: string) => {
