@@ -1,18 +1,31 @@
+// hooks/Volunteers/useToggleVolunteerStatus.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toggleVolunteerStatus } from "../../../services/Volunteers/volunteerApprovedService";
 import { toast } from "sonner";
+import { toggleVolunteerStatus } from "../../../services/Volunteers/volunteerApprovedService";
+
+interface ToggleVolunteerStatusResponse {
+  idVoluntario: number;
+  isActive: boolean;
+}
 
 export function useToggleVolunteerStatus() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: toggleVolunteerStatus,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["volunteers-approved"] });
-      toast.success("Estado actualizado correctamente");
+  const qc = useQueryClient();
+  
+  return useMutation<ToggleVolunteerStatusResponse, Error, number>({
+    mutationFn: (id: number) => toggleVolunteerStatus(id) as Promise<ToggleVolunteerStatusResponse>,
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["volunteers-approved"] });
+      qc.invalidateQueries({ queryKey: ["volunteer-detail", data.idVoluntario] });
+      
+      const mensaje = data.isActive
+        ? "Voluntario activado correctamente"
+        : "Voluntario desactivado correctamente";
+      
+      toast.success(mensaje);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Error al cambiar estado");
+      const mensaje = error?.response?.data?.message || error?.message || "Error al cambiar el estado del voluntario";
+      toast.error(mensaje);
     },
   });
 }

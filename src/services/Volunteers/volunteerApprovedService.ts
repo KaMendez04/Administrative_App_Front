@@ -36,13 +36,9 @@ export async function getVolunteerApproved(
 }
 
 // Toggle estado (activar/desactivar)
-export async function toggleVolunteerStatus(
-  id: number
-): Promise<VoluntarioIndividual> {
-  const response = await apiConfig.patch(
-    `/voluntarios-individuales/${id}/toggle-status`
-  );
-  return VoluntarioIndividualSchema.parse(response.data);
+export async function toggleVolunteerStatus(id: number) {
+  const response = await apiConfig.patch(`/voluntarios-individuales/${id}/toggle-status`);
+  return response.data;
 }
 
 // Estadísticas

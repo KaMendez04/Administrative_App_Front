@@ -1,19 +1,31 @@
+// hooks/Volunteers/useToggleOrganizacionStatus.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toggleOrganizationStatus } from "../../../services/Volunteers/organizationApprovedService";
-import { showErrorAlertRegister, showSuccessAlertRegister } from "../../../utils/alerts";
+import { toast } from "sonner";
+import { toggleOrganizacionStatus } from "../../../services/Volunteers/organizationApprovedService";
 
-export function useToggleOrganizationStatus() {
-  const queryClient = useQueryClient();
+interface ToggleOrganizacionStatusResponse {
+  idOrganizacion: number;
+  isActive: boolean;
+}
 
-  return useMutation({
-    mutationFn: (id: number) => toggleOrganizationStatus(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["organizations-approved"] });
-      showSuccessAlertRegister("Estado actualizado correctamente");
+export function useToggleOrganizacionStatus() {
+  const qc = useQueryClient();
+  
+  return useMutation<ToggleOrganizacionStatusResponse, Error, number>({
+    mutationFn: (id: number) => toggleOrganizacionStatus(id) as Promise<ToggleOrganizacionStatusResponse>,
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["organizaciones-approved"] });
+      qc.invalidateQueries({ queryKey: ["organizacion-detail", data.idOrganizacion] });
+      
+      const mensaje = data.isActive
+        ? "Organización activada correctamente"
+        : "Organización desactivada correctamente";
+      
+      toast.success(mensaje);
     },
     onError: (error: any) => {
-      const msg = error?.response?.data?.message || "Error al cambiar el estado";
-      showErrorAlertRegister(msg);
+      const mensaje = error?.response?.data?.message || error?.message || "Error al cambiar el estado de la organización";
+      toast.error(mensaje);
     },
   });
 }

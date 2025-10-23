@@ -35,13 +35,9 @@ export async function getOrganizationApproved(
 }
 
 // Toggle estado (activar/desactivar)
-export async function toggleOrganizationStatus(
-  id: number
-): Promise<Organizacion> {
-  const response = await apiConfig.patch(
-    `/organizaciones/${id}/toggle-status`
-  );
-  return OrganizacionSchema.parse(response.data);
+export async function toggleOrganizacionStatus(id: number) {
+  const response = await apiConfig.patch(`/organizaciones/${id}/toggle-status`);
+  return response.data;
 }
 
 // Actualizar organización
