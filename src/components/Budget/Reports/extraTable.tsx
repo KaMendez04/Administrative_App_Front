@@ -28,7 +28,7 @@ export default function ExtraTable({ rows, loading }: { rows: ExtraRow[]; loadin
           <div className="py-10 text-center text-gray-400">Sin resultados</div>
         )}
 
-        {!loading && rows.map((r, i) => (
+        {!loading && rows.map((r) => (
           <div
             key={r.id}
             className="grid grid-cols-5 gap-4 px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition"

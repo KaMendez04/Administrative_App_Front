@@ -46,7 +46,7 @@ export function PieChartSection({ data, isLoading, formatCurrency }: PieChartSec
                     paddingAngle={2}
                     dataKey="value"
                   >
-                    {data.map((entry, index) => (
+                    {data.map((_entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={`url(#gradient-${index % COLORS.length})`}

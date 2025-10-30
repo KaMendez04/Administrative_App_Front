@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { listDisponibilidades } from "../../services/Volunteers/volunteerCatalogsService";
+import { listDisponibilidades } from "../../../services/Volunteers/volunteerCatalogsService";
+
 
 export function useDisponibilidades() {
   return useQuery({

@@ -39,7 +39,7 @@ export function downloadPDFFromRows(
   doc.text(`Filtro aplicado: ${opts?.filterText ?? "Sin filtro"}`, marginLeft, y);
 
   // Línea dorada 
-  y += 12; // espacio antes de la línea
+  y += 12;
   const topLineY = y;
   doc.setDrawColor(...brandGold);
   doc.setLineWidth(0.8);
@@ -50,37 +50,40 @@ export function downloadPDFFromRows(
   const body = rows.map(r => columns.map(c => String(r[c.field] ?? "")));
 
   autoTable(doc, {
-  head,
-  body,
-  startY: 86,
-  
-  styles: { 
-    fontSize: 10,
-    cellPadding: 6,
-    valign: "middle",
-    overflow: "linebreak",  // permite salto de línea en textos largos
-  },
-  headStyles: { fillColor: brandGreen, textColor: 255, fontStyle: "bold" },
-  alternateRowStyles: { fillColor: [250, 249, 245] },
+    head,
+    body,
+    startY: 86,
+    
+    styles: { 
+      fontSize: 10,
+      cellPadding: 6,
+      valign: "middle",
+      overflow: "linebreak",
+    },
+    headStyles: { fillColor: brandGreen, textColor: 255, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [250, 249, 245] },
 
-  // Márgenes simétricos + centrado
-  margin: { top: 86, left: 40, right: 40 },
-  tableWidth: "auto",   
-  halign: "center",     
+    margin: { top: 86, left: 40, right: 40 },
+    tableWidth: "auto",   
+    halign: "center",     
 
-  // 👇 Tipamos 'data' para TP
-  didDrawPage: (data: any) => {
-    const str = `Página ${data.pageNumber} de ${doc.internal.getNumberOfPages()}`;
-    doc.setFontSize(10);
-    doc.setTextColor(120);
-    doc.text(str, pageWidth - 40, pageHeight - 20, { align: "right" });
+    didDrawPage: (data: any) => {
+      // Acceder al número de página desde data.pageNumber
+      const currentPage = data.pageNumber;
+      
+      // Para obtener el total de páginas, usar doc directamente
+      const totalPages = (doc as any).internal.getNumberOfPages();
+      
+      const str = `Página ${currentPage} de ${totalPages}`;
+      doc.setFontSize(10);
+      doc.setTextColor(120);
+      doc.text(str, pageWidth - 40, pageHeight - 20, { align: "right" });
 
-    doc.setDrawColor(...brandGold);
-    doc.setLineWidth(0.8);
-    doc.line(40, 64, pageWidth - 40, 64);
-  },
-});
-
+      doc.setDrawColor(...brandGold);
+      doc.setLineWidth(0.8);
+      doc.line(40, 64, pageWidth - 40, 64);
+    },
+  });
 
   // ---- Resumen final
   const afterTableY = (doc as any).lastAutoTable?.finalY ?? topLineY + 14;

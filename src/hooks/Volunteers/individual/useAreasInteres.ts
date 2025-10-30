@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { listAreasInteres } from "../../services/Volunteers/volunteerCatalogsService";
+import { listAreasInteres } from "../../../services/Volunteers/volunteerCatalogsService";
+
 
 export function useAreasInteres() {
   return useQuery({

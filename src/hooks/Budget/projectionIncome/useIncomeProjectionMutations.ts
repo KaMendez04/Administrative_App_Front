@@ -32,7 +32,7 @@ export function useCreateIncomeType() {
   const qc = useQueryClient();
   const m = useMutation({
     mutationFn: (payload: CreatePIncomeTypeDTO) => createPIncomeType(payload),
-    onSuccess: (created, payload) => {
+    onSuccess: ( payload) => {
       // refresca tipos del departamento afectado
       qc.invalidateQueries({
         queryKey: ["pIncomeTypes", payload.departmentId ?? "none"],
@@ -48,7 +48,7 @@ export function useCreateIncomeSubType() {
   const m = useMutation({
     mutationFn: (payload: CreatePIncomeSubTypeDTO) =>
       createPIncomeSubType(payload),
-    onSuccess: (created, payload) => {
+    onSuccess: ( payload) => {
       // refresca subtipos del tipo afectado
       qc.invalidateQueries({
         queryKey: ["pIncomeSubTypes", payload.pIncomeTypeId ?? "none"],

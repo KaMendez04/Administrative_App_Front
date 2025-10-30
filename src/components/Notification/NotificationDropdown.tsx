@@ -17,35 +17,6 @@ export function NotificationDropdown() {
     return date.toLocaleDateString("es-CR")
   }
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "solicitud":
-        return <Bell className="w-4 h-4 text-white" />
-      case "warning":
-        return <Bell className="w-4 h-4 text-white" />
-      case "info":
-        return <Bell className="w-4 h-4 text-white" />
-      case "success":
-        return <Bell className="w-4 h-4 text-white" />
-      default:
-        return <Bell className="w-4 h-4 text-white" />
-    }
-  }
-
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case "solicitud":
-        return "bg-[#5B732E]"
-      case "warning":
-        return "bg-[#5B732E]"
-      case "info":
-        return "bg-[#5B732E]"
-      case "success":
-        return "bg-[#5B732E]"
-      default:
-        return "bg-[#5B732E]"
-    }
-  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

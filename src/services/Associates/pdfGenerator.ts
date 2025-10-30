@@ -97,7 +97,7 @@ export const generateSolicitudPDF = (
     
     let xPos = margin + 3;
     const boxSize = 3;
-    const itemSpacing = 4;
+
     
     items.forEach((item) => {
       const itemWidth = doc.getTextWidth(item) + boxSize + 10;

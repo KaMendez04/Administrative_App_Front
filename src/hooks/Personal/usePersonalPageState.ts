@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react"
 import { PersonalPageInitialState, type PersonalPageType } from "../../models/PersonalPageType"
-import apiConfig from "../../services/apiConfig"
 
 
 // Mapea el objeto de la UI (birthdate) al payload de API (birthDate) para CREATE

@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   useIncomeReport,
   useIncomeReportFilters,
-  useIncomeSubTypes,
   useIncomeTypes,
 } from "../../../hooks/Budget/reports/usePIncomeReport";
 import {
@@ -60,7 +59,6 @@ export default function PIncomeProjectionsPage() {
 
   // tipos/subtipos (sí dependen del dept / tipo)
   const { data: incomeTypesData = [] } = useIncomeTypes(departmentId);
-  const { data: incomeSubTypesData = [] } = useIncomeSubTypes(incomeTypeId);
   const incomeTypes = ensureArray<any>(incomeTypesData);
 
   // reporte

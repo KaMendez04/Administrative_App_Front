@@ -15,7 +15,7 @@ export default function IncomeReportPage() {
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState<any>({});
 
-  const { data, isFetching, isLoading } = useIncomeReport(submitted);
+  const { data, isFetching} = useIncomeReport(submitted);
   const { mutateAsync: generateIncomePDF, isPending: isPdfGenerating } = useIncomeReportPDF();
  const { mutateAsync: generateIncomeExcel, isPending: isExcelGenerating } = useIncomeReportExcel(); 
   const rows = data?.rows ?? [];

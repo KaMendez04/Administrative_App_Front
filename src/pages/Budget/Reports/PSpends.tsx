@@ -57,18 +57,6 @@ export default function PSpendProjectionsPage() {
     name: t.name ?? t.spendTypeName,
   }));
 
-  // subtipos por tipo (habilitado solo si hay tipo)
-  const { data: subTypesData = [], isFetching: subsLoading } = useQuery({
-    queryKey: ["pSpendSubTypes", spendTypeId ?? null],
-    queryFn: () => pSpendService.listSpendSubTypes(spendTypeId),
-    enabled: !!spendTypeId,
-    refetchOnMount: "always",
-    staleTime: 0
-  });
-  const spendSubTypes = ensureArray<any>(subTypesData).map((s: any) => ({
-    id: s.id ?? s.spendSubTypeId,
-    name: s.name ?? s.spendSubTypeName,
-  }));
 
   // ------- reseteos dependientes (clave para que el select “Tipo” funcione) -------
   useEffect(() => {
@@ -81,7 +69,7 @@ export default function PSpendProjectionsPage() {
   }, [spendTypeId]);
 
   // ------- reporte (comparativo egresos) -------
-  const { data: reportData, isFetching: reportLoading, refetch } = useQuery({
+  const { data: reportData, isFetching: reportLoading } = useQuery({
     queryKey: ["pSpendCompareReport", submitted],
     queryFn: () => pSpendService.getSpendReport(submitted),
   });
@@ -114,8 +102,7 @@ export default function PSpendProjectionsPage() {
   const handleDownloadPDF = () => pSpendService.downloadSpendComparePDF(filters);
   const handleExcelComparativo = () =>
     pSpendService.downloadSpendCompareExcel(filters);
-  const handleExcelPSpend = () =>
-    pSpendService.downloadPSpendListExcel(filters);
+
 
   return (
     <div className="min-h-screen">
