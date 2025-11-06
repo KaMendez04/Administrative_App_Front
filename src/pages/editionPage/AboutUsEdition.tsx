@@ -1,9 +1,12 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection"
-import BackButton from "../../components/PagesEdition/BackButton"
 import { useAboutUsEdit } from "../../hooks/EditionSection/AboutUsHook"
 import { showSuccessAlert } from "../../utils/alerts"
+import { ActionButtons } from "../../components/ActionButtons"
+import { useNavigate } from "@tanstack/react-router"
+import { useState, useEffect } from "react"
 
 export default function AboutUsEdition() {
+  const navigate = useNavigate()
   const {
     loading, saving, error,
     isEditing,
@@ -13,49 +16,72 @@ export default function AboutUsEdition() {
     saveAll,
   } = useAboutUsEdit()
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+  const [initialWhoWeAre, setInitialWhoWeAre] = useState("")
+  const [initialMission, setInitialMission] = useState("")
+  const [initialVision, setInitialVision] = useState("")
+  const [hasChanges, setHasChanges] = useState(false)
+
+  // Guardar valores iniciales
+  useEffect(() => {
+    setInitialWhoWeAre(whoWeAre)
+    setInitialMission(mission)
+    setInitialVision(vision)
+  }, [loading])
+
+  // Detectar cambios
+  useEffect(() => {
+    const changed = 
+      whoWeAre !== initialWhoWeAre ||
+      mission !== initialMission ||
+      vision !== initialVision
+    setHasChanges(changed)
+  }, [whoWeAre, mission, vision, initialWhoWeAre, initialMission, initialVision])
+
+  const handleSave = async () => {
     try {
       await saveAll()
       
-      // Mostrar alerta de éxito si no hay error
       if (!error) {
-        showSuccessAlert("Actualización completada");
+        showSuccessAlert("Actualización completada")
       }
     } catch (err) {
-      // Si hay algún error, no mostrar la alerta de éxito
-      console.error("Error al guardar:", err);
+      console.error("Error al guardar:", err)
     }
   }
 
-  const canCreate = whoWeAre.trim() && mission.trim() && vision.trim()
+  const handleCancel = () => {
+    setWhoWeAre(initialWhoWeAre)
+    setMission(initialMission)
+    setVision(initialVision)
+  }
 
-  // Máximo y contadores (estrictamente necesario para la validación visual)
+  const canSave = whoWeAre.trim() && mission.trim() && vision.trim()
+
+  // Máximo y contadores
   const MAX = 250
-  const leftWho   = Math.max(0, MAX - (whoWeAre?.length ?? 0))
+  const leftWho = Math.max(0, MAX - (whoWeAre?.length ?? 0))
   const leftMission = Math.max(0, MAX - (mission?.length ?? 0))
-  const leftVision  = Math.max(0, MAX - (vision?.length ?? 0))
+  const leftVision = Math.max(0, MAX - (vision?.length ?? 0))
 
   return (
-    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B]">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] p-4">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection />
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-2">Edición de la Sección Sobre Nosotros</h1>
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold mb-2">Edición de la Sección Sobre Nosotros</h1>
           <p className="text-base text-[#475C1D]">
             {isEditing ? "Modifica 'Quiénes somos', 'Misión' y 'Visión'." : "Crea las secciones de Sobre Nosotros."}
           </p>
         </div>
 
-        <div className="bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-8 shadow">
+        <div className="bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-4 shadow">
           <h2 className="text-2xl font-semibold mb-6">{isEditing ? "Editar existente" : "Crear secciones"}</h2>
 
           {loading ? (
             <p>Cargando…</p>
           ) : (
-            <form className="space-y-6" onSubmit={onSubmit}>
+            <div className="space-y-6">
               {/* Quiénes somos */}
               <div>
                 <label htmlFor="whoWeAre" className="block text-sm font-medium text-gray-700 mb-1">
@@ -66,7 +92,8 @@ export default function AboutUsEdition() {
                   rows={4}
                   value={whoWeAre}
                   onChange={(e) => setWhoWeAre(e.target.value)}
-                  maxLength={MAX}                            
+                  maxLength={MAX}
+                  disabled={saving}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
                   placeholder="Describe quiénes son…"
                 />
@@ -85,7 +112,8 @@ export default function AboutUsEdition() {
                   rows={4}
                   value={mission}
                   onChange={(e) => setMission(e.target.value)}
-                  maxLength={MAX}                   
+                  maxLength={MAX}
+                  disabled={saving}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
                   placeholder="Escribe la misión…"
                 />
@@ -105,6 +133,7 @@ export default function AboutUsEdition() {
                   value={vision}
                   onChange={(e) => setVision(e.target.value)}
                   maxLength={MAX}
+                  disabled={saving}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
                   placeholder="Escribe la visión…"
                 />
@@ -113,23 +142,34 @@ export default function AboutUsEdition() {
                 </p>
               </div>
 
-              <div className="flex justify-end gap-4">
-                <button
-                  type="submit"
-                  disabled={saving || (!isEditing && !canCreate)}
-                  className="px-4 py-2 rounded-md border border-green-600 text-green-600 hover:bg-green-50 font-semibold disabled:opacity-60"
-                >
-                  {saving ? (isEditing ? "Guardando…" : "Creando…") : (isEditing ? "Guardar" : "Guardar")}
-                </button>
+              {/* Botones usando ActionButtons */}
+              <div className="flex justify-end">
+                <ActionButtons
+                  onSave={handleSave}
+                  onCancel={handleCancel}
+                  showSave={true}
+                  showCancel={true}
+                  showText={true}
+                  isSaving={saving || !canSave}
+                  requireConfirmCancel={hasChanges}
+                  cancelConfirmText="Los cambios no guardados se perderán."
+                  saveText={isEditing ? "Guardar cambios" : "Crear secciones"}
+                />
               </div>
 
               {error && <p className="text-sm text-red-600">{error}</p>}
-            </form>
+            </div>
           )}
         </div>
 
+        {/* Botón de regresar abajo */}
         <div className="flex justify-end mt-8">
-          <BackButton label="Regresar" />
+          <ActionButtons
+            onBack={() => navigate({ to: "/Principal" })}
+            showBack={true}
+            backText="Regresar"
+            showText={true}
+          />
         </div>
       </div>
     </div>
