@@ -278,7 +278,7 @@ const yesterdayStr = formatYMD(yesterday);
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Fecha de nacimiento */}
-              <form.Field name="birthDate" validators={validators.birthDate}>
+            <form.Field name="birthDate" validators={validators.birthDate}>
                 {(fieldApi) => {
                   const err = fieldApi.state.meta.errors[0]
                   return (
@@ -288,11 +288,14 @@ const yesterdayStr = formatYMD(yesterday);
                         id="birthdate"
                         type="date"
                         value={personalPage.birthDate ?? ""}
-                        max={maxBirthDate}  // ✅ No permite fechas de este año
+                        min="1925-01-01"  // ✅ Fecha mínima histórica
+                        max={cutoffStr}   // ✅ Máximo: hace exactamente 18 años (bloquea días no válidos)
+                        // ✅ El calendario se abre en la fecha de hace 18 años si no hay valor
+                        defaultValue={!personalPage.birthDate ? defaultBirthDate : undefined}
                         onChange={(e) => {
                           const v = e.target.value
-                          // Bloquear fechas de este año o menores de 18
-                          if (v && (v > maxBirthDate || v > cutoffStr)) return
+                          // Bloquear fechas posteriores al límite de 18 años
+                          if (v && v > cutoffStr) return
                           setPersonalPage({ ...personalPage, birthDate: v })
                           fieldApi.handleChange(v)
                         }}
@@ -301,7 +304,7 @@ const yesterdayStr = formatYMD(yesterday);
                       />
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                       <p className="mt-1 text-xs text-gray-500">
-                        No se permiten fechas de {currentYear}. Debe ser mayor de 18 años.
+                        Debe tener al menos 18 años cumplidos.
                       </p>
                     </div>
                   )
@@ -465,7 +468,8 @@ const yesterdayStr = formatYMD(yesterday);
                         id="startWorkDate"
                         type="date"
                         value={personalPage.startWorkDate ?? ""}
-                        max={yesterdayStr}  // ✅ Máximo ayer (no permite hoy)
+                        min="1925-01-01"    // ✅ Fecha mínima histórica
+                        max={yesterdayStr}  // ✅ Máximo ayer (bloquea hoy y futuro en calendario)
                         onChange={(e) => {
                           const v = e.target.value
                           if (v && v >= todayStr) return  // ⛔ Bloquear hoy o futuro
@@ -507,7 +511,7 @@ const yesterdayStr = formatYMD(yesterday);
                   const start = personalPage.startWorkDate ?? ""
                   
                   // Calcular mínimo: al menos 1 día después del inicio
-                  let minEndDate = undefined
+                  let minEndDate = "1925-01-01"
                   if (start) {
                     const startDate = new Date(start)
                     startDate.setDate(startDate.getDate() + 1)
@@ -521,7 +525,7 @@ const yesterdayStr = formatYMD(yesterday);
                         id="endWorkDate"
                         type="date"
                         value={personalPage.endWorkDate ?? ""}
-                        min={minEndDate}  // ✅ Al menos 1 día después del inicio
+                        min={minEndDate}  // ✅ Al menos 1 día después del inicio (bloquea días no válidos)
                         onChange={(e) => {
                           if (personalPage.isActive) return
                           const v = e.target.value
