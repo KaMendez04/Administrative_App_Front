@@ -77,6 +77,14 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       if ("setValue" in money && typeof (money as any).setValue === "function") {
         (money as any).setValue("");
       }
+      setDepartmentId("");
+      setTypeId("");
+      setSubTypeId("");
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      setDate(`${yyyy}-${mm}-${dd}`);
       onSuccess?.(res.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el egreso" }));
