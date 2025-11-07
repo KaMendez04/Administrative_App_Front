@@ -31,25 +31,27 @@ export function EditPersonalPageModal({
   // TanStack Form + validadores (extraídos al hook)
   const { form, validators } = useEditPersonalPageModal(personalPage)
 
-  // Reemplaza las constantes de fecha al inicio del componente (después de readOnlyStyle):
 
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const todayStr = formatYMD(new Date());
+const pad = (n: number) => String(n).padStart(2, "0");
+const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const todayStr = formatYMD(new Date());
 
-  // Fecha límite nacimiento: 31 dic del año pasado (no permite fechas de este año)
-  const currentYear = new Date().getFullYear();
-  const maxBirthDate = `${currentYear - 1}-12-31`;
+// Fecha límite nacimiento: 31 dic del año pasado (no permite fechas de este año)
+const currentYear = new Date().getFullYear();
+const maxBirthDate = `${currentYear - 1}-12-31`;
 
-  // Fecha límite: hoy menos 18 años (nacidos en esta fecha o antes)
-  const cutoff = new Date();
-  cutoff.setFullYear(cutoff.getFullYear() - 18);
-  const cutoffStr = cutoff.toISOString().split("T")[0];
+// Fecha límite: hoy menos 18 años (nacidos en esta fecha o antes)
+const cutoff = new Date();
+cutoff.setFullYear(cutoff.getFullYear() - 18);
+const cutoffStr = cutoff.toISOString().split("T")[0];
 
-  // Para startWorkDate: no puede ser hoy (máximo ayer)
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = formatYMD(yesterday);
+// Fecha sugerida para el calendario: hace exactamente 18 años
+const defaultBirthDate = cutoffStr;
+
+// Para startWorkDate: no puede ser hoy (máximo ayer)
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+const yesterdayStr = formatYMD(yesterday);
 
 
   // ===== PASO 2: Normalizador del payload (sin cambiar diseño/lógica) =====
@@ -453,49 +455,49 @@ export function EditPersonalPageModal({
             {/* Fechas laborales */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               {/* Fecha de inicio laboral */}
-                <form.Field name="startWorkDate" validators={validators.startWorkDate}>
-                  {(fieldApi) => {
-                    const err = fieldApi.state.meta.errors[0]
-                    return (
-                      <div>
-                        <label className={label} htmlFor="startWorkDate">Fecha de inicio laboral</label>
-                        <input
-                          id="startWorkDate"
-                          type="date"
-                          value={personalPage.startWorkDate ?? ""}
-                          max={yesterdayStr}  // ✅ Máximo ayer (no permite hoy)
-                          onChange={(e) => {
-                            const v = e.target.value
-                            if (v && v >= todayStr) return  // ⛔ Bloquear hoy o futuro
+              <form.Field name="startWorkDate" validators={validators.startWorkDate}>
+                {(fieldApi) => {
+                  const err = fieldApi.state.meta.errors[0]
+                  return (
+                    <div>
+                      <label className={label} htmlFor="startWorkDate">Fecha de inicio laboral</label>
+                      <input
+                        id="startWorkDate"
+                        type="date"
+                        value={personalPage.startWorkDate ?? ""}
+                        max={yesterdayStr}  // ✅ Máximo ayer (no permite hoy)
+                        onChange={(e) => {
+                          const v = e.target.value
+                          if (v && v >= todayStr) return  // ⛔ Bloquear hoy o futuro
 
-                            // Si ya había endWorkDate, verificar que start sea al menos 1 día antes
-                            let nextEnd = personalPage.endWorkDate ?? ""
-                            if (nextEnd && v) {
-                              const startDate = new Date(v)
-                              const endDate = new Date(nextEnd)
-                              const dayAfterStart = new Date(startDate)
-                              dayAfterStart.setDate(dayAfterStart.getDate() + 1)
-                              
-                              // Si end no es al menos 1 día después, limpiar
-                              if (endDate <= startDate) {
-                                nextEnd = ""
-                              }
+                          // Si ya había endWorkDate, verificar que start sea al menos 1 día antes
+                          let nextEnd = personalPage.endWorkDate ?? ""
+                          if (nextEnd && v) {
+                            const startDate = new Date(v)
+                            const endDate = new Date(nextEnd)
+                            const dayAfterStart = new Date(startDate)
+                            dayAfterStart.setDate(dayAfterStart.getDate() + 1)
+                            
+                            // Si end no es al menos 1 día después, limpiar
+                            if (endDate <= startDate) {
+                              nextEnd = ""
                             }
+                          }
 
-                            setPersonalPage({ ...personalPage, startWorkDate: v, endWorkDate: nextEnd })
-                            fieldApi.handleChange(v)
-                          }}
-                          placeholder="YYYY-MM-DD"
-                          className={inputClass}
-                        />
-                        {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-                        <p className="mt-1 text-xs text-gray-500">
-                          Debe ser anterior a hoy.
-                        </p>
-                      </div>
-                    )
-                  }}
-                </form.Field>
+                          setPersonalPage({ ...personalPage, startWorkDate: v, endWorkDate: nextEnd })
+                          fieldApi.handleChange(v)
+                        }}
+                        placeholder="YYYY-MM-DD"
+                        className={inputClass}
+                      />
+                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+                      <p className="mt-1 text-xs text-gray-500">
+                        Debe ser anterior a hoy.
+                      </p>
+                    </div>
+                  )
+                }}
+              </form.Field>
 
 
               {/* Fecha de salida */}
