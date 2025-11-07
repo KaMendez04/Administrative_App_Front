@@ -42,7 +42,6 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
     [subTypes.data]
   );
 
-  // ✅ Cascada: limpiar dependientes (sin autoselección)
   useEffect(() => {
     setTypeId("");
     setSubTypeId("");
@@ -66,6 +65,9 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       if ("setValue" in money && typeof (money as any).setValue === "function") {
         (money as any).setValue("");
       }
+      setDepartmentId("");
+      setTypeId("");
+      setSubTypeId("");
       onSuccess?.(res.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar la proyección" }));
