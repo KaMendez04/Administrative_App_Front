@@ -31,8 +31,15 @@ export function EditPersonalPageModal({
   // TanStack Form + validadores (extraídos al hook)
   const { form, validators } = useEditPersonalPageModal(personalPage)
 
-  // Fecha máxima permitida (hoy) en formato YYYY-MM-DD
-  const todayStr = new Date().toISOString().split("T")[0]
+  // Fecha límite: hoy menos 18 años (nacidos en esta fecha o antes)
+const cutoff = new Date()
+cutoff.setFullYear(cutoff.getFullYear() - 18)
+const cutoffStr = cutoff.toISOString().split("T")[0]
+
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const todayStr = formatYMD(new Date()); // hoy en YYYY-MM-DD
 
   // ===== PASO 2: Normalizador del payload (sin cambiar diseño/lógica) =====
   const normalizePayload = (formData: PersonalPageType, base: any) => ({
@@ -268,16 +275,19 @@ export function EditPersonalPageModal({
                         id="birthdate"
                         type="date"
                         value={personalPage.birthDate ?? ""}
-                        max={todayStr}            // ⛔ no permite fechas futuras en el picker
+                      // min opcional (si quieres un mínimo histórico): min="1900-01-01"
+                        max={cutoffStr}     // ✅ solo permite fechas <= hoy-18
                         onChange={(e) => {
                           const v = e.target.value
-                          if (v && v > todayStr) return
+                          if (v && v > cutoffStr) return     // ❌ bloquear menores de 18 (fechas posteriores al corte)
                           setPersonalPage({ ...personalPage, birthDate: v })
                           fieldApi.handleChange(v)
                         }}
                         className={inputClass}
                         required
                       />
+
+
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
                   )
@@ -431,53 +441,73 @@ export function EditPersonalPageModal({
             {/* Fechas laborales */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               {/* Fecha de inicio laboral */}
-              <form.Field name="startWorkDate">
-                {(fieldApi) => (
-                  <div>
-                    <label className={label} htmlFor="startWorkDate">Fecha de inicio laboral</label>
-                    <input
-                      id="startWorkDate"
-                      type="date"
-                      value={personalPage.startWorkDate ?? ""}
-                      max={todayStr}
-                      onChange={(e) => {
-                        const v = e.target.value
-                        if (v && v > todayStr) return
-                        setPersonalPage({ ...personalPage, startWorkDate: v })
-                        fieldApi.handleChange(v)
-                      }}
-                      placeholder="YYYY-MM-DD"
-                      className={inputClass}
-                    />
-                  </div>
-                )}
-              </form.Field>
+              <form.Field name="startWorkDate" validators={validators.startWorkDate}>
+                {(fieldApi) => {
+                  const err = fieldApi.state.meta.errors[0]
+                  return (
+                    <div>
+                      <label className={label} htmlFor="startWorkDate">Fecha de inicio laboral</label>
+                      <input
+                            id="startWorkDate"
+                            type="date"
+                            value={personalPage.startWorkDate ?? ""}
+                            max={todayStr}  // ✅ no puede ser hoy ni futuro
+                            onChange={(e) => {
+                              const v = e.target.value
+                              if (v && v >= todayStr) return  // ❌ bloquear hoy o futuro
+
+                              // si ya había endWorkDate y quedó antes que el nuevo start, la limpiamos
+                              let nextEnd = personalPage.endWorkDate ?? ""
+                              if (nextEnd && v && nextEnd < v) nextEnd = ""
+
+                              setPersonalPage({ ...personalPage, startWorkDate: v, endWorkDate: nextEnd })
+                              fieldApi.handleChange(v)
+                            }}
+                            placeholder="YYYY-MM-DD"
+                            className={inputClass}
+                          />
+                          {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+                        </div>
+                      )
+                    }}
+                  </form.Field>
+
 
               {/* Fecha de salida */}
-              <form.Field name="endWorkDate">
-                {(fieldApi) => (
-                  <div>
-                    <label className={label} htmlFor="endWorkDate">Fecha de salida</label>
-                    <input
-                      id="endWorkDate"
-                      type="date"
-                      value={personalPage.endWorkDate ?? ""}
-                      max={todayStr}
-                      onChange={(e) => {
-                        // Permite edición manual solo si está inactivo
-                        if (personalPage.isActive) return
-                        const v = e.target.value
-                        if (v && v > todayStr) return
-                        setPersonalPage({ ...personalPage, endWorkDate: v })
-                        fieldApi.handleChange(v)
-                      }}
-                      placeholder="YYYY-MM-DD"
-                      className={`${inputClass} ${personalPage.isActive ? readOnlyStyle : ""}`}
-                      readOnly={personalPage.isActive}
-                      disabled={personalPage.isActive}
-                    />
-                  </div>
-                )}
+              <form.Field name="endWorkDate" validators={validators.endWorkDate}>
+                {(fieldApi) => {
+                  const err = fieldApi.state.meta.errors[0]
+                  const start = personalPage.startWorkDate ?? ""
+                  return (
+                    <div>
+                      <label className={label} htmlFor="endWorkDate">Fecha de salida</label>
+                      <input
+                        id="endWorkDate"
+                        type="date"
+                        value={personalPage.endWorkDate ?? ""}
+
+                        // ✅ nunca menor que la fecha de inicio (si hay inicio)
+                        min={start || undefined}
+
+                        // No restringimos a < hoy porque tú dijiste “no hace falta más que eso”
+                        // (si quisieras, podrías usar max={todayStr})
+
+                        onChange={(e) => {
+                          if (personalPage.isActive) return  // sigue tu lógica: solo si inactivo
+                          const v = e.target.value
+                          if (start && v && v < start) return // ❌ bloquear anterior al inicio
+                          setPersonalPage({ ...personalPage, endWorkDate: v })
+                          fieldApi.handleChange(v)
+                        }}
+                        placeholder="YYYY-MM-DD"
+                        className={`${inputClass} ${personalPage.isActive ? readOnlyStyle : ""}`}
+                        readOnly={personalPage.isActive}
+                        disabled={personalPage.isActive}
+                      />
+                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+                    </div>
+                  )
+                }}
               </form.Field>
 
               <div className="hidden md:block" />
