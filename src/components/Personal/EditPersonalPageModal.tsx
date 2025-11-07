@@ -36,6 +36,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const todayStr = formatYMD(new Date());
 
+// Fecha límite nacimiento: 31 dic del año pasado (no permite fechas de este año)
+const currentYear = new Date().getFullYear();
+const maxBirthDate = `${currentYear - 1}-12-31`;
 
 // Fecha límite: hoy menos 18 años (nacidos en esta fecha o antes)
 const cutoff = new Date();
@@ -49,7 +52,6 @@ const defaultBirthDate = cutoffStr;
 const yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
 const yesterdayStr = formatYMD(yesterday);
-
 
 
   // ===== PASO 2: Normalizador del payload (sin cambiar diseño/lógica) =====
@@ -276,40 +278,41 @@ const yesterdayStr = formatYMD(yesterday);
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Fecha de nacimiento */}
-              <form.Field name="birthDate" validators={validators.birthDate}>
-                {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
-                  return (
-                    <div>
-                      <label className={label} htmlFor="birthdate">Fecha de nacimiento</label>
-                      <input
-                        id="birthdate"
-                        type="date"
-                        value={personalPage.birthDate ?? ""}
-                        min="1900-01-01"
-                        max={cutoffStr}
-                        defaultValue={!personalPage.birthDate ? defaultBirthDate : undefined}
-                        onChange={(e) => {
-                          const v = e.target.value
-                          // Bloquear fechas fuera del rango igual que en fechas de trabajo
-                          if (v && (v < '1900-01-01' || v > cutoffStr)) {
-                            e.target.value = personalPage.birthDate ?? '';
-                            return;
-                          }
-                          setPersonalPage({ ...personalPage, birthDate: v })
-                          fieldApi.handleChange(v)
-                        }}
-                        className={inputClass}
-                        required
-                      />
-                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-                      <p className="mt-1 text-xs text-gray-500">
-                        Debe tener al menos 18 años cumplidos. (Máximo: {cutoffStr})
-                      </p>
-                    </div>
-                  )
-                }}
-              </form.Field>
+                <form.Field name="birthDate" validators={validators.birthDate}>
+                  {(fieldApi) => {
+                    const err = fieldApi.state.meta.errors[0]
+                    return (
+                      <div>
+                        <label className={label} htmlFor="birthdate">Fecha de nacimiento</label>
+                        <input
+                          id="birthdate"
+                          type="date"
+                          value={personalPage.birthDate ?? ""}
+                          min="1900-01-01"
+                          max={cutoffStr}
+                          defaultValue={!personalPage.birthDate ? defaultBirthDate : undefined}
+                          onChange={(e) => {
+                            const v = e.target.value
+                            // Bloquear fechas fuera del rango igual que en fechas de trabajo
+                            if (v && (v < '1900-01-01' || v > cutoffStr)) {
+                              e.target.value = personalPage.birthDate ?? '';
+                              return;
+                            }
+                            setPersonalPage({ ...personalPage, birthDate: v })
+                            fieldApi.handleChange(v)
+                          }}
+                          className={inputClass}
+                          required
+                        />
+                        {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+                        <p className="mt-1 text-xs text-gray-500">
+                          Debe tener al menos 18 años cumplidos. (Máximo: {cutoffStr})
+                        </p>
+                      </div>
+                    )
+                  }}
+                </form.Field>
+
               <div />
             </div>
           </section>
