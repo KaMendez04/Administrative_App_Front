@@ -36,22 +36,16 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const todayStr = formatYMD(new Date());
 
-// Fecha límite nacimiento: 31 dic del año pasado (no permite fechas de este año)
-const currentYear = new Date().getFullYear();
-const maxBirthDate = `${currentYear - 1}-12-31`;
-
-// Fecha límite: hoy menos 18 años (nacidos en esta fecha o antes)
+// Fecha límite: hoy menos 18 años
 const cutoff = new Date();
 cutoff.setFullYear(cutoff.getFullYear() - 18);
 const cutoffStr = cutoff.toISOString().split("T")[0];
-
-// Fecha sugerida para el calendario: hace exactamente 18 años
-const defaultBirthDate = cutoffStr;
 
 // Para startWorkDate: no puede ser hoy (máximo ayer)
 const yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
 const yesterdayStr = formatYMD(yesterday);
+
 
 
   // ===== PASO 2: Normalizador del payload (sin cambiar diseño/lógica) =====
@@ -290,7 +284,7 @@ const yesterdayStr = formatYMD(yesterday);
                           value={personalPage.birthDate ?? ""}
                           min="1900-01-01"
                           max={cutoffStr}
-                          defaultValue={!personalPage.birthDate ? defaultBirthDate : undefined}
+                          defaultValue={!personalPage.birthDate ? cutoffStr : undefined}
                           onChange={(e) => {
                             const v = e.target.value
                             // Bloquear fechas fuera del rango igual que en fechas de trabajo
