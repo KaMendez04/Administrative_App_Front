@@ -22,7 +22,7 @@ export default function AssociatesEdition() {
     updateBenefitText, resetCurrentBenefit, saveCurrentBenefit, canSaveBenefit,
     // requirements
     requirements, requirementIndex, setRequirementIndex,
-    updateRequirement, addRequirement, removeRequirement,
+    updateRequirement, addRequirement,
     resetCurrentRequirement, saveRequirements, canSaveReq,
   } = useAssociatesEdition();
 
@@ -88,7 +88,6 @@ export default function AssociatesEdition() {
                 limits={{ requirement: limits.requirement }}
                 onChange={updateRequirement}
                 onAdd={addRequirement}
-                onRemove={removeRequirement}
                 onCancel={resetCurrentRequirement}
                 onSave={saveRequirements}
                 canSave={canSaveReq}
