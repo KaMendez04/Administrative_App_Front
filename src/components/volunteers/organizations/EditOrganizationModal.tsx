@@ -67,41 +67,57 @@ export function EditOrganizationModal({
     validateOrgField(field, value);
   };
 
-  const validateRepField = (index: number, field: string, value: any) => {
-    try {
-      const testData = { [field]: value };
-      const result = UpdateRepresentanteSchema.safeParse(testData);
-      
-      if (result.success) {
-        setRepErrors((prev) => {
-          const newErrors = { ...prev };
-          if (newErrors[index]) {
-            delete newErrors[index][field];
-            if (Object.keys(newErrors[index]).length === 0) {
-              delete newErrors[index];
-            }
+ const validateRepField = (index: number, field: string, value: any) => {
+  try {
+    // ✅ Si el campo está vacío y es opcional (telefono, email, direccion), no validar
+    const optionalFields = ['telefono', 'email', 'direccion'];
+    if (optionalFields.includes(field) && (!value || value === "")) {
+      setRepErrors((prev) => {
+        const newErrors = { ...prev };
+        if (newErrors[index]) {
+          delete newErrors[index][field];
+          if (Object.keys(newErrors[index]).length === 0) {
+            delete newErrors[index];
           }
-          return newErrors;
-        });
-      } else {
-        const fieldError = result.error.issues.find(
-          (issue) => issue.path[0] === field
-        );
-        
-        if (fieldError) {
-          setRepErrors((prev) => ({
-            ...prev,
-            [index]: {
-              ...prev[index],
-              [field]: fieldError.message,
-            },
-          }));
         }
-      }
-    } catch (err: any) {
-      console.error("Error validando representante:", err);
+        return newErrors;
+      });
+      return;
     }
-  };
+
+    const testData = { [field]: value };
+    const result = UpdateRepresentanteSchema.safeParse(testData);
+    
+    if (result.success) {
+      setRepErrors((prev) => {
+        const newErrors = { ...prev };
+        if (newErrors[index]) {
+          delete newErrors[index][field];
+          if (Object.keys(newErrors[index]).length === 0) {
+            delete newErrors[index];
+          }
+        }
+        return newErrors;
+      });
+    } else {
+      const fieldError = result.error.issues.find(
+        (issue) => issue.path[0] === field
+      );
+      
+      if (fieldError) {
+        setRepErrors((prev) => ({
+          ...prev,
+          [index]: {
+            ...prev[index],
+            [field]: fieldError.message,
+          },
+        }));
+      }
+    }
+  } catch (err: any) {
+    console.error("Error validando representante:", err);
+  }
+};
 
   const updateRepresentante = (index: number, field: string, value: string | number) => {
     const updated = [...representantesData];

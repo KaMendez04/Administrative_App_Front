@@ -19,9 +19,10 @@ export const UpdateVoluntarioIndividualSchema = z.object({
   
   direccion: z
     .string()
-    .trim()
-    .max(200, "Máximo 200 caracteres")
-    .min(10, "La dirección es requerida"),
+    .optional()
+    .refine((val) => !val || val.trim().length <= 200, {
+      message: "Máximo 200 caracteres"
+    }),
   
   motivacion: z
     .string()
@@ -59,9 +60,10 @@ export const UpdateOrganizacionSchema = z.object({
   
   direccion: z
     .string()
-    .trim()
-    .max(200, "Máximo 200 caracteres")
-    .min(10, "La dirección es requerida"),
+    .optional()
+    .refine((val) => !val || val.trim().length <= 200, {
+      message: "Máximo 200 caracteres"
+    }),
   
   telefono: z
     .string()
@@ -104,23 +106,27 @@ export const UpdateRepresentanteSchema = z.object({
     .min(1, "El segundo apellido es requerido")
     .max(60, "Máximo 60 caracteres"),
   
+  // ✅ Campos opcionales
   telefono: z
     .string()
-    .trim()
-    .min(8, "El teléfono debe tener al menos 8 caracteres")
-    .max(20, "Máximo 20 caracteres"),
+    .optional()
+    .refine((val) => !val || (val.trim().length >= 8 && val.trim().length <= 20), {
+      message: "El teléfono debe tener entre 8 y 20 caracteres"
+    }),
   
   email: z
     .string()
-    .trim()
-    .toLowerCase()
-    .email("Email inválido"),
+    .optional()
+    .refine((val) => !val || z.string().email().safeParse(val).success, {
+      message: "Email inválido"
+    }),
   
   direccion: z
     .string()
-    .trim()
-    .max(200, "Máximo 200 caracteres")
-    .min(10, "La dirección es requerida"),
+    .optional()
+    .refine((val) => !val || val.trim().length <= 200, {
+      message: "Máximo 200 caracteres"
+    }),
 });
 
 export type UpdateRepresentanteValues = z.infer<typeof UpdateRepresentanteSchema>;
