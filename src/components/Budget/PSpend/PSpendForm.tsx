@@ -75,10 +75,10 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
       {/* Departamento */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm text-gray-700">Departamento</label>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-[#33361D]">Departamento</label>
         <CustomSelect
           value={departmentId}
           onChange={(value) => setDepartmentId(value ? Number(value) : "")}
@@ -90,8 +90,8 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       </div>
 
       {/* Tipo */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm text-gray-700">Tipo</label>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-[#33361D]">Tipo</label>
         <CustomSelect
           value={typeId}
           onChange={(value) => setTypeId(value ? Number(value) : "")}
@@ -103,8 +103,8 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       </div>
 
       {/* Subtipo */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm text-gray-700">Subtipo</label>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-[#33361D]">Subtipo</label>
         <CustomSelect
           value={subTypeId}
           onChange={(value) => setSubTypeId(value ? Number(value) : "")}
@@ -116,8 +116,8 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       </div>
 
       {/* Monto */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm text-gray-700">Monto</label>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-[#33361D]">Monto</label>
         <input
           className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
           placeholder="₡0,00"
@@ -128,17 +128,18 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
         {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       </div>
 
-      {/* Botón */}
-      <button
-        onClick={onSubmit}
-        disabled={disabled || !departmentId || !typeId || !subTypeId || !amountStr || amount <= 0}
-        className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <Plus className="h-4 w-4" />
-        Registrar proyección
-      </button>
-
-      {errors.api && <p className="text-xs text-red-600">{errors.api}</p>}
+      {/* Separador y Botón */}
+      <div className="pt-4 border-t border-gray-100">
+        <button
+          onClick={onSubmit}
+          disabled={disabled || !departmentId || !typeId || !subTypeId || !amountStr || amount <= 0}
+          className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Plus className="h-4 w-4" />
+          Registrar proyección
+        </button>
+        {errors.api && <p className="text-xs text-red-600 mt-3">{errors.api}</p>}
+      </div>
     </div>
   );
 }
