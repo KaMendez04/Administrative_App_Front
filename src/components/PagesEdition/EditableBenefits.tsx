@@ -1,6 +1,6 @@
 import { LucideIcon } from "../common/lucideIcon";
-import { showConfirmAlert, showSuccessAlert } from "../../utils/alerts";
-import { CustomSelect } from "../CustomSelect"; // 👈 Ajusta la ruta según tu estructura
+import { CustomSelect } from "../CustomSelect";
+import { ActionButtons } from "../ActionButtons";
 
 export function EditableBenefits({
   items, index, setIndex, limits,
@@ -23,21 +23,6 @@ export function EditableBenefits({
   const tl = limits.benefitTitle - (b.title?.length ?? 0);
   const dl = limits.benefitDesc  - (b.desc?.length ?? 0);
 
-  const handleSaveClick = async () => {
-    if (!canSave || saving) return;
-    await showSuccessAlert("Confirmar guardado");
-    onSave();
-  };
-
-  const handleCancelClick = async () => {
-    const confirmed = await showConfirmAlert(
-      "Confirmar cancelación",
-      "¿Está seguro que desea cancelar los cambios?"
-    );
-    if (confirmed) onCancel();
-  };
-
-  // 👇 Transformar beneficios a opciones para el CustomSelect
   const benefitOptions = items.map((it, i) => ({
     value: i,
     label: it.title || `Beneficio #${i + 1}`
@@ -47,7 +32,6 @@ export function EditableBenefits({
     <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-5">
       <h2 className="text-2xl font-semibold">Editar Beneficio</h2>
 
-      {/* Selector - Reemplazado por CustomSelect */}
       <CustomSelect
         value={index}
         onChange={(value) => setIndex(Number(value))}
@@ -85,20 +69,21 @@ export function EditableBenefits({
         <p className="text-xs text-gray-500 mt-1">Quedan {dl} de {limits.benefitDesc} caracteres</p>
       </div>
 
-      <div className="flex justify-end gap-3 pt-2">
-        <button
-          onClick={handleSaveClick}
-          disabled={!canSave || saving}
-          className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50 ${!canSave || saving ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          {saving ? "Guardando…" : "Guardar"}
-        </button>
-        <button
-          onClick={handleCancelClick}
-          className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 font-semibold"
-        >
-          Cancelar
-        </button>
+      <div className="flex justify-end pt-2">
+        <ActionButtons
+          showSave
+          showCancel
+          showText
+          onSave={onSave}
+          onCancel={onCancel}
+          disabled={!canSave}
+          isSaving={saving}
+          requireConfirmCancel
+          cancelConfirmTitle="Confirmar cancelación"
+          cancelConfirmText="¿Está seguro que desea cancelar los cambios?"
+          saveText="Guardar"
+          cancelText="Cancelar"
+        />
       </div>
     </div>
   );

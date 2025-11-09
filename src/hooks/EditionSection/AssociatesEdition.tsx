@@ -17,8 +17,11 @@ export function useAssociatesEdition() {
 
   // ui
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// Reemplaza el estado único `saving` por tres estados:
+const [savingHeader, setSavingHeader] = useState(false);
+const [savingBenefits, setSavingBenefits] = useState(false);
+const [savingRequirements, setSavingRequirements] = useState(false); 
+ const [error, setError] = useState<string | null>(null);
 
   const limits = { title: 75, desc: 250, benefitTitle: 60, benefitDesc: 160, requirement: 180 };
 
@@ -50,24 +53,32 @@ export function useAssociatesEdition() {
     requirements: requirements.map((r, i) => ({ text: r.text, order: i })),
   }), [headerTitle, headerDescription, benefits, requirements]);
 
-  const saveAll = useCallback(async () => {
-    setSaving(true);
-    setError(null);
-    try {
-      const updated = await upsertAssociatesPage(buildPayload());
-      setServer(updated);
-      setHeaderTitle(updated.headerTitle);
-      setHeaderDescription(updated.headerDescription);
-      setBenefits([...updated.benefits].sort((a, b) => a.order - b.order));
-      setRequirements([...updated.requirements].sort((a, b) => a.order - b.order));
-      return updated;
-    } catch (e: any) {
-      setError(e?.message ?? "Error al guardar");
-      throw e;
-    } finally {
-      setSaving(false);
-    }
-  }, [buildPayload]);
+  const saveAll = useCallback(async (block: 'header' | 'benefits' | 'requirements') => {
+  // Establece el estado correspondiente
+  if (block === 'header') setSavingHeader(true);
+  else if (block === 'benefits') setSavingBenefits(true);
+  else if (block === 'requirements') setSavingRequirements(true);
+  
+  setError(null);
+  try {
+    const updated = await upsertAssociatesPage(buildPayload());
+    setServer(updated);
+    setHeaderTitle(updated.headerTitle);
+    setHeaderDescription(updated.headerDescription);
+    setBenefits([...updated.benefits].sort((a, b) => a.order - b.order));
+    setRequirements([...updated.requirements].sort((a, b) => a.order - b.order));
+    return updated;
+  } catch (e: any) {
+    setError(e?.message ?? "Error al guardar");
+    throw e;
+  } finally {
+    // Limpia el estado correspondiente
+    if (block === 'header') setSavingHeader(false);
+    else if (block === 'benefits') setSavingBenefits(false);
+    else if (block === 'requirements') setSavingRequirements(false);
+  }
+}, [buildPayload]);
+
 
   // —— Acciones por bloque ——
   // Encabezado
@@ -76,7 +87,7 @@ export function useAssociatesEdition() {
     setHeaderTitle(server.headerTitle);
     setHeaderDescription(server.headerDescription);
   };
-  const saveHeader = () => saveAll();
+const saveHeader = () => saveAll('header');
 
   // Beneficios (solo texto)
   const updateBenefitText = (idx: number, patch: Partial<Pick<typeof benefits[number], "title" | "desc">>) => {
@@ -89,7 +100,7 @@ export function useAssociatesEdition() {
       prev.map((b, i) => (i === benefitIndex ? { ...b, title: src[i]?.title ?? "", desc: src[i]?.desc ?? "" } : b))
     );
   };
-  const saveCurrentBenefit = () => saveAll();
+const saveCurrentBenefit = () => saveAll('benefits');
 
   // Requisitos
   const updateRequirement = (idx: number, text: string) => {
@@ -118,7 +129,7 @@ export function useAssociatesEdition() {
     );
   };
 
-  const saveRequirements = () => saveAll();
+  const saveRequirements = () => saveAll('requirements');
 
   // Habilitaciones de botones
   const canSaveHeader = useMemo(
@@ -140,7 +151,13 @@ export function useAssociatesEdition() {
   }, [requirements, requirementIndex]);
 
   return {
-    loading, saving, error, limits, reload: load,
+     loading, 
+  savingHeader,    
+  savingBenefits,  
+  savingRequirements, 
+  error, 
+  limits, 
+  reload: load,
 
     // header
     headerTitle, headerDescription, setHeaderTitle, setHeaderDescription,

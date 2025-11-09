@@ -1,9 +1,9 @@
-import { showConfirmAlert, showSuccessAlert, showConfirmDeleteAlert } from "../../utils/alerts";
 import { CustomSelect } from "../CustomSelect";
+import { ActionButtons } from "../ActionButtons";
 
 export function EditableRequirements({
   items, index, setIndex, limits,
-  onChange, onRemove,
+  onChange,
   onCancel, onSave, canSave, saving,
 }: {
   items: Array<{ text: string; order: number }>;
@@ -11,39 +11,13 @@ export function EditableRequirements({
   limits: { requirement: number };
   onChange: (idx: number, text: string) => void;
   onAdd: (text: string) => void;
-  onRemove: (idx: number) => void;
   onCancel: () => void; onSave: () => void; canSave: boolean; saving: boolean;
 }) {
   const current = index >= 0 ? items[index] : null;
-
-  // usa el valor actual para el contador (evita que quede "pegado")
   const leftEdit = current ? limits.requirement - (current.text?.length ?? 0) : limits.requirement;
 
-  const handleSaveClick = async () => {
-    if (!canSave || saving) return;
-    await showSuccessAlert("Confirmar guardado");
-    onSave();
-  };
-
-  const handleCancelClick = async () => {
-    const confirmed = await showConfirmAlert(
-      "Confirmar cancelación",
-      "¿Está seguro que desea cancelar los cambios?"
-    );
-    if (confirmed) onCancel();
-  };
-
-  const handleDeleteClick = async () => {
-    const confirmed = await showConfirmDeleteAlert(
-      "Confirmar eliminación",
-      "¿Está seguro que desea eliminar este requisito?"
-    );
-    if (confirmed) onRemove(index);
-  };
-
-  // 👇 Transformar requisitos a opciones para el CustomSelect
   const requirementOptions = [
-    { value: -1, label: "Selecciona un requisito" }, // Opción placeholder
+    { value: -1, label: "Selecciona un requisito" },
     ...items.map((r, i) => ({
       value: i,
       label: r.text.slice(0, 60)
@@ -56,7 +30,6 @@ export function EditableRequirements({
         <h2 className="text-2xl font-semibold">Requisitos</h2>
       </div>
 
-      {/* Selector - Reemplazado por CustomSelect */}
       <CustomSelect
         value={index}
         onChange={(value) => setIndex(Number(value))}
@@ -79,31 +52,21 @@ export function EditableRequirements({
         </div>
       )}
 
-      <div className="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={handleSaveClick}
-          disabled={!canSave || saving}
-          className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50 ${
-            !canSave || saving ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          {saving ? "Guardando…" : "Guardar"}
-        </button>
-        <button
-          type="button"
-          onClick={handleCancelClick}
-          className="px-4 py-2 rounded-md border border-gray-400 text-gray-600 hover:bg-gray-50"
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          onClick={handleDeleteClick}
-          className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 flex items-center gap-2 font-semibold"
-        >
-          Eliminar
-        </button>
+      <div className="flex justify-end pt-2">
+        <ActionButtons
+          showSave
+          showCancel
+          showText
+          onSave={onSave}
+          onCancel={onCancel}
+          disabled={!canSave}
+          isSaving={saving}
+          requireConfirmCancel
+          cancelConfirmTitle="Confirmar cancelación"
+          cancelConfirmText="¿Está seguro que desea cancelar los cambios?"
+          saveText="Guardar"
+          cancelText="Cancelar"
+        />
       </div>
     </div>
   );

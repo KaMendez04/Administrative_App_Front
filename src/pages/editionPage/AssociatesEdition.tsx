@@ -7,7 +7,13 @@ import { useAssociatesEdition } from "../../hooks/EditionSection/AssociatesEditi
 
 export default function AssociatesEdition() {
   const {
-    loading, saving, error, limits, reload,
+  loading, 
+  savingHeader,       
+  savingBenefits,     
+  savingRequirements, 
+  error, 
+  limits, 
+  reload,
     // header
     headerTitle, headerDescription, setHeaderTitle, setHeaderDescription,
     resetHeader, saveHeader, canSaveHeader,
@@ -54,7 +60,7 @@ export default function AssociatesEdition() {
                 onCancel={resetHeader}
                 onSave={saveHeader}
                 canSave={canSaveHeader}
-                saving={saving}
+                saving={savingHeader}
               />
             </div>
 
@@ -69,7 +75,7 @@ export default function AssociatesEdition() {
                 onCancel={resetCurrentBenefit}
                 onSave={saveCurrentBenefit}
                 canSave={canSaveBenefit}
-                saving={saving}
+                saving={savingBenefits}
               />
             </div>
 
@@ -86,7 +92,7 @@ export default function AssociatesEdition() {
                 onCancel={resetCurrentRequirement}
                 onSave={saveRequirements}
                 canSave={canSaveReq}
-                saving={saving}
+                saving={savingRequirements}
               />
             </div>
 

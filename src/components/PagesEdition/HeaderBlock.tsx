@@ -1,4 +1,4 @@
-import { showConfirmAlert, showSuccessAlert } from "../../utils/alerts";
+import { ActionButtons } from "../ActionButtons";
 
 export function HeaderBlock({
   title,
@@ -21,23 +21,6 @@ export function HeaderBlock({
   canSave: boolean;
   saving: boolean;
 }) {
-  const handleSaveClick = async () => {
-    if (canSave && !saving) {
-      await showSuccessAlert("Confirmar guardado");
-      onSave();
-    }
-  };
-
-  const handleCancelClick = async () => {
-    const confirmed = await showConfirmAlert(
-      "Confirmar cancelación",
-      "¿Está seguro que desea cancelar los cambios?"
-    );
-    if (confirmed) {
-      onCancel();
-    }
-  };
-
   return (
     <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-4">
       <h2 className="text-2xl font-semibold">Editar Encabezado</h2>
@@ -69,22 +52,21 @@ export function HeaderBlock({
         </p>
       </div>
 
-      <div className="flex justify-end gap-3 pt-2">
-        <button
-          onClick={handleSaveClick}
-          disabled={!canSave || saving}
-          className={`px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50${
-            !canSave || saving ? "bg-gray-400" : "bg-[#708C3E] hover:bg-green-50"
-          }`}
-        >
-          {saving ? "Guardando…" : "Guardar"}
-        </button>
-        <button
-          onClick={handleCancelClick}
-          className="px-4 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-50 font-semibold"
-        >
-          Cancelar
-        </button>
+      <div className="flex justify-end pt-2">
+        <ActionButtons
+          showSave
+          showCancel
+          showText
+          onSave={onSave}
+          onCancel={onCancel}
+          disabled={!canSave}
+          isSaving={saving}
+          requireConfirmCancel
+          cancelConfirmTitle="Confirmar cancelación"
+          cancelConfirmText="¿Está seguro que desea cancelar los cambios?"
+          saveText="Guardar"
+          cancelText="Cancelar"
+        />
       </div>
     </div>
   );
