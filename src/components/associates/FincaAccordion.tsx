@@ -284,7 +284,8 @@ export function FincaAccordion({ finca, isFirst }: Props) {
               <Section title="Tipos de Cerca" icon={Fence}>
                 <div className="flex flex-wrap gap-2">
                   {tiposCerca.map((tc: any, i: number) => {
-                    const chips: string[] = [];
+                    const chips: string[] = [];''
+                    if (tc?.tipoCerca?.alambrePuas) chips.push("Alambre de puas");
                     if (tc?.tipoCerca?.viva) chips.push("Viva");
                     if (tc?.tipoCerca?.electrica) chips.push("Eléctrica");
                     if (tc?.tipoCerca?.pMuerto) chips.push("P. muerto");

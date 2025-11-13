@@ -61,6 +61,7 @@ export interface Hato {
   
   export interface TipoCerca {
     idTipoCerca?: number | null;
+    alambrePuas?: boolean | null;
     viva?: boolean | null;
     electrica?: boolean | null;
     pMuerto?: boolean | null;
