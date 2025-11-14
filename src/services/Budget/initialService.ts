@@ -54,13 +54,15 @@ export async function fetchCardStats(params: Range = {}): Promise<CardStats> {
     projectedBalance: number;
   }>(`${HOME_SUMMARY_URL}${query ? `?${query}` : ""}`);
 
+  // ✅ Calcular el balance correcto: Ingresos Reales - Egresos Totales
+  const saldoRestante = data.incomes - data.spends;
+
   return {
     totalGastado: data.spends,
     totalIngresos: data.incomes,
-    saldoRestante: data.balance,
+    saldoRestante: saldoRestante,
   };
 }
-
 export const initialService = {
   fetchIncomeByDepartment,
   fetchSpendByDepartment,

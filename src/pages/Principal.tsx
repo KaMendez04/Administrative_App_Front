@@ -6,11 +6,10 @@ import { PieChartSection } from "../components/dashboard/pieChartSection"
 import { ModuleSummarySection } from "../components/dashboard/ModuleSummarySection"
 import { useAssociatesSolicitudesPolling } from "../hooks/notification/useAssociatesSolicitudesPolling"
 import { useInitial } from "../hooks/Budget/useInitial"
+import { useFiscalYear } from "../hooks/Budget/useFiscalYear"
 import { useState } from "react"
 
 const COLORS = ["#6B8E3D", "#8BA84E", "#A5C46D", "#C19A3D", "#D4B55A", "#E8C77D"]
-
-
 
 //Combina ingresos y egresos por departamento
 function combineIncomeAndSpendByDepartment(
@@ -50,8 +49,12 @@ function combineIncomeAndSpendByDepartment(
 export default function DashboardPage() {
   useAssociatesSolicitudesPolling()
 
+  // ✅ Obtener el año fiscal actual
+  const { current: fiscalYear } = useFiscalYear()
+
+  // ✅ Usar useInitial para obtener el balance correcto
   const [range] = useState({ startDate: '', endDate: '' });
-  useInitial(range);
+  const { cards } = useInitial(range);
   
   // Período actual: últimos 30 días
   const today = new Date()
@@ -63,25 +66,9 @@ export default function DashboardPage() {
     end: today.toISOString().split("T")[0],
   }
 
-  // Período anterior
-  const sixtyDaysAgo = new Date(today)
-  sixtyDaysAgo.setDate(today.getDate() - 60)
-
-
   // Queries período actual
   const { data: incomeData, isLoading: loadingIncome } = useIncomeReport(currentPeriod)
   const { data: spendData, isLoading: loadingSpend } = useSpendReport(currentPeriod)
-
-
-
-  // Métricas actuales
-  const totalIncome = Number(incomeData?.totals?.total) || 0
-  const totalSpend = Number(spendData?.totals?.total) || 0
-  const balance = totalIncome - totalSpend
-
-
-
-
 
   const isLoading = loadingIncome || loadingSpend
 
@@ -100,7 +87,11 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F0]">
       <div className="mx-auto max-w-7xl p-6 md:p-10 space-y-8">
-        <ModuleSummarySection currentBalance={balance} />
+        {/* ✅ Usar el saldoRestante de useInitial */}
+        <ModuleSummarySection 
+          currentBalance={cards.saldoRestante} 
+          fiscalYear={fiscalYear ?? undefined}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <BarChartSection 
