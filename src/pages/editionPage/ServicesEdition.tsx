@@ -31,13 +31,11 @@ export default function ServicesEdition() {
 
         {/* Agregar servicio */}
         <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow mb-6">
-          <h2 className="text-2xl font-semibold mb-6">Agregar nuevo Servicio</h2>
           <ServicesInformativeCreator onSubmit={handleCreate} />
         </div>
 
         {/* Editar servicio */}
         <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow mb-6">
-          <h2 className="text-2xl font-semibold mb-6">Editar Servicio Existente</h2>
           <ServicesInformativeEditor
             items={services}
             selectedId={selectedServiceId}

@@ -21,8 +21,8 @@ export default function EventEdition() {
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection />
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-2">Edición de la Sección Eventos</h1>
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold mb-2">Edición de la Sección Eventos</h1>
           <p className="text-base text-[#475C1D]">
             Agrega, edita o elimina los eventos que se muestran públicamente.
           </p>
@@ -30,13 +30,11 @@ export default function EventEdition() {
 
         {/* Crear evento */}
         <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow mb-12">
-          <h2 className="text-2xl font-semibold mb-6">Agregar nuevo Evento</h2>
           <EventCreator onSubmit={handleCreate} />
         </div>
 
         {/* Editar evento */}
         <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-          <h2 className="text-2xl font-semibold mb-6">Editar Evento Existente</h2>
           <EventEditor
             events={events}
             selectedEventId={selectedEventId}

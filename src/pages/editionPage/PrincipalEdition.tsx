@@ -77,7 +77,7 @@ function PrincipalEdition() {
           ) : (
             <div className="space-y-6">
               {/* Título Principal (deshabilitado) */}
-              <div>
+                <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
                   Título Principal <span className="text-xs text-gray-500">(No editable)</span>
                 </label>
@@ -94,7 +94,7 @@ function PrincipalEdition() {
               </div>
 
               {/* Descripción */}
-              <div>
+              <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                   Descripción
                 </label>

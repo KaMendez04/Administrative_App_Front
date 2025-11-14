@@ -1,14 +1,21 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection";
-import BackButton from "../../components/PagesEdition/BackButton";
 import { HeaderBlock } from "../../components/PagesEdition/HeaderBlock";
 import { EditableBenefits } from "../../components/PagesEdition/EditableBenefits";
 import { EditableRequirements } from "../../components/PagesEdition/EditableRequirements";
 import { useVolunteersEdition } from "../../hooks/EditionSection/VolunteersEdition";
+import { ActionButtons } from "../../components/ActionButtons";
+import { useNavigate } from "@tanstack/react-router";
 
 
 export default function VolunteersEdition() {
   const {
-    loading, saving, error, limits, reload,
+    loading,
+    savingHeader,
+    savingBenefits,
+    savingRequirements,
+    error,
+    limits,
+    reload,
     // header
     headerTitle, headerDescription, setHeaderTitle, setHeaderDescription,
     resetHeader, saveHeader, canSaveHeader,
@@ -17,17 +24,17 @@ export default function VolunteersEdition() {
     updateBenefitText, resetCurrentBenefit, saveCurrentBenefit, canSaveBenefit,
     // requirements
     requirements, requirementIndex, setRequirementIndex,
-    updateRequirement, addRequirement, removeRequirement,
+    updateRequirement, addRequirement,
     resetCurrentRequirement, saveRequirements, canSaveReq,
   } = useVolunteersEdition();
-
+const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B]">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] p-4">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection/>
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-2">Edición de la Sección Sobre Asociados</h1>
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold mb-2">Edición de la Sección Sobre Voluntarios</h1>
           <p className="text-base text-[#475C1D]">
             Edita cada bloque y guarda desde sus propios botones.
           </p>
@@ -44,8 +51,7 @@ export default function VolunteersEdition() {
           </div>
         ) : (
           <>
-            {/* Encabezado con botones locales */}
-            <div className="mb-12 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
+            <div className="mb-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-4 shadow">
               <HeaderBlock
                 title={headerTitle}
                 desc={headerDescription}
@@ -55,12 +61,11 @@ export default function VolunteersEdition() {
                 onCancel={resetHeader}
                 onSave={saveHeader}
                 canSave={canSaveHeader}
-                saving={saving}
+                saving={savingHeader} 
               />
             </div>
 
-            {/* Beneficios con select + botones locales */}
-            <div className="mb-12 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
+            <div className="mb-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-4 shadow">
               <EditableBenefits
                 items={benefits}
                 index={benefitIndex}
@@ -70,11 +75,10 @@ export default function VolunteersEdition() {
                 onCancel={resetCurrentBenefit}
                 onSave={saveCurrentBenefit}
                 canSave={canSaveBenefit}
-                saving={saving}
+                saving={savingBenefits}  
               />
             </div>
 
-            {/* Requisitos con select, agregar/eliminar + botones locales */}
             <div className="mb-12">
               <EditableRequirements
                 items={requirements}
@@ -83,16 +87,20 @@ export default function VolunteersEdition() {
                 limits={{ requirement: limits.requirement }}
                 onChange={updateRequirement}
                 onAdd={addRequirement}
-                onRemove={removeRequirement}
                 onCancel={resetCurrentRequirement}
                 onSave={saveRequirements}
                 canSave={canSaveReq}
-                saving={saving}
+                saving={savingRequirements}  
               />
             </div>
 
             <div className="flex justify-end mt-6">
-              <BackButton label="Regresar" />
+              <ActionButtons
+            onBack={() => navigate({ to: "/Principal" })}
+            showBack={true}
+            backText="Regresar"
+            showText={true}
+          />
             </div>
           </>
         )}

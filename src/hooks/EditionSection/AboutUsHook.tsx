@@ -10,21 +10,35 @@ export function useAboutUsEdit() {
 
   // Campos del formulario
   const [whoWeAre, setWhoWeAre] = useState("")
-  const [mission, setMission]   = useState("")
-  const [vision, setVision]     = useState("")
+  const [mission, setMission] = useState("")
+  const [vision, setVision] = useState("")
+
+  // ✅ Valores iniciales para detectar cambios
+  const [initialWhoWeAre, setInitialWhoWeAre] = useState("")
+  const [initialMission, setInitialMission] = useState("")
+  const [initialVision, setInitialVision] = useState("")
 
   const load = async () => {
     setLoading(true)
     setError(null)
     try {
-      const list = await fetchAllAboutUs() // GET /aboutUs  :contentReference[oaicite:5]{index=5}
+      const list = await fetchAllAboutUs()
       setRecords(list)
 
       // Mapear por título (slug) a los 3 campos
       const map = new Map(list.map(i => [slugifyTitle(i.title), i]))
-      setWhoWeAre(map.get(SECTION_DEFS[0].slug)?.description ?? "")
-      setMission(  map.get(SECTION_DEFS[1].slug)?.description ?? "")
-      setVision(   map.get(SECTION_DEFS[2].slug)?.description ?? "")
+      const whoWeAreValue = map.get(SECTION_DEFS[0].slug)?.description ?? ""
+      const missionValue = map.get(SECTION_DEFS[1].slug)?.description ?? ""
+      const visionValue = map.get(SECTION_DEFS[2].slug)?.description ?? ""
+      
+      setWhoWeAre(whoWeAreValue)
+      setMission(missionValue)
+      setVision(visionValue)
+      
+      // ✅ Guardar valores iniciales
+      setInitialWhoWeAre(whoWeAreValue)
+      setInitialMission(missionValue)
+      setInitialVision(visionValue)
     } catch (e: any) {
       setError(e?.message ?? "Error cargando 'Sobre Nosotros'")
     } finally {
@@ -39,7 +53,7 @@ export function useAboutUsEdit() {
     setError(null)
     try {
       await upsertAboutUsSections({ whoWeAre, mission, vision })
-      await load()
+      await load() // Esto recargará y actualizará los valores iniciales
     } catch (e: any) {
       setError(e?.message ?? "No se pudo guardar")
     } finally {
@@ -49,13 +63,37 @@ export function useAboutUsEdit() {
 
   const isEditing = useMemo(() => records.length > 0, [records])
 
+  // ✅ Detectar si hay cambios
+  const hasChanges = useMemo(() => {
+    return (
+      whoWeAre !== initialWhoWeAre ||
+      mission !== initialMission ||
+      vision !== initialVision
+    )
+  }, [whoWeAre, mission, vision, initialWhoWeAre, initialMission, initialVision])
+
+  // ✅ Validar campos requeridos
+  const canSave = useMemo(() => {
+    return whoWeAre.trim() !== "" && mission.trim() !== "" && vision.trim() !== ""
+  }, [whoWeAre, mission, vision])
+
   return {
-    loading, saving, error,
-    whoWeAre, setWhoWeAre,
-    mission, setMission,
-    vision, setVision,
+    loading,
+    saving,
+    error,
+    whoWeAre,
+    setWhoWeAre,
+    mission,
+    setMission,
+    vision,
+    setVision,
     isEditing,
     reload: load,
     saveAll,
+    hasChanges, 
+    canSave,    
+    initialWhoWeAre,
+    initialMission,
+    initialVision,
   }
 }

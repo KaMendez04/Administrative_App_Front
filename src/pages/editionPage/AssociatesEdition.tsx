@@ -1,9 +1,10 @@
 import NavbarEditionSection from "../../components/NavbarEditionSection";
-import BackButton from "../../components/PagesEdition/BackButton";
 import { HeaderBlock } from "../../components/PagesEdition/HeaderBlock";
 import { EditableBenefits } from "../../components/PagesEdition/EditableBenefits";
 import { EditableRequirements } from "../../components/PagesEdition/EditableRequirements";
 import { useAssociatesEdition } from "../../hooks/EditionSection/AssociatesEdition";
+import { ActionButtons } from "../../components/ActionButtons";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function AssociatesEdition() {
   const {
@@ -25,16 +26,17 @@ export default function AssociatesEdition() {
     updateRequirement, addRequirement,
     resetCurrentRequirement, saveRequirements, canSaveReq,
   } = useAssociatesEdition();
+  const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B]">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] p-4">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection/>
 
-        <div className="text-center mb-12 ">
-          <h1 className="text-4xl font-bold mb-2">Edición de la Sección Sobre Asociados</h1>
+        <div className="text-center mb-6 ">
+          <h1 className="text-2xl font-bold mb-2">Edición de la Sección Sobre Asociados</h1>
           <p className="text-base text-[#475C1D]">
-            Edita cada bloque y guarda desde sus propios botones.
+            Edita cada bloque de información relevante para quienes desean ser asociados.
           </p>
         </div>
 
@@ -50,7 +52,7 @@ export default function AssociatesEdition() {
         ) : (
           <>
             {/* Encabezado con botones locales */}
-            <div className="mb-12 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-8 shadow">
+            <div className="mb-6 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-4 shadow">
               <HeaderBlock
                 title={headerTitle}
                 desc={headerDescription}
@@ -65,7 +67,7 @@ export default function AssociatesEdition() {
             </div>
 
             {/* Beneficios con select + botones locales */}
-            <div className="mb-12 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-8 shadow">
+            <div className="mb-6 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-4 shadow">
               <EditableBenefits
                 items={benefits}
                 index={benefitIndex}
@@ -80,7 +82,7 @@ export default function AssociatesEdition() {
             </div>
 
             {/* Requisitos con select, agregar/eliminar + botones locales */}
-            <div className="mb-12 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-8 shadow">
+            <div className="mb-6 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-4 shadow">
               <EditableRequirements
                 items={requirements}
                 index={requirementIndex}
@@ -95,9 +97,14 @@ export default function AssociatesEdition() {
               />
             </div>
 
-            <div className="flex justify-end mt-6">
-              <BackButton label="Regresar" />
-            </div>
+            <div className="flex justify-end mt-6 ">
+            <ActionButtons
+                onBack={() => navigate({ to: "/Principal" })}
+                showBack={true}
+                backText="Regresar"
+                showText={true}
+              />            
+              </div>
           </>
         )}
       </div>

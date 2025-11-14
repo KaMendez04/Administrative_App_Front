@@ -112,6 +112,8 @@ export default function ServicesInformativeEditor({
   return (
     <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
       {/* Selector */}
+                <h2 className="text-2xl font-semibold mb-6">Editar Servicio Existente</h2>
+
       <CustomSelect
         value={selectedId ?? ""}
         onChange={(value) => setSelectedId(value ? Number(value) : null)}

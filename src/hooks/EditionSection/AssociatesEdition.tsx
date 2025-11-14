@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchAssociatesPage, upsertAssociatesPage } from "../../services/EditionSection/associatesPageService";
 import type { InfoPageVM, InfoPageUpdate } from "../../models/editionSection/InfoPageType";
+import { showSuccessAlert } from "../../utils/alerts";
 
 export function useAssociatesEdition() {
   const [server, setServer] = useState<InfoPageVM | null>(null);
@@ -67,6 +68,7 @@ const [savingRequirements, setSavingRequirements] = useState(false);
     setHeaderDescription(updated.headerDescription);
     setBenefits([...updated.benefits].sort((a, b) => a.order - b.order));
     setRequirements([...updated.requirements].sort((a, b) => a.order - b.order));
+    showSuccessAlert("Cambios guardados exitosamente");
     return updated;
   } catch (e: any) {
     setError(e?.message ?? "Error al guardar");

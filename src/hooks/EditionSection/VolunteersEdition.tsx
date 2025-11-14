@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { InfoPageVM, InfoPageUpdate } from "../../models/editionSection/InfoPageType";
 import { fetchVolunteersPage, upsertVolunteersPage } from "../../services/EditionSection/volunteersPageService";
+import { showSuccessAlert } from "../../utils/alerts";
 
 export function useVolunteersEdition() {
   const [server, setServer] = useState<InfoPageVM | null>(null);
@@ -15,9 +16,11 @@ export function useVolunteersEdition() {
   const [benefitIndex, setBenefitIndex] = useState(0);
   const [requirementIndex, setRequirementIndex] = useState<number>(-1);
 
-  // ui
+  // ui - ✅ ESTADOS SEPARADOS
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingHeader, setSavingHeader] = useState(false);
+  const [savingBenefits, setSavingBenefits] = useState(false);
+  const [savingRequirements, setSavingRequirements] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const limits = { title: 75, desc: 250, benefitTitle: 60, benefitDesc: 160, requirement: 180 };
@@ -50,8 +53,13 @@ export function useVolunteersEdition() {
     requirements: requirements.map((r, i) => ({ text: r.text, order: i })),
   }), [headerTitle, headerDescription, benefits, requirements]);
 
-  const saveAll = useCallback(async () => {
-    setSaving(true);
+  // ✅ saveAll ahora recibe qué bloque está guardando
+  const saveAll = useCallback(async (block: 'header' | 'benefits' | 'requirements') => {
+    // Establece el estado correspondiente
+    if (block === 'header') setSavingHeader(true);
+    else if (block === 'benefits') setSavingBenefits(true);
+    else if (block === 'requirements') setSavingRequirements(true);
+
     setError(null);
     try {
       const updated = await upsertVolunteersPage(buildPayload());
@@ -60,12 +68,16 @@ export function useVolunteersEdition() {
       setHeaderDescription(updated.headerDescription);
       setBenefits([...updated.benefits].sort((a, b) => a.order - b.order));
       setRequirements([...updated.requirements].sort((a, b) => a.order - b.order));
+      showSuccessAlert("Cambios guardados exitosamente");
       return updated;
     } catch (e: any) {
       setError(e?.message ?? "Error al guardar");
       throw e;
     } finally {
-      setSaving(false);
+      // Limpia el estado correspondiente
+      if (block === 'header') setSavingHeader(false);
+      else if (block === 'benefits') setSavingBenefits(false);
+      else if (block === 'requirements') setSavingRequirements(false);
     }
   }, [buildPayload]);
 
@@ -76,7 +88,7 @@ export function useVolunteersEdition() {
     setHeaderTitle(server.headerTitle);
     setHeaderDescription(server.headerDescription);
   };
-  const saveHeader = () => saveAll();
+  const saveHeader = () => saveAll('header'); // ✅
 
   // Beneficios (solo texto)
   const updateBenefitText = (idx: number, patch: Partial<Pick<typeof benefits[number], "title" | "desc">>) => {
@@ -89,7 +101,7 @@ export function useVolunteersEdition() {
       prev.map((b, i) => (i === benefitIndex ? { ...b, title: src[i]?.title ?? "", desc: src[i]?.desc ?? "" } : b))
     );
   };
-  const saveCurrentBenefit = () => saveAll();
+  const saveCurrentBenefit = () => saveAll('benefits'); // ✅
 
   // Requisitos
   const updateRequirement = (idx: number, text: string) => {
@@ -99,7 +111,6 @@ export function useVolunteersEdition() {
   const addRequirement = (text: string) => {
     setRequirements(prev => {
       const next = [...prev, { text, order: prev.length }];
-      // seleccionar el recién agregado para poder guardarlo de inmediato
       setRequirementIndex(next.length - 1);
       return next;
     });
@@ -118,7 +129,7 @@ export function useVolunteersEdition() {
     );
   };
 
-  const saveRequirements = () => saveAll();
+  const saveRequirements = () => saveAll('requirements'); // ✅
 
   // Habilitaciones de botones
   const canSaveHeader = useMemo(
@@ -132,7 +143,6 @@ export function useVolunteersEdition() {
     return !!b && b.title.trim().length > 0 && b.desc.trim().length > 0;
   }, [benefits, benefitIndex]);
 
-  // ahora valida SOLO el requisito seleccionado (evita que el botón quede deshabilitado)
   const canSaveReq = useMemo(() => {
     if (requirementIndex < 0) return false;
     const r = requirements[requirementIndex];
@@ -140,7 +150,13 @@ export function useVolunteersEdition() {
   }, [requirements, requirementIndex]);
 
   return {
-    loading, saving, error, limits, reload: load,
+    loading,
+    savingHeader,       
+    savingBenefits,     
+    savingRequirements, 
+    error,
+    limits,
+    reload: load,
 
     // header
     headerTitle, headerDescription, setHeaderTitle, setHeaderDescription,
