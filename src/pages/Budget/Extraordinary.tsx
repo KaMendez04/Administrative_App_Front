@@ -158,20 +158,6 @@ export default function BudgetExtraordinary() {
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => Form.reset()}
-                  className="rounded-xl bg-white 
-                  border border-[#6B6B6B] px-4 py-2 
-                  text-[#6B6B6B] hover:bg-[#ECECEC]
-                  hover:text-[#4F4F4F]
-                  transition-colors
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                  disabled:hover:bg-white"
-                >
-                  Cancelar
-                </button>
                 <Form.Subscribe selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}>
                   {({ canSubmit, isSubmitting }) => (
                     <button
@@ -193,6 +179,20 @@ export default function BudgetExtraordinary() {
                     </button>
                   )}
                 </Form.Subscribe>
+                  <button
+                  type="button"
+                  onClick={() => Form.reset()}
+                  className="rounded-xl bg-white 
+                  border border-[#6B6B6B] px-4 py-2 
+                  text-[#6B6B6B] hover:bg-[#ECECEC]
+                  hover:text-[#4F4F4F]
+                  transition-colors
+                  disabled:cursor-not-allowed
+                  disabled:opacity-60
+                  disabled:hover:bg-white"
+                >
+                  Cancelar
+                </button>
               </div>
             </form>
           )}

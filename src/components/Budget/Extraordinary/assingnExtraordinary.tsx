@@ -268,20 +268,6 @@ export default function AssignExtraordinaryCard({
               {({ canSubmit, isSubmitting }) => (
                 <div className="flex items-center justify-end gap-2 pt-1">
                 <button
-                  type="button"
-                  onClick={() => Form.reset()}
-                  className="rounded-xl bg-white 
-                  border border-[#6B6B6B] px-4 py-2 
-                  text-[#6B6B6B] hover:bg-[#ECECEC]
-                  hover:text-[#4F4F4F]
-                  transition-colors
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                  disabled:hover:bg-white"
-                >
-                  Cancelar
-                </button>
-                <button
                   type="submit"
                   disabled={!canSubmit || isSubmitting}
                   className="inline-flex items-center gap-2 
@@ -297,6 +283,20 @@ export default function AssignExtraordinaryCard({
                     >
                   <ArrowRightLeft className="h-5 w-5" />
                   {isSubmitting ? "Asignando…" : "Asignar a ingreso"}
+                </button>
+                                <button
+                  type="button"
+                  onClick={() => Form.reset()}
+                  className="rounded-xl bg-white 
+                  border border-[#6B6B6B] px-4 py-2 
+                  text-[#6B6B6B] hover:bg-[#ECECEC]
+                  hover:text-[#4F4F4F]
+                  transition-colors
+                  disabled:cursor-not-allowed
+                  disabled:opacity-60
+                  disabled:hover:bg-white"
+                >
+                  Cancelar
                 </button>
                 </div>
               )}
