@@ -33,11 +33,30 @@ export function useDownloadSolicitudPDF() {
         fincasCompletas
       );
 
+      // ✅ Construir nombre del archivo con nombre y cédula del asociado
+      const persona = solicitud.persona;
+      const nombreCompleto = `${persona.nombre}_${persona.apellido1}_${persona.apellido2}`;
+      const cedula = persona.cedula;
+      
+      // Sanitizar el nombre (remover caracteres especiales y espacios)
+      const nombreSanitizado = nombreCompleto
+        .normalize("NFD")                           // Descomponer caracteres acentuados
+        .replace(/[\u0300-\u036f]/g, "")           // Remover acentos
+        .replace(/[^a-zA-Z0-9_]/g, "_")            // Reemplazar caracteres especiales con _
+        .replace(/_+/g, "_")                       // Evitar múltiples guiones bajos consecutivos
+        .toLowerCase();
+      
+      const nombreArchivo = `Solicitud_${nombreSanitizado}_${cedula}.pdf`;
+
       // Descargar
-      doc.save(`solicitud-${solicitud.idSolicitud}.pdf`);
+      doc.save(nombreArchivo);
+      
+      return nombreArchivo; // Retornar para uso en onSuccess si es necesario
     },
-    onSuccess: () => {
-      toast.success("PDF descargado exitosamente");
+    onSuccess: (nombreArchivo) => {
+      toast.success("PDF descargado exitosamente", {
+        description: `Archivo: ${nombreArchivo}`
+      });
     },
     onError: (error: any) => {
       console.error('Error generando PDF:', error);
