@@ -4,12 +4,12 @@ import apiConfig from "../../services/apiConfig";
 import {
   showSuccessAlertRegister,
   showErrorAlertRegister,
-  showConfirmAlert,
 } from "../../utils/alerts";
 import { useZodValidation } from "../../hooks/Volunteers/useZodValidation";
 import { UpdateVoluntarioIndividualSchema } from "../../schemas/updateVolunteerSchema";
 import Swal from "sweetalert2";
 import { useToggleVolunteerStatus } from "../../hooks/Volunteers/individual/useToggleVolunteerStatus";
+import { ActionButtons } from "../../components/ActionButtons";
 
 interface EditVolunteerIndividualModalProps {
   voluntario: VoluntarioIndividual;
@@ -111,16 +111,6 @@ export function EditVolunteerIndividualModal({
       await showErrorAlertRegister(msg);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleCancel = async () => {
-    const confirm = await showConfirmAlert(
-      "¿Está seguro?",
-      "Los cambios no guardados se perderán."
-    );
-    if (confirm) {
-      onClose();
     }
   };
 
@@ -227,6 +217,7 @@ export function EditVolunteerIndividualModal({
                   placeholder="Ej. 8888-8888"
                   className={`${inputClass} ${errors.telefono ? errorClass : ""}`}
                   maxLength={20}
+                  disabled={isSubmitting}
                 />
                 <div className="flex justify-between items-center mt-1">
                   {errors.telefono && (
@@ -248,6 +239,7 @@ export function EditVolunteerIndividualModal({
                   onChange={(e) => handleChange("email", e.target.value)}
                   placeholder="correo@ejemplo.com"
                   className={`${inputClass} ${errors.email ? errorClass : ""}`}
+                  disabled={isSubmitting}
                 />
                 {errors.email && <p className={errorText}>{errors.email}</p>}
               </div>
@@ -263,6 +255,7 @@ export function EditVolunteerIndividualModal({
                   placeholder="Ej. San José, 100m norte de..."
                   className={`${inputClass} ${errors.direccion ? errorClass : ""}`}
                   maxLength={200}
+                  disabled={isSubmitting}
                 />
                 <div className="flex justify-between items-center mt-1">
                   {errors.direccion && (
@@ -298,6 +291,7 @@ export function EditVolunteerIndividualModal({
                     errors.nacionalidad ? errorClass : ""
                   }`}
                   maxLength={60}
+                  disabled={isSubmitting}
                 />
                 <div className="flex justify-between items-center mt-1">
                   {errors.nacionalidad && (
@@ -324,6 +318,7 @@ export function EditVolunteerIndividualModal({
                   }`}
                   rows={3}
                   maxLength={150}
+                  disabled={isSubmitting}
                 />
                 <div className="flex justify-between items-center mt-1">
                   {errors.motivacion && (
@@ -350,6 +345,7 @@ export function EditVolunteerIndividualModal({
                   }`}
                   rows={3}
                   maxLength={150}
+                  disabled={isSubmitting}
                 />
                 <div className="flex justify-between items-center mt-1">
                   {errors.habilidades && (
@@ -376,6 +372,7 @@ export function EditVolunteerIndividualModal({
                   }`}
                   rows={3}
                   maxLength={150}
+                  disabled={isSubmitting}
                 />
                 <div className="flex justify-between items-center mt-1">
                   {errors.experiencia && (
@@ -389,23 +386,23 @@ export function EditVolunteerIndividualModal({
             </div>
           </section>
 
-          {/* Botones */}
-          <div className="flex justify-end gap-3 pt-5 border-t border-[#E6E1D6]">
-            <button
-              type="button"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-              className="px-4 py-2 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || Object.keys(errors).length > 0}
-              className="px-4 py-2 rounded-lg bg-[#5B732E] hover:bg-[#4a5c25] text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? "Guardando..." : "Guardar cambios"}
-            </button>
+          {/* Footer con ActionButtons */}
+          <div className="flex justify-end pt-5 border-t border-[#E6E1D6]">
+            <ActionButtons
+              onCancel={onClose}
+              onSave={() => {}}
+              showCancel={true}
+              showSave={true}
+              showText={true}
+              saveButtonType="submit"
+              isSaving={isSubmitting}
+              disabled={Object.keys(errors).length > 0}
+              requireConfirmCancel={true}
+              cancelConfirmTitle="¿Está seguro?"
+              cancelConfirmText="Los cambios no guardados se perderán."
+              saveText="Guardar cambios"
+              cancelText="Cancelar"
+            />
           </div>
         </form>
       </div>

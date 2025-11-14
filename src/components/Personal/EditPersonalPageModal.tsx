@@ -2,7 +2,8 @@ import React from "react"
 import type { PersonalPageType } from "../../models/PersonalPageType"
 import { personalApi } from "../../services/personalPageService"
 import { useEditPersonalPageModal } from "../../hooks/Personal/useEditPersonalPageModal"
-import { showSuccessAlertRegister, showErrorAlertRegister, showConfirmAlert } from "../../utils/alerts";
+import { showSuccessAlertRegister, showErrorAlertRegister } from "../../utils/alerts"
+import { ActionButtons } from "../../components/ActionButtons"
 
 interface EditPersonalPageModalProps {
   personalPage: PersonalPageType;
@@ -19,6 +20,8 @@ export function EditPersonalPageModal({
   onSaved,
   lookup,
 }: EditPersonalPageModalProps) {
+  const [isSaving, setIsSaving] = React.useState(false)
+
   const inputClass =
     "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white";
   const label =
@@ -31,24 +34,21 @@ export function EditPersonalPageModal({
   // TanStack Form + validadores (extraídos al hook)
   const { form, validators } = useEditPersonalPageModal(personalPage)
 
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const todayStr = formatYMD(new Date());
 
-const pad = (n: number) => String(n).padStart(2, "0");
-const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const todayStr = formatYMD(new Date());
+  // Fecha límite: hoy menos 18 años
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - 18);
+  const cutoffStr = cutoff.toISOString().split("T")[0];
 
-// Fecha límite: hoy menos 18 años
-const cutoff = new Date();
-cutoff.setFullYear(cutoff.getFullYear() - 18);
-const cutoffStr = cutoff.toISOString().split("T")[0];
+  // Para startWorkDate: no puede ser hoy (máximo ayer)
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = formatYMD(yesterday);
 
-// Para startWorkDate: no puede ser hoy (máximo ayer)
-const yesterday = new Date();
-yesterday.setDate(yesterday.getDate() - 1);
-const yesterdayStr = formatYMD(yesterday);
-
-
-
-  // ===== PASO 2: Normalizador del payload (sin cambiar diseño/lógica) =====
+  // Normalizador del payload
   const normalizePayload = (formData: PersonalPageType, base: any) => ({
     ...base,
     startWorkDate:
@@ -61,23 +61,22 @@ const yesterdayStr = formatYMD(yesterday);
           ? formData.endWorkDate
           : todayISO()),
   })
-  // =======================================================================
 
-  // Submit (misma lógica, solo integramos normalizePayload y alerts)
+  // Submit
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     await form.handleSubmit()
 
+    setIsSaving(true)
     const { id, IdUser, ...rest } = personalPage as any
     let payload: any = { ...rest }
 
-    // Normaliza fechas antes de enviar (PASO 2)
+    // Normaliza fechas antes de enviar
     payload = normalizePayload(personalPage, payload)
 
     try {
       if (isNew) {
         await personalApi.create(payload)
-        // éxito crear
         await showSuccessAlertRegister("Registrado correctamente")
       } else {
         const realId = id ?? IdUser
@@ -85,14 +84,12 @@ const yesterdayStr = formatYMD(yesterday);
           console.error("No hay id para actualizar")
           return
         }
-        // Mantienes tu regla: no se actualizan los identificadores en edición
         delete payload.IDE
         delete payload.name
         delete payload.lastname1
         delete payload.lastname2
 
         await personalApi.update(realId, payload)
-        // éxito actualizar
         await showSuccessAlertRegister("Cambios guardados correctamente")
       }
 
@@ -104,7 +101,13 @@ const yesterdayStr = formatYMD(yesterday);
         err?.message ||
         (isNew ? "No se pudo registrar." : "No se pudieron guardar los cambios.")
       await showErrorAlertRegister(msg)
+    } finally {
+      setIsSaving(false)
     }
+  }
+
+  const handleCancel = () => {
+    setPersonalPage(null)
   }
 
   return (
@@ -136,7 +139,7 @@ const yesterdayStr = formatYMD(yesterday);
                       type="text"
                       placeholder="Número de cédula"
                       value={personalPage.IDE ?? ""}
-                      disabled={!isNew}
+                      disabled={!isNew || isSaving}
                       readOnly={!isNew}
                       title={!isNew ? "Este campo no se puede modificar al editar" : undefined}
                       onChange={async (e) => {
@@ -179,7 +182,7 @@ const yesterdayStr = formatYMD(yesterday);
                         id="name"
                         type="text"
                         value={personalPage.name ?? ""}
-                        disabled={!isNew}
+                        disabled={!isNew || isSaving}
                         readOnly={!isNew}
                         aria-disabled={!isNew}
                         onChange={(e) => {
@@ -213,7 +216,7 @@ const yesterdayStr = formatYMD(yesterday);
                       <input
                         id="lastname1"
                         type="text"
-                        disabled={!isNew}
+                        disabled={!isNew || isSaving}
                         readOnly={!isNew}
                         aria-disabled={!isNew}
                         value={personalPage.lastname1 ?? ""}
@@ -246,7 +249,7 @@ const yesterdayStr = formatYMD(yesterday);
                       <input
                         id="lastname2"
                         type="text"
-                        disabled={!isNew}
+                        disabled={!isNew || isSaving}
                         readOnly={!isNew}
                         aria-disabled={!isNew}
                         value={personalPage.lastname2 ?? ""}
@@ -272,40 +275,40 @@ const yesterdayStr = formatYMD(yesterday);
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Fecha de nacimiento */}
-                <form.Field name="birthDate" validators={validators.birthDate}>
-                  {(fieldApi) => {
-                    const err = fieldApi.state.meta.errors[0]
-                    return (
-                      <div>
-                        <label className={label} htmlFor="birthdate">Fecha de nacimiento</label>
-                        <input
-                          id="birthdate"
-                          type="date"
-                          value={personalPage.birthDate ?? ""}
-                          min="1900-01-01"
-                          max={cutoffStr}
-                          defaultValue={!personalPage.birthDate ? cutoffStr : undefined}
-                          onChange={(e) => {
-                            const v = e.target.value
-                            // Bloquear fechas fuera del rango igual que en fechas de trabajo
-                            if (v && (v < '1900-01-01' || v > cutoffStr)) {
-                              e.target.value = personalPage.birthDate ?? '';
-                              return;
-                            }
-                            setPersonalPage({ ...personalPage, birthDate: v })
-                            fieldApi.handleChange(v)
-                          }}
-                          className={inputClass}
-                          required
-                        />
-                        {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-                        <p className="mt-1 text-xs text-gray-500">
-                          Debe tener al menos 18 años cumplidos. (Máximo: {cutoffStr})
-                        </p>
-                      </div>
-                    )
-                  }}
-                </form.Field>
+              <form.Field name="birthDate" validators={validators.birthDate}>
+                {(fieldApi) => {
+                  const err = fieldApi.state.meta.errors[0]
+                  return (
+                    <div>
+                      <label className={label} htmlFor="birthdate">Fecha de nacimiento</label>
+                      <input
+                        id="birthdate"
+                        type="date"
+                        value={personalPage.birthDate ?? ""}
+                        min="1900-01-01"
+                        max={cutoffStr}
+                        defaultValue={!personalPage.birthDate ? cutoffStr : undefined}
+                        disabled={isSaving}
+                        onChange={(e) => {
+                          const v = e.target.value
+                          if (v && (v < '1900-01-01' || v > cutoffStr)) {
+                            e.target.value = personalPage.birthDate ?? '';
+                            return;
+                          }
+                          setPersonalPage({ ...personalPage, birthDate: v })
+                          fieldApi.handleChange(v)
+                        }}
+                        className={inputClass}
+                        required
+                      />
+                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+                      <p className="mt-1 text-xs text-gray-500">
+                        Debe tener al menos 18 años cumplidos. (Máximo: {cutoffStr})
+                      </p>
+                    </div>
+                  )
+                }}
+              </form.Field>
 
               <div />
             </div>
@@ -326,6 +329,7 @@ const yesterdayStr = formatYMD(yesterday);
                         id="email"
                         type="email"
                         value={personalPage.email ?? ""}
+                        disabled={isSaving}
                         onChange={(e) => {
                           setPersonalPage({ ...personalPage, email: e.target.value })
                           fieldApi.handleChange(e.target.value)
@@ -353,6 +357,7 @@ const yesterdayStr = formatYMD(yesterday);
                         maxLength={8}
                         pattern="\d{8}"
                         value={personalPage.phone ?? ""}
+                        disabled={isSaving}
                         onChange={(e) => {
                           const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 8)
                           setPersonalPage({ ...personalPage, phone: onlyDigits })
@@ -379,6 +384,7 @@ const yesterdayStr = formatYMD(yesterday);
                         id="direction"
                         type="text"
                         value={personalPage.direction ?? ""}
+                        disabled={isSaving}
                         onChange={(e) => {
                           setPersonalPage({ ...personalPage, direction: e.target.value })
                           fieldApi.handleChange(e.target.value)
@@ -410,6 +416,7 @@ const yesterdayStr = formatYMD(yesterday);
                         id="occupation"
                         type="text"
                         value={personalPage.occupation ?? ""}
+                        disabled={isSaving}
                         onChange={(e) => {
                           setPersonalPage({ ...personalPage, occupation: e.target.value })
                           fieldApi.handleChange(e.target.value)
@@ -432,9 +439,9 @@ const yesterdayStr = formatYMD(yesterday);
                     <select
                       id="isActive"
                       value={personalPage.isActive ? "activo" : "inactivo"}
+                      disabled={isSaving}
                       onChange={(e) => {
                         const v = e.target.value === "activo"
-                        // si cambia a inactivo y no hay fecha fin, auto-coloca hoy; si vuelve a activo, limpia
                         setPersonalPage({
                           ...personalPage,
                           isActive: v,
@@ -465,13 +472,13 @@ const yesterdayStr = formatYMD(yesterday);
                         id="startWorkDate"
                         type="date"
                         value={personalPage.startWorkDate ?? ""}
-                        min="1925-01-01"    // ✅ Fecha mínima histórica
-                        max={yesterdayStr}  // ✅ Máximo ayer (bloquea hoy y futuro en calendario)
+                        min="1925-01-01"
+                        max={yesterdayStr}
+                        disabled={isSaving}
                         onChange={(e) => {
                           const v = e.target.value
-                          if (v && v >= todayStr) return  // ⛔ Bloquear hoy o futuro
+                          if (v && v >= todayStr) return
 
-                          // Si ya había endWorkDate, verificar que start sea al menos 1 día antes
                           let nextEnd = personalPage.endWorkDate ?? ""
                           if (nextEnd && v) {
                             const startDate = new Date(v)
@@ -479,7 +486,6 @@ const yesterdayStr = formatYMD(yesterday);
                             const dayAfterStart = new Date(startDate)
                             dayAfterStart.setDate(dayAfterStart.getDate() + 1)
                             
-                            // Si end no es al menos 1 día después, limpiar
                             if (endDate <= startDate) {
                               nextEnd = ""
                             }
@@ -500,14 +506,12 @@ const yesterdayStr = formatYMD(yesterday);
                 }}
               </form.Field>
 
-
               {/* Fecha de salida */}
               <form.Field name="endWorkDate" validators={validators.endWorkDate}>
                 {(fieldApi) => {
                   const err = fieldApi.state.meta.errors[0]
                   const start = personalPage.startWorkDate ?? ""
                   
-                  // Calcular mínimo: al menos 1 día después del inicio
                   let minEndDate = "1925-01-01"
                   if (start) {
                     const startDate = new Date(start)
@@ -522,17 +526,16 @@ const yesterdayStr = formatYMD(yesterday);
                         id="endWorkDate"
                         type="date"
                         value={personalPage.endWorkDate ?? ""}
-                        min={minEndDate}  // ✅ Al menos 1 día después del inicio (bloquea días no válidos)
+                        min={minEndDate}
+                        disabled={personalPage.isActive || isSaving}
                         onChange={(e) => {
                           if (personalPage.isActive) return
                           const v = e.target.value
                           
-                          // Verificar que sea al menos 1 día después del inicio
                           if (start && v) {
                             const startDate = new Date(start)
                             const endDate = new Date(v)
                             
-                            // ⛔ Bloquear si es el mismo día o anterior
                             if (endDate <= startDate) return
                           }
                           
@@ -542,7 +545,6 @@ const yesterdayStr = formatYMD(yesterday);
                         placeholder="YYYY-MM-DD"
                         className={`${inputClass} ${personalPage.isActive ? readOnlyStyle : ""}`}
                         readOnly={personalPage.isActive}
-                        disabled={personalPage.isActive}
                       />
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                       {start && !personalPage.isActive && (
@@ -559,32 +561,23 @@ const yesterdayStr = formatYMD(yesterday);
             </div>
           </section>
 
-          {/* Footer */}
-          <div className="flex justify-end gap-3 pt-5 border-t border-[#E6E1D6]">
-            <button
-              type="button"
-              onClick={async () => {
-                const confirm = await showConfirmAlert(
-                  "¿Está seguro?",
-                  "Está a punto de cancelar la acción. Los datos no se guardarán."
-                );
-                if (confirm) {
-                  setPersonalPage(null);
-                }
-              }}
-              className="px-4 py-2 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 shadow-sm"
-            >
-              Cancelar
-            </button>
-
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-lg bg-[#708C3E] hover:bg-[#5e7630] text-white font-medium shadow-md"
-            >
-              {isNew ? "Registrar" : "Guardar cambios"}
-            </button>
+          {/* Footer con ActionButtons - ✅ ARREGLADO */}
+          <div className="flex justify-end pt-5 border-t border-[#E6E1D6]">
+            <ActionButtons
+              onCancel={handleCancel}
+              onSave={() => {}}  // Vacío porque el submit lo maneja el form
+              showCancel={true}
+              showSave={true}
+              showText={true}
+              saveButtonType="submit"  // ✅ CLAVE: El botón es type="submit"
+              isSaving={isSaving}
+              requireConfirmCancel={true}
+              cancelConfirmTitle="¿Está seguro?"
+              cancelConfirmText="Está a punto de cancelar la acción. Los datos no se guardarán."
+              saveText={isNew ? "Registrar" : "Guardar cambios"}
+              cancelText="Cancelar"
+            />
           </div>
-
         </form>
       </div>
     </div>

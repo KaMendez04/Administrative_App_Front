@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import apiConfig from "../../../services/apiConfig";
-import { showConfirmAlert, showErrorAlertRegister, showSuccessAlertRegister } from "../../../utils/alerts";
+import { showErrorAlertRegister, showSuccessAlertRegister } from "../../../utils/alerts";
 import type { Organizacion } from "../../../schemas/volunteerSchemas";
 import { UpdateOrganizacionSchema, UpdateRepresentanteSchema } from "../../../schemas/updateVolunteerSchema";
 import { useZodValidation } from "../../../hooks/Volunteers/useZodValidation";
 import Swal from "sweetalert2";
 import { useToggleOrganizacionStatus } from "../../../hooks/Volunteers/organizations/useToggleOrganizationStatus";
+import { ActionButtons } from "../../../components/ActionButtons";
 
 interface EditOrganizationModalProps {
   organizacion: Organizacion;
@@ -67,57 +68,57 @@ export function EditOrganizationModal({
     validateOrgField(field, value);
   };
 
- const validateRepField = (index: number, field: string, value: any) => {
-  try {
-    // ✅ Si el campo está vacío y es opcional (telefono, email, direccion), no validar
-    const optionalFields = ['telefono', 'email', 'direccion'];
-    if (optionalFields.includes(field) && (!value || value === "")) {
-      setRepErrors((prev) => {
-        const newErrors = { ...prev };
-        if (newErrors[index]) {
-          delete newErrors[index][field];
-          if (Object.keys(newErrors[index]).length === 0) {
-            delete newErrors[index];
+  const validateRepField = (index: number, field: string, value: any) => {
+    try {
+      // Si el campo está vacío y es opcional (telefono, email, direccion), no validar
+      const optionalFields = ['telefono', 'email', 'direccion'];
+      if (optionalFields.includes(field) && (!value || value === "")) {
+        setRepErrors((prev) => {
+          const newErrors = { ...prev };
+          if (newErrors[index]) {
+            delete newErrors[index][field];
+            if (Object.keys(newErrors[index]).length === 0) {
+              delete newErrors[index];
+            }
           }
-        }
-        return newErrors;
-      });
-      return;
-    }
-
-    const testData = { [field]: value };
-    const result = UpdateRepresentanteSchema.safeParse(testData);
-    
-    if (result.success) {
-      setRepErrors((prev) => {
-        const newErrors = { ...prev };
-        if (newErrors[index]) {
-          delete newErrors[index][field];
-          if (Object.keys(newErrors[index]).length === 0) {
-            delete newErrors[index];
-          }
-        }
-        return newErrors;
-      });
-    } else {
-      const fieldError = result.error.issues.find(
-        (issue) => issue.path[0] === field
-      );
-      
-      if (fieldError) {
-        setRepErrors((prev) => ({
-          ...prev,
-          [index]: {
-            ...prev[index],
-            [field]: fieldError.message,
-          },
-        }));
+          return newErrors;
+        });
+        return;
       }
+
+      const testData = { [field]: value };
+      const result = UpdateRepresentanteSchema.safeParse(testData);
+      
+      if (result.success) {
+        setRepErrors((prev) => {
+          const newErrors = { ...prev };
+          if (newErrors[index]) {
+            delete newErrors[index][field];
+            if (Object.keys(newErrors[index]).length === 0) {
+              delete newErrors[index];
+            }
+          }
+          return newErrors;
+        });
+      } else {
+        const fieldError = result.error.issues.find(
+          (issue) => issue.path[0] === field
+        );
+        
+        if (fieldError) {
+          setRepErrors((prev) => ({
+            ...prev,
+            [index]: {
+              ...prev[index],
+              [field]: fieldError.message,
+            },
+          }));
+        }
+      }
+    } catch (err: any) {
+      console.error("Error validando representante:", err);
     }
-  } catch (err: any) {
-    console.error("Error validando representante:", err);
-  }
-};
+  };
 
   const updateRepresentante = (index: number, field: string, value: string | number) => {
     const updated = [...representantesData];
@@ -219,16 +220,6 @@ export function EditOrganizationModal({
     }
   };
 
-  const handleCancel = async () => {
-    const confirm = await showConfirmAlert(
-      "¿Está seguro?",
-      "Los cambios no guardados se perderán."
-    );
-    if (confirm) {
-      onClose();
-    }
-  };
-
   const hasErrors = Object.keys(orgErrors).length > 0 || Object.keys(repErrors).length > 0;
   const currentStatus = organizacion.isActive ?? false;
 
@@ -250,7 +241,7 @@ export function EditOrganizationModal({
           onSubmit={handleSubmit}
           className="px-6 py-6 space-y-6 overflow-y-auto flex-1"
         >
-          {/* ✅ TOGGLE DE ESTADO */}
+          {/* TOGGLE DE ESTADO */}
           <div className="rounded-xl bg-[#F8F9F3] p-4 border-2 border-[#EAEFE0]">
             <div className="flex items-center justify-between">
               <div>
@@ -343,6 +334,7 @@ export function EditOrganizationModal({
                     orgErrors.numeroVoluntarios ? errorClass : ""
                   }`}
                   min={1}
+                  disabled={isSubmitting}
                 />
                 {orgErrors.numeroVoluntarios && (
                   <p className={errorText}>{orgErrors.numeroVoluntarios}</p>
@@ -350,7 +342,7 @@ export function EditOrganizationModal({
               </div>
               <div>
                 <label className={label} htmlFor="telefono">
-                  Teléfono *
+                  Teléfono 
                 </label>
                 <input
                   id="telefono"
@@ -363,6 +355,7 @@ export function EditOrganizationModal({
                   placeholder="Ej. 8888-8888"
                   className={`${inputClass} ${orgErrors.telefono ? errorClass : ""}`}
                   maxLength={20}
+                  disabled={isSubmitting}
                 />
                 <div className="flex justify-between items-center mt-1">
                   {orgErrors.telefono && (
@@ -385,6 +378,7 @@ export function EditOrganizationModal({
                   placeholder="correo@ejemplo.com"
                   className={`${inputClass} ${orgErrors.email ? errorClass : ""}`}
                   maxLength={100}
+                  disabled={isSubmitting}
                 />
                 <div className="flex justify-between items-center mt-1">
                   {orgErrors.email && <p className={errorText}>{orgErrors.email}</p>}
@@ -405,6 +399,7 @@ export function EditOrganizationModal({
                   placeholder="Ej. San José, 100m norte de..."
                   className={`${inputClass} ${orgErrors.direccion ? errorClass : ""}`}
                   maxLength={200}
+                  disabled={isSubmitting}
                 />
                 <div className="flex justify-between items-center mt-1">
                   {orgErrors.direccion && (
@@ -448,6 +443,7 @@ export function EditOrganizationModal({
                             repErrors[index]?.nombre ? errorClass : ""
                           }`}
                           maxLength={60}
+                          disabled={isSubmitting}
                         />
                         <div className="flex justify-between items-center mt-1">
                           {repErrors[index]?.nombre && (
@@ -473,6 +469,7 @@ export function EditOrganizationModal({
                             repErrors[index]?.apellido1 ? errorClass : ""
                           }`}
                           maxLength={60}
+                          disabled={isSubmitting}
                         />
                         <div className="flex justify-between items-center mt-1">
                           {repErrors[index]?.apellido1 && (
@@ -498,6 +495,7 @@ export function EditOrganizationModal({
                             repErrors[index]?.apellido2 ? errorClass : ""
                           }`}
                           maxLength={60}
+                          disabled={isSubmitting}
                         />
                         <div className="flex justify-between items-center mt-1">
                           {repErrors[index]?.apellido2 && (
@@ -523,6 +521,7 @@ export function EditOrganizationModal({
                             repErrors[index]?.cargo ? errorClass : ""
                           }`}
                           maxLength={100}
+                          disabled={isSubmitting}
                         />
                         <div className="flex justify-between items-center mt-1">
                           {repErrors[index]?.cargo && (
@@ -551,6 +550,7 @@ export function EditOrganizationModal({
                             repErrors[index]?.telefono ? errorClass : ""
                           }`}
                           maxLength={20}
+                          disabled={isSubmitting}
                         />
                         <div className="flex justify-between items-center mt-1">
                           {repErrors[index]?.telefono && (
@@ -576,6 +576,7 @@ export function EditOrganizationModal({
                             repErrors[index]?.email ? errorClass : ""
                           }`}
                           maxLength={60}
+                          disabled={isSubmitting}
                         />
                         <div className="flex justify-between items-center mt-1">
                           {repErrors[index]?.email && (
@@ -601,6 +602,7 @@ export function EditOrganizationModal({
                             repErrors[index]?.direccion ? errorClass : ""
                           }`}
                           maxLength={200}
+                          disabled={isSubmitting}
                         />
                         <div className="flex justify-between items-center mt-1">
                           {repErrors[index]?.direccion && (
@@ -618,23 +620,23 @@ export function EditOrganizationModal({
             </section>
           )}
 
-          {/* Botones */}
-          <div className="flex justify-end gap-3 pt-5 border-t border-[#E6E1D6]">
-            <button
-              type="button"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-              className="px-4 py-2 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || hasErrors}
-              className="px-4 py-2 rounded-lg bg-[#8C3A33] hover:bg-[#7a312b] text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? "Guardando..." : "Guardar cambios"}
-            </button>
+          {/* Footer con ActionButtons */}
+          <div className="flex justify-end pt-5 border-t border-[#E6E1D6]">
+            <ActionButtons
+              onCancel={onClose}
+              onSave={() => {}}
+              showCancel={true}
+              showSave={true}
+              showText={true}
+              saveButtonType="submit"
+              isSaving={isSubmitting}
+              disabled={hasErrors}
+              requireConfirmCancel={true}
+              cancelConfirmTitle="¿Está seguro?"
+              cancelConfirmText="Los cambios no guardados se perderán."
+              saveText="Guardar cambios"
+              cancelText="Cancelar"
+            />
           </div>
         </form>
       </div>

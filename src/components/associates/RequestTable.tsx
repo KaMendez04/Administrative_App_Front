@@ -21,9 +21,9 @@ type RequestsTableProps = {
   isLoading: boolean;
   isReadOnly: boolean;
   onView: (id: number) => void;
-  onApprove: (id: number) => void;
+  onApprove: (id: number) => void | Promise<void>;
   onReject: (id: number) => void;
-  isApproving: boolean;
+  approvingId: number | null;
 };
 
 export function RequestsTable({
@@ -33,7 +33,7 @@ export function RequestsTable({
   onView,
   onApprove,
   onReject,
-  isApproving,
+  approvingId,
 }: RequestsTableProps) {
   const columnHelper = createColumnHelper<SolicitudRow>();
 
@@ -102,16 +102,21 @@ export function RequestsTable({
       id: "acciones",
       header: () => <div className="text-center">Acciones</div>,
       size: 160,
-      cell: (info) => (
-        <ActionButtons
-          onView={() => onView(info.row.original.idSolicitud)}
-          onApprove={() => onApprove(info.row.original.idSolicitud)}
-          onReject={() => onReject(info.row.original.idSolicitud)}
-          showApproveReject={info.row.original.estado === "PENDIENTE"}
-          isApproving={isApproving}
-          isReadOnly={isReadOnly}
-        />
-      ),
+      cell: (info) => {
+        const solicitudId = info.row.original.idSolicitud;
+        const isThisApproving = approvingId === solicitudId;
+        
+        return (
+          <ActionButtons
+            onView={() => onView(solicitudId)}
+            onApprove={() => onApprove(solicitudId)}
+            onReject={() => onReject(solicitudId)}
+            showApproveReject={info.row.original.estado === "PENDIENTE"}
+            isApproving={isThisApproving}
+            isReadOnly={isReadOnly}
+          />
+        );
+      },
     }),
   ];
 

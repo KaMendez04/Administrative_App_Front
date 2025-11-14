@@ -11,9 +11,9 @@ interface VolunteerRequestsTableProps {
   isLoading: boolean;
   isReadOnly: boolean;
   onView: (id: number) => void;
-  onApprove: (id: number) => void;
+  onApprove: (id: number) => void | Promise<void>;
   onReject: (id: number) => void;
-  isApproving: boolean;
+  approvingId: number | null;
 }
 
 export function VolunteerRequestsTable({
@@ -23,7 +23,7 @@ export function VolunteerRequestsTable({
   onView,
   onApprove,
   onReject,
-  isApproving,
+  approvingId,
 }: VolunteerRequestsTableProps) {
   const columnHelper = createColumnHelper<SolicitudVoluntariadoListItem>();
 
@@ -124,11 +124,19 @@ export function VolunteerRequestsTable({
       columnHelper.accessor("fechaSolicitud", {
         header: "Fecha",
         size: 100,
-        cell: (info) => (
-          <div className="text-[#33361D]">
-            {new Date(info.getValue()).toLocaleDateString("es-CR")}
-          </div>
-        ),
+        cell: (info) => {
+          const date = new Date(info.getValue());
+          return (
+            <div className="text-[#33361D]">
+              {new Intl.DateTimeFormat("es-CR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                timeZone: "UTC"  
+              }).format(date)}
+            </div>
+          );
+        },
       }),
       columnHelper.display({
         id: "acciones",
@@ -136,29 +144,31 @@ export function VolunteerRequestsTable({
         size: 150,
         cell: (info) => {
           const isPending = info.row.original.estado === "PENDIENTE";
+          const solicitudId = info.row.original.idSolicitudVoluntariado;
+          const isThisApproving = approvingId === solicitudId;
 
           return (
             <ActionButtons
-              onView={() => onView(info.row.original.idSolicitudVoluntariado)}
+              onView={() => onView(solicitudId)}
               onApprove={
                 isPending && !isReadOnly
-                  ? () => onApprove(info.row.original.idSolicitudVoluntariado)
+                  ? () => onApprove(solicitudId)
                   : undefined
               }
               onReject={
                 isPending && !isReadOnly
-                  ? () => onReject(info.row.original.idSolicitudVoluntariado)
+                  ? () => onReject(solicitudId)
                   : undefined
               }
               showApproveReject={isPending && !isReadOnly}
-              isApproving={isApproving}
+              isApproving={isThisApproving}
               isReadOnly={isReadOnly}
             />
           );
         },
       }),
     ],
-    [isReadOnly, isApproving, onView, onApprove, onReject]
+    [isReadOnly, approvingId, onView, onApprove, onReject]
   );
 
   return <GenericTable data={data} columns={columns} isLoading={isLoading} />;

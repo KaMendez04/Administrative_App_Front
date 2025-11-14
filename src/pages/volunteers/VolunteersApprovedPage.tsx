@@ -10,6 +10,7 @@ import { UnifiedVolunteersTable, type UnifiedVolunteerRow } from "../../componen
 import { useVolunteerApprovedDetail } from "../../hooks/Volunteers/individual/useVolunteerApprovedDetail";
 import { EditOrganizationModal } from "../../components/volunteers/organizations/EditOrganizationModal";
 import { EditVolunteerIndividualModal } from "../../components/volunteers/EditVolunteerIndividualModal";
+import { ActionButtons } from "../../components/ActionButtons";
 
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
@@ -60,7 +61,7 @@ export default function VolunteersApprovedPage() {
     editId?.tipo === "INDIVIDUAL" ? editId.id : 0
   );
 
-  // ✅ Fetch para edición de organización
+  // Fetch para edición de organización
   const { data: organizationEditDetail } = useOrganizationDetail(
     editId?.tipo === "ORGANIZACION" ? editId.id : null
   );
@@ -161,28 +162,26 @@ export default function VolunteersApprovedPage() {
           onEdit={(id, tipo) => setEditId({ id, tipo })}
         />
 
-        {/* Paginación */}
-        <div className="flex justify-between items-center mt-6">
-          <span className="text-sm text-[#556B2F] font-medium">
-            {unifiedData.length} resultados — página {page} de {totalPages || 1}
-          </span>
-          <div className="flex gap-3">
-            <button
-              className="px-3 py-1 rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              Anterior
-            </button>
-            <button
-              className="px-3 py-1 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-              disabled={totalPages <= page}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Siguiente
-            </button>
+        {/* Paginación con ActionButtons */}
+        {!isLoading && (
+          <div className="flex justify-between items-center mt-6">
+            <span className="text-sm text-[#556B2F] font-medium">
+              {unifiedData.length} resultados — página {page} de {totalPages || 1}
+            </span>
+            
+            <ActionButtons
+              showPrevious
+              showNext
+              showText
+              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => p + 1)}
+              disablePrevious={page <= 1}
+              disableNext={totalPages <= page}
+              previousText="Anterior"
+              nextText="Siguiente"
+            />
           </div>
-        </div>
+        )}
 
         {/* Modal de visualización dinámico */}
         {viewId && viewId.tipo === "INDIVIDUAL" && (

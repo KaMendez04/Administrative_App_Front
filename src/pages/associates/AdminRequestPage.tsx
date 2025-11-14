@@ -9,11 +9,13 @@ import { getCurrentUser } from "../../services/auth";
 import { RequestsTable } from "../../components/associates/RequestTable";
 import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";
+import { ActionButtons } from "../../components/ActionButtons";
 
 export default function AdminRequestsPage() {
   const [status, setStatus] = useState<"PENDIENTE" | "APROBADO" | "RECHAZADO" | undefined>("PENDIENTE");
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
+  const [approvingId, setApprovingId] = useState<number | null>(null);
   const limit = 20;
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
@@ -71,34 +73,37 @@ export default function AdminRequestsPage() {
           isLoading={isLoading}
           isReadOnly={isReadOnly}
           onView={setViewId}
-          onApprove={(id) => approve.mutate(id)}
+          onApprove={async (id) => {
+            setApprovingId(id);
+            try {
+              await approve.mutateAsync(id);
+            } finally {
+              setApprovingId(null);
+            }
+          }}
           onReject={setRejectId}
-          isApproving={approve.isPending}
+          approvingId={approvingId}
         />
 
-        {/* Paginación */}
+        {/* Paginación con ActionButtons */}
         {!isLoading && (
           <div className="flex justify-between items-center mt-6">
             <span className="text-sm text-[#556B2F] font-medium">
               {data?.total ?? 0} resultados — página {data?.page ?? 1} de{" "}
               {data?.pages ?? 1}
             </span>
-            <div className="flex gap-3">
-              <button
-                className="px-6 py-3 rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                Anterior
-              </button>
-              <button
-                className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                disabled={(data?.pages ?? 1) <= page}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Siguiente
-              </button>
-            </div>
+            
+            <ActionButtons
+              showPrevious
+              showNext
+              showText
+              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => p + 1)}
+              disablePrevious={page <= 1}
+              disableNext={(data?.pages ?? 1) <= page}
+              previousText="Anterior"
+              nextText="Siguiente"
+            />
           </div>
         )}
 

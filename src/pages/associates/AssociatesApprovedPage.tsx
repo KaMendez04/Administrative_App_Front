@@ -8,6 +8,7 @@ import { getCurrentUser } from "../../services/auth";
 import { AssociatesTable, type AssociateRow } from "../../components/associates/associatesTable";
 import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";
+import { ActionButtons } from "../../components/ActionButtons";
 
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
@@ -61,35 +62,32 @@ export default function AssociatesApprovedPage() {
       <div className="mx-auto max-w-7xl p-4 md:p-8">
         {/* Filtros y KPIs lado a lado */}
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-1">
-       
-
-        {/* Filtros */}
-        <StatusFilters
-          status={estadoFilter}
-          onStatusChange={(newStatus) => {
-            setEstadoFilter(newStatus as EstadoFilter);
-            setPage(1);
-          }}
-          search={search}
-          onSearchChange={(newSearch) => {
-            setSearch(newSearch);
-            setPage(1);
-          }}
-          statusOptions={["ACTIVO", "INACTIVO"]}
-          showAllOption={true}
-        />
+          {/* Filtros */}
+          <StatusFilters
+            status={estadoFilter}
+            onStatusChange={(newStatus) => {
+              setEstadoFilter(newStatus as EstadoFilter);
+              setPage(1);
+            }}
+            search={search}
+            onSearchChange={(newSearch) => {
+              setSearch(newSearch);
+              setPage(1);
+            }}
+            statusOptions={["ACTIVO", "INACTIVO"]}
+            showAllOption={true}
+          />
 
           {/* KPIs a la derecha en columna */}
           <div className="flex flex-col gap-2">
             <KPICard
-              label="Total Solicitudes"
+              label="Total Asociados"
               value={data?.total ?? 0}
               tone="base"
             />
-            <KPICard label="Estado" value={status || "Todos"} tone="gold" />
+            <KPICard label="Estado" value={estadoFilter || "Todos"} tone="gold" />
           </div>
         </div>
-
 
         {/* Tabla */}
         <AssociatesTable
@@ -100,29 +98,27 @@ export default function AssociatesApprovedPage() {
           onEdit={(id) => setEditId(id)}
         />
 
-        {/* Paginación */}
-        <div className="flex justify-between items-center mt-6">
-          <span className="text-sm text-[#556B2F] font-medium">
-            {data?.total ?? 0} resultados — página {data?.page ?? 1} de{" "}
-            {data?.pages ?? 1}
-          </span>
-          <div className="flex gap-3">
-            <button
-              className="px-3 py-1 rounded-xl border-2 border-[#5B732E] text-[#5B732E] font-semibold hover:bg-[#EAEFE0] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              Anterior
-            </button>
-            <button
-              className="px-3 py-1 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-              disabled={(data?.pages ?? 1) <= page}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Siguiente
-            </button>
+        {/* Paginación con ActionButtons */}
+        {!isLoading && (
+          <div className="flex justify-between items-center mt-6">
+            <span className="text-sm text-[#556B2F] font-medium">
+              {data?.total ?? 0} resultados — página {data?.page ?? 1} de{" "}
+              {data?.pages ?? 1}
+            </span>
+            
+            <ActionButtons
+              showPrevious
+              showNext
+              showText
+              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => p + 1)}
+              disablePrevious={page <= 1}
+              disableNext={(data?.pages ?? 1) <= page}
+              previousText="Anterior"
+              nextText="Siguiente"
+            />
           </div>
-        </div>
+        )}
 
         {/* Modales */}
         <AssociateViewModal

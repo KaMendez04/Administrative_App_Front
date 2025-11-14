@@ -1,10 +1,9 @@
+import { useNavigate } from "@tanstack/react-router"
+import { ActionButtons } from "../../components/ActionButtons"
 import NavbarEditionSection from "../../components/NavbarEditionSection"
-import BackButton from "../../components/PagesEdition/BackButton"
 import { useEvents } from "../../hooks/EditionSection/EventHook"
 import EventCreator from "./Event/EventCreator"
 import EventEditor from "./Event/EventEditor"
-
-
 
 export default function EventEdition() {
   const {
@@ -15,9 +14,9 @@ export default function EventEdition() {
     handleUpdate,
     handleDelete,
   } = useEvents()
-
+  const navigate = useNavigate()
   return (
-    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B]">
+    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] p-4">
       <div className="max-w-5xl mx-auto">
         <NavbarEditionSection />
 
@@ -29,12 +28,12 @@ export default function EventEdition() {
         </div>
 
         {/* Crear evento */}
-        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow mb-12">
+        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-4 shadow mb-6">
           <EventCreator onSubmit={handleCreate} />
         </div>
 
         {/* Editar evento */}
-        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
+        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-4 shadow">
           <EventEditor
             events={events}
             selectedEventId={selectedEventId}
@@ -44,9 +43,14 @@ export default function EventEdition() {
           />
         </div>
         {/* Botón de regresar abajo a la derecha */}
-                <div className="flex justify-end mt-8">
-                  <BackButton label="Regresar" />
-                </div>
+                <div className="flex justify-end mt-6">
+            <ActionButtons
+                onBack={() => navigate({ to: "/Principal" })}
+                showBack={true}
+                backText="Regresar"
+                showText={true}
+              />                
+              </div>
       </div>
     </div>
   )

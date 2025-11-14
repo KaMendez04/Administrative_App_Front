@@ -25,12 +25,18 @@ export function VolunteerViewModal({
 
   if (!open) return null;
 
+
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("es-CR", {
+    if (!dateString) return "—";
+    
+    const date = new Date(dateString);
+    
+    return new Intl.DateTimeFormat("es-CR", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    });
+      timeZone: "UTC" 
+    }).format(date);
   };
 
   if (isLoading || !solicitud) {

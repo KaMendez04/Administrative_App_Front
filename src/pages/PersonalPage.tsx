@@ -5,13 +5,14 @@ import { PersonalPageHeader } from "../components/Personal/PersonalPageHeader";
 import { PersonalPageSearch } from "../components/Personal/PersonalPageSearch";
 import { PersonalPageInfoModal } from "../components/Personal/PersonalPageInfoModal";
 import { EditPersonalPageModal } from "../components/Personal/EditPersonalPageModal";
-import BackButton from "../components/Personal/BackButton";
 import { personalApi } from "../services/personalPageService";
 import { fetchCedulaData } from "../services/cedulaService";
 import { downloadPDFFromRows } from "../utils/exportUtils";
 import { getCurrentUser } from "../services/auth";
 import type { PersonalPageType } from "../models/PersonalPageType";
 import { PersonalTable } from "../components/Personal/PersonalPageTable";
+import { ActionButtons } from "../components/ActionButtons";
+import { useNavigate } from "@tanstack/react-router";
 
 // ===== API -> UI (incluye fechas laborales) =====
 function mapApiToUi(p: any): PersonalPageType {
@@ -48,7 +49,7 @@ export default function PersonalPage() {
     setNewPersonalPage,
     openNewPersonalPage,
   } = usePersonalPageState();
-
+  const navigate = useNavigate();
   // Rol (solo JUNTA es read-only)
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
@@ -134,7 +135,12 @@ export default function PersonalPage() {
           <div className="text-sm text-[#556B2F] font-medium">
             {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
           </div>
-          <BackButton />
+          <ActionButtons
+                          onBack={() => navigate({ to: "/Principal" })}
+                          showBack={true}
+                          backText="Regresar"
+                          showText={true}
+                        />   
         </div>
       </div>
 

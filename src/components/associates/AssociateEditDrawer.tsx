@@ -1,7 +1,9 @@
 import { useForm } from "@tanstack/react-form";
 import { UpdateAssociateSchema, type UpdateAssociateValues } from "../../schemas/adminSolicitudes";
 import { useToggleAssociateStatus } from "../../hooks/associates/useToggleAssociateStatus";
+import { ActionButtons } from "../../components/ActionButtons";
 import Swal from "sweetalert2";
+import { useState } from "react";
 
 function validateWithZod(v: any) {
   const r = UpdateAssociateSchema.safeParse(v);
@@ -25,17 +27,18 @@ type Props = {
   onSave: (patch: UpdateAssociateValues) => Promise<void> | void;
 };
 
-type FieldName = "telefono" | "email" | "direccion" | "marcaGanado" | "CVO";
+// type FieldName = "telefono" | "email" | "direccion" | "marcaGanado" | "CVO";
 
-const fields: Array<{ name: FieldName; label: string; placeholder?: string }> = [
-  { name: "telefono",    label: "Teléfono",         placeholder: "8888-8888" },
-  { name: "email",       label: "Email",            placeholder: "correo@ejemplo.com" },
-  { name: "direccion",   label: "Dirección",        placeholder: "Dirección exacta" },
-  { name: "marcaGanado", label: "Marca de Ganado",  placeholder: "Código o identificador" },
-  { name: "CVO",         label: "CVO",              placeholder: "CVO" },
-];
+// const fields: Array<{ name: FieldName; label: string; placeholder?: string; maxLength?: number }> = [
+//   { name: "telefono",    label: "Teléfono",         placeholder: "Ej. 8888-8888", maxLength: 20 },
+//   { name: "email",       label: "Email",            placeholder: "correo@ejemplo.com", maxLength: 100 },
+//   { name: "direccion",   label: "Dirección",        placeholder: "Distrito, cantón, provincia…", maxLength: 200 },
+//   { name: "marcaGanado", label: "Marca de Ganado",  placeholder: "Código o identificador", maxLength: 50 },
+//   { name: "CVO",         label: "CVO",              placeholder: "CVO", maxLength: 50 },
+// ];
 
 export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const toggleStatus = useToggleAssociateStatus();
 
   const form = useForm({
@@ -51,10 +54,15 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
       onSubmit: ({ value }) => validateWithZod(value),
     },
     onSubmit: async ({ value }) => {
-      const payload = Object.fromEntries(
-        Object.entries(value).filter(([_, v]) => String(v ?? "").trim() !== "")
-      ) as UpdateAssociateValues;
-      await onSave(payload);
+      setIsSubmitting(true);
+      try {
+        const payload = Object.fromEntries(
+          Object.entries(value).filter(([_, v]) => String(v ?? "").trim() !== "")
+        ) as UpdateAssociateValues;
+        await onSave(payload);
+      } finally {
+        setIsSubmitting(false);
+      }
     },
   });
 
@@ -90,120 +98,253 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
 
   const currentStatus = initial.estado ?? false;
 
+  const inputClass =
+    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#5B732E] focus:bg-white";
+  const label =
+    "block text-[11px] font-semibold text-[#556B2F] uppercase tracking-wide mb-1";
+  const errorClass = "border-red-500 focus:border-red-500";
+  const errorText = "text-xs text-red-600 mt-1";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" 
-        onClick={onClose} 
-      />
-
-      {/* 🔸 MODAL CENTRADO */}
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-[#FAF9F5] border border-[#E6E1D6] rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="relative">
-          <div className="h-20 bg-gradient-to-r from-[#EAEFE0] via-[#F8F9F3] to-[#FEF6E0]" />
-          <div className="absolute inset-x-0 bottom-0 px-6 pb-4">
-            <h3 className="text-xl font-bold text-[#33361D]">Editar asociado</h3>
-            {initial.nombreCompleto && (
-              <p className="text-sm text-[#5B732E] mt-0.5 font-medium">{initial.nombreCompleto}</p>
-            )}
-          </div>
-
-          {/* Close Button */}
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar"
-            className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 hover:bg-white/90 border border-[#EAEFE0] text-[#33361D] shadow-sm transition"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white/60">
+          <h2 className="text-xl font-bold text-[#374321]">
+            Editar Información del Asociado
+          </h2>
+          {initial.nombreCompleto && (
+            <p className="text-sm text-[#556B2F] mt-1">
+              {initial.nombreCompleto}
+            </p>
+          )}
         </div>
 
-        {/* 🔸 CONTENT CON SCROLL */}
+        {/* Form */}
         <form
-          onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}
-          className="flex-1 overflow-y-auto"
+          onSubmit={(e) => { 
+            e.preventDefault(); 
+            form.handleSubmit(); 
+          }}
+          className="px-6 py-6 space-y-6 overflow-y-auto flex-1"
         >
-          <div className="px-6 pt-6 pb-6 space-y-5">
-            {/* ✅ TOGGLE DE ESTADO */}
-            <div className="rounded-xl bg-[#F8F9F3] p-4 border-2 border-[#EAEFE0]">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="block text-sm font-semibold text-[#33361D] mb-1">
-                    Estado del Asociado
-                  </label>
-                  <p className="text-xs text-gray-600">
-                    {currentStatus ? "El asociado está activo y puede acceder" : "El asociado está inactivo"}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleToggleClick}
-                  disabled={toggleStatus.isPending}
-                  className={`
-                    relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out
-                    ${currentStatus ? "bg-[#5B732E]" : "bg-gray-300"}
-                    ${toggleStatus.isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-90"}
-                  `}
-                  aria-label={currentStatus ? "Desactivar asociado" : "Activar asociado"}
-                >
-                  <span
-                    className={`
-                      inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out
-                      ${currentStatus ? "translate-x-6" : "translate-x-1"}
-                    `}
-                  />
-                </button>
+          {/* TOGGLE DE ESTADO */}
+          <div className="rounded-xl bg-[#F8F9F3] p-4 border-2 border-[#EAEFE0]">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-sm font-semibold text-[#33361D] mb-1">
+                  Estado del Asociado
+                </label>
+                <p className="text-xs text-gray-600">
+                  {currentStatus ? "El asociado está activo y puede acceder" : "El asociado está inactivo"}
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={handleToggleClick}
+                disabled={toggleStatus.isPending}
+                className={`
+                  relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out
+                  ${currentStatus ? "bg-[#5B732E]" : "bg-gray-300"}
+                  ${toggleStatus.isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-90"}
+                `}
+                aria-label={currentStatus ? "Desactivar asociado" : "Activar asociado"}
+              >
+                <span
+                  className={`
+                    inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out
+                    ${currentStatus ? "translate-x-6" : "translate-x-1"}
+                  `}
+                />
+              </button>
             </div>
+          </div>
 
-            {/* Campos del formulario */}
-            {fields.map(({ name, label, placeholder }) => (
-              <form.Field key={name} name={name}>
+          {/* Información de Contacto */}
+          <section>
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#556B2F]">
+              Información de Contacto
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Teléfono */}
+              <form.Field name="telefono">
                 {(f: any) => (
                   <div>
-                    <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                      {label}
+                    <label className={label} htmlFor="telefono">
+                      Teléfono
                     </label>
                     <input
+                      id="telefono"
+                      type="text"
                       value={f.state.value}
-                      onChange={(e) => f.handleChange(e.target.value)}
+                      onChange={(e) => {
+                        const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 20);
+                        f.handleChange(onlyDigits);
+                      }}
                       onBlur={f.handleBlur}
-                      placeholder={placeholder}
-                      className="w-full rounded-xl border border-[#D8E0C7] bg-white px-3 py-3 text-[#33361D] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] transition"
+                      placeholder="Ej. 8888-8888"
+                      className={`${inputClass} ${f.state.meta.errors?.length ? errorClass : ""}`}
+                      maxLength={20}
+                      disabled={isSubmitting}
                     />
-                    {!!f.state.meta.errors?.length && (
-                      <p className="text-sm text-red-600 mt-1.5 font-medium">
-                        {f.state.meta.errors[0]}
+                    <div className="flex justify-between items-center mt-1">
+                      {f.state.meta.errors?.length > 0 && (
+                        <p className={errorText}>{f.state.meta.errors[0]}</p>
+                      )}
+                      <p className="text-xs text-gray-500 ml-auto">
+                        {f.state.value.length}/20 caracteres
                       </p>
-                    )}
+                    </div>
                   </div>
                 )}
               </form.Field>
-            ))}
-          </div>
 
-          {/* 🔸 FOOTER FIJO EN EL MODAL */}
-          <div className="bg-white/90 backdrop-blur border-t border-[#EAEFE0] px-6 py-4">
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                className="px-5 py-2.5 rounded-xl border border-[#D8E0C7] text-[#33361D] font-semibold hover:bg-[#F7FAF1] transition"
-                onClick={onClose}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="px-5 py-2.5 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] shadow-sm transition"
-              >
-                Guardar cambios
-              </button>
+              {/* Email */}
+              <form.Field name="email">
+                {(f: any) => (
+                  <div>
+                    <label className={label} htmlFor="email">
+                      Correo
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      value={f.state.value}
+                      onChange={(e) => f.handleChange(e.target.value)}
+                      onBlur={f.handleBlur}
+                      placeholder="correo@ejemplo.com"
+                      className={`${inputClass} ${f.state.meta.errors?.length ? errorClass : ""}`}
+                      maxLength={100}
+                      disabled={isSubmitting}
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      {f.state.meta.errors?.length > 0 && (
+                        <p className={errorText}>{f.state.meta.errors[0]}</p>
+                      )}
+                      <p className="text-xs text-gray-500 ml-auto">
+                        {f.state.value.length}/100 caracteres
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </form.Field>
+
+              {/* Dirección */}
+              <form.Field name="direccion">
+                {(f: any) => (
+                  <div className="md:col-span-2">
+                    <label className={label} htmlFor="direccion">
+                      Dirección
+                    </label>
+                    <input
+                      id="direccion"
+                      type="text"
+                      value={f.state.value}
+                      onChange={(e) => f.handleChange(e.target.value)}
+                      onBlur={f.handleBlur}
+                      placeholder="Distrito, cantón, provincia…"
+                      className={`${inputClass} ${f.state.meta.errors?.length ? errorClass : ""}`}
+                      maxLength={200}
+                      disabled={isSubmitting}
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      {f.state.meta.errors?.length > 0 && (
+                        <p className={errorText}>{f.state.meta.errors[0]}</p>
+                      )}
+                      <p className="text-xs text-gray-500 ml-auto">
+                        {f.state.value.length}/200 caracteres
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </form.Field>
             </div>
+          </section>
+
+          {/* Información Ganadera */}
+          <section>
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#556B2F]">
+              Información Ganadera
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Marca de Ganado */}
+              <form.Field name="marcaGanado">
+                {(f: any) => (
+                  <div>
+                    <label className={label} htmlFor="marcaGanado">
+                      Marca de Ganado
+                    </label>
+                    <input
+                      id="marcaGanado"
+                      type="text"
+                      value={f.state.value}
+                      onChange={(e) => f.handleChange(e.target.value)}
+                      onBlur={f.handleBlur}
+                      placeholder="Código o identificador"
+                      className={`${inputClass} ${f.state.meta.errors?.length ? errorClass : ""}`}
+                      maxLength={50}
+                      disabled={isSubmitting}
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      {f.state.meta.errors?.length > 0 && (
+                        <p className={errorText}>{f.state.meta.errors[0]}</p>
+                      )}
+                      <p className="text-xs text-gray-500 ml-auto">
+                        {f.state.value.length}/50 caracteres
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </form.Field>
+
+              {/* CVO */}
+              <form.Field name="CVO">
+                {(f: any) => (
+                  <div>
+                    <label className={label} htmlFor="CVO">
+                      CVO
+                    </label>
+                    <input
+                      id="CVO"
+                      type="text"
+                      value={f.state.value}
+                      onChange={(e) => f.handleChange(e.target.value)}
+                      onBlur={f.handleBlur}
+                      placeholder="CVO"
+                      className={`${inputClass} ${f.state.meta.errors?.length ? errorClass : ""}`}
+                      maxLength={50}
+                      disabled={isSubmitting}
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      {f.state.meta.errors?.length > 0 && (
+                        <p className={errorText}>{f.state.meta.errors[0]}</p>
+                      )}
+                      <p className="text-xs text-gray-500 ml-auto">
+                        {f.state.value.length}/50 caracteres
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </form.Field>
+            </div>
+          </section>
+
+          {/* Footer con ActionButtons */}
+          <div className="flex justify-end pt-5 border-t border-[#E6E1D6]">
+            <ActionButtons
+              onCancel={onClose}
+              onSave={() => {}}
+              showCancel={true}
+              showSave={true}
+              showText={true}
+              saveButtonType="submit"
+              isSaving={isSubmitting}
+              requireConfirmCancel={true}
+              cancelConfirmTitle="¿Está seguro?"
+              cancelConfirmText="Los cambios no guardados se perderán."
+              saveText="Guardar cambios"
+              cancelText="Cancelar"
+            />
           </div>
         </form>
       </div>
