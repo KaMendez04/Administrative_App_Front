@@ -62,6 +62,7 @@ export default function CatalogModalPSpend({
     setTypeId("");
     setNewSubType("");
   }, [departmentId]);
+  
   useEffect(() => {
     setNewSubType("");
   }, [typeId]);
@@ -72,9 +73,14 @@ export default function CatalogModalPSpend({
 
   async function handleCreateDepartment() {
     setErrors((e) => ({ ...e, dept: "", api: "" }));
+    
     if (!newDepartment.trim()) {
       return setErrors((e) => ({ ...e, dept: "Escribe el nombre del departamento" }));
     }
+    
+    // 🔒 Prevenir doble click
+    if (mCreateDept.loading) return;
+    
     try {
       const created = await mCreateDept.mutate({ name: newDepartment.trim() });
       setNewDepartment("");
@@ -86,19 +92,25 @@ export default function CatalogModalPSpend({
 
   async function handleCreateType() {
     setErrors((e) => ({ ...e, type: "", api: "" }));
+    
     if (!newType.trim()) {
       return setErrors((e) => ({ ...e, type: "Escribe el nombre del tipo" }));
     }
     if (!departmentId) {
       return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
     }
+    
+    // 🔒 Prevenir doble click
+    if (mCreateType.loading) return;
+    
     try {
-      await mCreateType.mutate({
+      // ✅ UNA SOLA LLAMADA
+      const created = await mCreateType.mutate({
         name: newType.trim(),
         departmentId: Number(departmentId),
       });
+      
       setNewType("");
-      const created = await mCreateType.mutate({ name: newType.trim(), departmentId: Number(departmentId) });
       setTypeId(created.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el tipo (proyección)" }));
@@ -107,12 +119,17 @@ export default function CatalogModalPSpend({
 
   async function handleCreateSubType() {
     setErrors((e) => ({ ...e, subType: "", api: "" }));
+    
     if (!newSubType.trim()) {
       return setErrors((e) => ({ ...e, subType: "Escribe el nombre del subtipo" }));
     }
     if (!typeId) {
       return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
     }
+    
+    // 🔒 Prevenir doble click
+    if (mCreateSub.loading) return;
+    
     try {
       await mCreateSub.mutate({
         name: newSubType.trim(),
@@ -163,6 +180,7 @@ export default function CatalogModalPSpend({
                   placeholder="Nuevo departamento"
                   value={newDepartment}
                   onChange={(e) => setNewDepartment(e.target.value)}
+                  disabled={mCreateDept.loading}
                 />
                 <button
                   type="button"
@@ -170,7 +188,8 @@ export default function CatalogModalPSpend({
                   disabled={mCreateDept.loading || !newDepartment.trim()}
                   className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
                 >
-                  <Plus className="h-4 w-4" /> Agregar
+                  <Plus className="h-4 w-4" /> 
+                  {mCreateDept.loading ? "Creando..." : "Agregar"}
                 </button>
               </div>
             </div>
@@ -199,7 +218,7 @@ export default function CatalogModalPSpend({
                   placeholder="Nuevo tipo"
                   value={newType}
                   onChange={(e) => setNewType(e.target.value)}
-                  disabled={!departmentId}
+                  disabled={!departmentId || mCreateType.loading}
                 />
                 <button
                   type="button"
@@ -207,7 +226,8 @@ export default function CatalogModalPSpend({
                   disabled={mCreateType.loading || !newType.trim() || !departmentId}
                   className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
                 >
-                  <Plus className="h-4 w-4" /> Agregar
+                  <Plus className="h-4 w-4" /> 
+                  {mCreateType.loading ? "Creando..." : "Agregar"}
                 </button>
               </div>
             </div>
@@ -224,7 +244,7 @@ export default function CatalogModalPSpend({
                 placeholder="Nuevo subtipo"
                 value={newSubType}
                 onChange={(e) => setNewSubType(e.target.value)}
-                disabled={!typeId}
+                disabled={!typeId || mCreateSub.loading}
               />
               <button
                 type="button"
@@ -232,7 +252,8 @@ export default function CatalogModalPSpend({
                 disabled={mCreateSub.loading || !newSubType.trim() || !typeId}
                 className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
               >
-                <Plus className="h-4 w-4" /> Agregar
+                <Plus className="h-4 w-4" /> 
+                {mCreateSub.loading ? "Creando..." : "Agregar"}
               </button>
             </div>
             {errors.subType && <p className="text-xs text-red-600">{errors.subType}</p>}
