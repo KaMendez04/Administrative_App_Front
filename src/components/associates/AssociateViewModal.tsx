@@ -10,7 +10,7 @@ type Props = {
   isLoading?: boolean;
 };
 
-type Tab = 'info' | 'necesidades' | 'finca'; // 🔸 Agregar 'finca'
+type Tab = 'info' | 'necesidades' | 'finca';
 
 export function AssociateViewModal({ open, onClose, associate, isLoading }: Props) {
   const [selectedTab, setSelectedTab] = useState<Tab>('info');
@@ -33,7 +33,7 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
         <div 
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-8"
+          className="bg-white rounded-lg shadow-xl w-full max-w-4xl p-8"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-center">
@@ -65,170 +65,176 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div 
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] p-6 border-b border-[#EAEFE0] rounded-t-2xl">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-2xl font-bold text-[#33361D]">Detalles del Asociado</h3>
-              <div className="mt-2 flex items-center gap-2">
-                <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                  associate.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                }`}>
-                  {associate.estado ? "Activo" : "Inactivo"}
-                </span>
-                
-                <div className="flex items-center gap-1.5">
-                  <div className={`w-2 h-2 rounded-full ${associate.estado ? "bg-green-500" : "bg-red-500"}`} />
-                  <span className="text-xs text-gray-600 font-medium">
-                    {associate.estado ? "En operación" : "Sin acceso"}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h3 className="text-xl font-semibold text-gray-900">Información del Asociado</h3>
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              associate.estado ? "bg-[#E6EDC8] text-[#5A7018]" : "bg-[#F7E9E6] text-[#8C3A33]"
+            }`}>
+              {associate.estado ? "Activo" : "Inactivo"}
+            </span>
           </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        {/* 🔸 TABS */}
-        <div className="flex border-b border-[#EAEFE0] px-6 bg-white">
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 px-6 bg-gray-50">
           <button
             onClick={() => setSelectedTab('info')}
-            className={`px-4 py-3 font-semibold text-sm transition ${
+            className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
               selectedTab === 'info'
-                ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
-                : 'text-[#33361D] hover:text-[#5B732E]'
+                ? 'text-[#6F8C1F]'
+                : 'text-gray-600 hover:text-[#6F8C1F]'
             }`}
           >
             Información General
+            {selectedTab === 'info' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6F8C1F]"></div>
+            )}
           </button>
-          {/* 🔸 NUEVA PESTAÑA */}
           <button
             onClick={() => setSelectedTab('finca')}
-            className={`px-4 py-3 font-semibold text-sm transition ${
+            className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
               selectedTab === 'finca'
-                ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
-                : 'text-[#33361D] hover:text-[#5B732E]'
+                ? 'text-[#6F8C1F]'
+                : 'text-gray-600 hover:text-[#6F8C1F]'
             }`}
           >
-            Finca
+            Fincas
+            {selectedTab === 'finca' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6F8C1F]"></div>
+            )}
           </button>
-                <button
+          <button
             onClick={() => setSelectedTab('necesidades')}
-            className={`px-4 py-3 font-semibold text-sm transition ${
+            className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
               selectedTab === 'necesidades'
-                ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
-                : 'text-[#33361D] hover:text-[#5B732E]'
+                ? 'text-[#6F8C1F]'
+                : 'text-gray-600 hover:text-[#6F8C1F]'
             }`}
           >
-            Necesidades y Observaciones
+            Necesidades
+            {selectedTab === 'necesidades' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6F8C1F]"></div>
+            )}
           </button>
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto bg-gray-50">
           {selectedTab === 'info' && (
-            <div className="space-y-6">
-              {/* Información Personal */}
-              <div>
-                <h4 className="text-lg font-bold text-[#33361D] mb-3">Información Personal</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {personalFields.map((field, idx) => (
-                    <div key={idx} className="rounded-xl bg-[#F8F9F3] p-4">
-                      <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                        {field.label}
-                      </div>
-                      <div className="text-base text-[#33361D] font-medium">
-                        {field.value}
-                      </div>
-                    </div>
-                  ))}
+            <div className="p-6 space-y-4">
+              {/* Información Personal - Layout en columnas */}
+              <div className="bg-white rounded-lg border border-gray-200">
+                <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
+                  <h4 className="text-sm font-semibold text-gray-900">Información Personal</h4>
                 </div>
-              </div>
-
-              {/* Datos del Asociado */}
-              <div>
-                <h4 className="text-lg font-bold text-[#33361D] mb-3">Datos del Asociado</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {asociadoFields.map((field, idx) => (
-                    <div key={idx} className="rounded-xl bg-[#F8F9F3] p-4">
-                      <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                        {field.label}
+                <div className="p-6">
+                  <div className="grid grid-cols-3 gap-x-12 gap-y-6">
+                    {personalFields.map((field, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <div className="text-xs font-medium text-gray-500 uppercase">
+                          {field.label}
+                        </div>
+                        <div className="text-sm text-gray-900 font-medium">
+                          {field.value}
+                        </div>
                       </div>
-                      <div className="text-base text-[#33361D] font-medium">
-                        {field.value}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Núcleo Familiar */}
-              {nucleoFamiliar && (
-                <div>
-                  <h4 className="text-lg font-bold text-[#33361D] mb-3">Núcleo Familiar</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="rounded-xl bg-[#F8F9F3] p-4">
-                      <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Hombres</div>
-                      <div className="text-base text-[#33361D] font-medium">{nucleoFamiliar.nucleoHombres}</div>
-                    </div>
-                    <div className="rounded-xl bg-[#F8F9F3] p-4">
-                      <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Mujeres</div>
-                      <div className="text-base text-[#33361D] font-medium">{nucleoFamiliar.nucleoMujeres}</div>
-                    </div>
-                    <div className="rounded-xl bg-[#FEF6E0] p-4">
-                      <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Total</div>
-                      <div className="text-base text-[#33361D] font-medium">{nucleoFamiliar.nucleoTotal}</div>
-                    </div>
+                    ))}
                   </div>
                 </div>
-              )}
+              </div>
+
+              {/* Datos del Asociado y Núcleo Familiar - Layout horizontal */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white rounded-lg border border-gray-200">
+                  <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
+                    <h4 className="text-sm font-semibold text-gray-900">Datos del Asociado</h4>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    {asociadoFields.map((field, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <div className="text-xs font-medium text-gray-500 uppercase">
+                          {field.label}
+                        </div>
+                        <div className="text-sm text-gray-900 font-medium">
+                          {field.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {nucleoFamiliar && (
+                  <div className="bg-white rounded-lg border border-gray-200">
+                    <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
+                      <h4 className="text-sm font-semibold text-gray-900">Núcleo Familiar</h4>
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center justify-around h-full">
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-gray-900">{nucleoFamiliar.nucleoHombres}</div>
+                          <div className="text-xs text-gray-500 uppercase mt-1">Hombres</div>
+                        </div>
+                        <div className="w-px h-16 bg-gray-200"></div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-gray-900">{nucleoFamiliar.nucleoMujeres}</div>
+                          <div className="text-xs text-gray-500 uppercase mt-1">Mujeres</div>
+                        </div>
+                        <div className="w-px h-16 bg-gray-200"></div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-[#6F8C1F]">{nucleoFamiliar.nucleoTotal}</div>
+                          <div className="text-xs text-gray-500 uppercase mt-1">Total</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {selectedTab === 'necesidades' && (
-            <div>
+            <div className="p-6">
               {loadingNecesidades ? (
                 <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B732E]"></div>
-                  <p className="mt-4 text-sm text-[#556B2F]">Cargando necesidades...</p>
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#6F8C1F]"></div>
+                  <p className="mt-4 text-sm text-gray-600">Cargando necesidades...</p>
                 </div>
               ) : (
                 <>
                   {Array.isArray(necesidades) && necesidades.length > 0 ? (
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-bold text-[#33361D] mb-4 border-b-2 border-[#EAEFE0] pb-2">
-                        Necesidades y Mejoras Identificadas
-                      </h4>
-                      {necesidades.map((necesidad: any, i: number) => (
-                        <div key={necesidad?.idNecesidad ?? i} className="rounded-xl bg-[#F8F9F3] p-4 hover:bg-[#EAEFE0] transition">
-                          <div className="flex items-start gap-4">
-                            <span className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-[#5B732E] text-white text-sm font-bold">
-                              {necesidad?.orden ?? i + 1}
-                            </span>
-                            <div className="flex-1">
-                              <p className="text-base text-[#33361D] leading-relaxed">
+                    <div className="bg-white rounded-lg border border-gray-200">
+                      <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
+                        <h4 className="text-sm font-semibold text-gray-900">Necesidades Identificadas</h4>
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {necesidades.map((necesidad: any, i: number) => (
+                          <div key={necesidad?.idNecesidad ?? i} className="p-5 hover:bg-gray-50 transition-colors">
+                            <div className="flex gap-4">
+                              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#6F8C1F] text-white flex items-center justify-center text-sm font-bold">
+                                {necesidad?.orden ?? i + 1}
+                              </div>
+                              <p className="text-sm text-gray-700 leading-relaxed flex-1 pt-1">
                                 {necesidad?.descripcion ?? "—"}
                               </p>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <div className="text-[#556B2F] text-lg mb-2">
-                        📝 No hay necesidades registradas
-                      </div>
-                      <p className="text-sm text-[#556B2F] opacity-75">
-                        Las necesidades y observaciones aparecerán aquí una vez sean registradas
-                      </p>
+                    <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+                      <div className="text-gray-300 text-5xl mb-3">📝</div>
+                      <p className="text-gray-500 text-sm">No hay necesidades registradas</p>
                     </div>
                   )}
                 </>
@@ -236,9 +242,8 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
             </div>
           )}
 
-          {/* 🔸 TAB: FINCA */}
           {selectedTab === 'finca' && (
-            <div>
+            <div className="p-6">
               {associate.fincas && associate.fincas.length > 0 ? (
                 <div className="space-y-4">
                   {associate.fincas.map((finca, idx) => (
@@ -251,13 +256,9 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <div className="text-[#556B2F] text-lg mb-2">
-                    🏡 No hay fincas registradas
-                  </div>
-                  <p className="text-sm text-[#556B2F] opacity-75">
-                    Las fincas del asociado aparecerán aquí una vez sean registradas
-                  </p>
+                <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+                  <div className="text-gray-300 text-5xl mb-3">🏡</div>
+                  <p className="text-gray-500 text-sm">No hay fincas registradas</p>
                 </div>
               )}
             </div>
@@ -265,12 +266,13 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#EAEFE0] px-6 py-4 bg-[#F8F9F3]">
-          <div className="flex justify-end">
-            <button onClick={onClose} className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm">
-              Cerrar
-            </button>
-          </div>
+        <div className="border-t border-gray-200 px-6 py-3 bg-white flex justify-end">
+          <button 
+            onClick={onClose} 
+            className="px-6 py-2 rounded-lg bg-[#6F8C1F] text-white text-sm font-medium hover:bg-[#5A7018] transition-colors"
+          >
+            Cerrar
+          </button>
         </div>
       </div>
     </div>
