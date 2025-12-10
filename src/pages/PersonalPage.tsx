@@ -7,7 +7,6 @@ import { PersonalPageInfoModal } from "../components/Personal/PersonalPageInfoMo
 import { EditPersonalPageModal } from "../components/Personal/EditPersonalPageModal";
 import { personalApi } from "../services/personalPageService";
 import { fetchCedulaData } from "../services/cedulaService";
-import { downloadPDFFromRows } from "../utils/exportUtils";
 import { getCurrentUser } from "../services/auth";
 import type { PersonalPageType } from "../models/PersonalPageType";
 import { PersonalTable } from "../components/Personal/PersonalPageTable";
@@ -50,6 +49,7 @@ export default function PersonalPage() {
     openNewPersonalPage,
   } = usePersonalPageState();
   const navigate = useNavigate();
+  
   // Rol (solo JUNTA es read-only)
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
@@ -78,25 +78,9 @@ export default function PersonalPage() {
     );
   }, [search, items]);
 
-  // Columnas para PDF
-  const pdfColumns = [
-    { header: "Nombre", field: "name", width: 100 },
-    { header: "Primer Apellido", field: "lastname1", width: 110 },
-    { header: "Segundo Apellido", field: "lastname2", width: 110 },
-    { header: "Cédula", field: "IDE", width: 100 },
-    { header: "Teléfono", field: "phone", width: 100 },
-    { header: "Puesto", field: "occupation", width: 120 },
-    { header: "Email", field: "email", width: 170 },
-  ];
 
   const lookupCedula = (id: string) => fetchCedulaData(id);
 
-  const handleExportPDF = () => {
-    downloadPDFFromRows("personal_filtrado.pdf", filtered as any[], pdfColumns, {
-      title: "Cámara de Ganaderos — Personal",
-      filterText: search.trim() || "Sin filtro",
-    });
-  };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Cargando…</div>;
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-600">Error: {error}</div>;
@@ -111,14 +95,6 @@ export default function PersonalPage() {
           <PersonalPageSearch value={search} onChange={setSearch} />
         </div>
 
-        <div className="mb-4 flex justify-end">
-          <button
-            onClick={handleExportPDF}
-            className="rounded-lg border border-[#A3853D] px-4 py-2 text-[#2E321B] bg-white hover:bg-[#FAF1DF]"
-          >
-            Exportar PDF
-          </button>
-        </div>
 
         {/* Tabla Reutilizable */}
         <PersonalTable
@@ -136,11 +112,11 @@ export default function PersonalPage() {
             {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
           </div>
           <ActionButtons
-                          onBack={() => navigate({ to: "/Principal" })}
-                          showBack={true}
-                          backText="Regresar"
-                          showText={true}
-                        />   
+            onBack={() => navigate({ to: "/Principal" })}
+            showBack={true}
+            backText="Regresar"
+            showText={true}
+          />   
         </div>
       </div>
 

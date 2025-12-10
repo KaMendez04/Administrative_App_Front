@@ -1,6 +1,8 @@
 // src/components/Personal/PersonalPageInfoModal.tsx
 import React from "react"
+import { Download } from "lucide-react"
 import type { PersonalPageType } from "../../models/PersonalPageType"
+import { downloadPersonalPDF } from "../../utils/personalPdfUtils"
 
 interface PersonalPageInfoModalProps {
   item: PersonalPageType
@@ -33,18 +35,27 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
   return (
     <div 
       className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      onClick={handleBackdropClick} // 👈 Agregar esto
+      onClick={handleBackdropClick}
     >
       <div className="bg-[#FAF9F5] border border-[#E6E1D6] rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-xl font-bold text-[#374321]">Información del personal</h2>
-          <button
-            onClick={onClose}
-            className="rounded-lg border border-[#E6E1D6] bg-white px-3 py-1.5 text-sm hover:bg-[#F4F1E7] transition-colors"
-          >
-            Cerrar
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => downloadPersonalPDF(item)}
+              className="flex items-center gap-2 bg-[#708C3E] hover:bg-[#5e7630] text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Descargar PDF
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-lg border border-[#E6E1D6] bg-white px-4 py-2 text-sm hover:bg-[#F4F1E7] transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -59,6 +70,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
               {row("Primer apellido", `${item.lastname1 ?? ""}`)}
               {row("Segundo apellido", `${item.lastname2 ?? ""}`)}
               <div className="md:col-span-3">{row("Cédula", show(item.IDE))}</div>
+              <div className="md:col-span-3">{row("Fecha de nacimiento", show(item.birthDate))}</div>
             </div>
           </section>
 
@@ -83,7 +95,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
               <div className="md:col-span-2">{row("Puesto / ocupación", show(item.occupation))}</div>
               {row("Estado", item.isActive ? "Activo" : "Inactivo")}
               {row("Fecha de inicio laboral", show(item.startWorkDate))}
-              {row("Fecha de salida", show(item.endWorkDate))}
+              {!item.isActive && row("Fecha de salida", show(item.endWorkDate))}
             </div>
           </section>
         </div>
