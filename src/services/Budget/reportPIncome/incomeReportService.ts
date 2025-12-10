@@ -56,7 +56,7 @@ function clean<T extends object>(obj: T): Partial<T> {
     const url = URL.createObjectURL(blob);
   
     const cd = (res as any).headers?.["content-disposition"];
-    const filename = filenameFromCD(cd, `reporte-ingresos.pdf-${new Date().toISOString().slice(0, 10)}`);
+    const filename = filenameFromCD(cd, `reporte-pingresos-${new Date().toISOString().slice(0, 10)}.pdf`);
   
     const a = document.createElement("a");
     a.href = url;
