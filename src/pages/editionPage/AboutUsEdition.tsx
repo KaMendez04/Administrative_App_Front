@@ -44,7 +44,7 @@ export default function AboutUsEdition() {
   }
 
   // Máximo y contadores
-  const MAX = 250
+  const MAX = 1000
   const leftWho = Math.max(0, MAX - (whoWeAre?.length ?? 0))
   const leftMission = Math.max(0, MAX - (mission?.length ?? 0))
   const leftVision = Math.max(0, MAX - (vision?.length ?? 0))
