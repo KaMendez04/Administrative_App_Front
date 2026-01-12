@@ -3,7 +3,7 @@ import type { AboutUsType, AboutUsUpdate } from "../../models/editionSection/Abo
 
 // Títulos fijos para cada sección (los usaremos como “clave”)
 export const SECTION_DEFS = [
-  { slug: "quienes-somos", title: "Quiénes Somos" },
+  { slug: "¿quiénes somos?", title: "¿Quiénes somos?" },
   { slug: "mision",        title: "Misión" },
   { slug: "vision",        title: "Visión" },
 ]

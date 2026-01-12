@@ -57,7 +57,7 @@ export default function AboutUsEdition() {
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold mb-2">Edición de la Sección Sobre Nosotros</h1>
           <p className="text-base text-[#475C1D]">
-            {isEditing ? "Modifica 'Quiénes somos', 'Misión' y 'Visión'." : "Crea las secciones de Sobre Nosotros."}
+            {isEditing ? "Modifica '¿Quiénes somos?', 'Misión' y 'Visión'." : "Crea las secciones de Sobre Nosotros."}
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export default function AboutUsEdition() {
                 {/* Quiénes somos */}
                 <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
                   <label htmlFor="whoWeAre" className="block text-sm font-medium text-gray-700 mb-1">
-                    Quiénes somos <span className="text-red-500">*</span>
+                    ¿Quiénes somos? <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     id="whoWeAre"
