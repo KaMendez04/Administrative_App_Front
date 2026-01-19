@@ -1,20 +1,39 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
+import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
+import { CustomSelect } from "../../CustomSelect";
+
 import { useDepartments, useIncomeSubTypes, useIncomeTypes } from "../../../hooks/Budget/income/useIncomeCatalog";
 import { useCreateIncomeEntry } from "../../../hooks/Budget/income/useIncomeMutation";
 import type { CreateIncomeDTO } from "../../../models/Budget/IncomeType";
-import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
-import { CustomSelect } from "../../CustomSelect";
+
+// 👇 traer proyección para mezclar
+import { usePIncomeTypes, usePIncomeSubTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
+import {
+  useEnsureIncomeSubTypeFromProjection,
+  useEnsureIncomeTypeFromProjection, // ✅
+} from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
 
 type Props = {
   onSuccess?: (createdId: number) => void;
   disabled?: boolean;
 };
 
+type OriginId = `r:${number}` | `p:${number}`;
+
+function parseOriginId(v: string | number | ""): { origin: "r" | "p"; id: number } | null {
+  if (!v) return null;
+  const s = String(v);
+  const [origin, raw] = s.split(":");
+  const id = Number(raw);
+  if ((origin !== "r" && origin !== "p") || !Number.isFinite(id)) return null;
+  return { origin: origin as "r" | "p", id };
+}
+
 export default function IncomeForm({ onSuccess, disabled }: Props) {
   const [departmentId, setDepartmentId] = useState<number | "">("");
-  const [typeId, setTypeId] = useState<number | "">("");
-  const [subTypeId, setSubTypeId] = useState<number | "">("");
+  const [typeKey, setTypeKey] = useState<OriginId | "">("");
+  const [subTypeKey, setSubTypeKey] = useState<OriginId | "">("");
 
   const money = useMoneyInput("");
   const amountStr: string = ((money as any).value ?? "") as string;
@@ -30,64 +49,129 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // ===== Queries =====
   const dept = useDepartments();
-  const types = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
-  const subTypes = useIncomeSubTypes(typeof typeId === "number" ? typeId : undefined);
 
+  // reales
+  const realTypes = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
+
+  // proyección (mismo dept)
+  const projTypes = usePIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
+
+  // subtypes dependen del type seleccionado (origen)
+  const typeParsed = parseOriginId(typeKey);
+
+  const realSubTypes = useIncomeSubTypes(typeParsed?.origin === "r" ? typeParsed.id : undefined);
+  const projSubTypes = usePIncomeSubTypes(typeParsed?.origin === "p" ? typeParsed.id : undefined);
+
+  // ===== Options =====
   const departmentOptions = useMemo(
     () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
     [dept.data]
   );
-  const typeOptions = useMemo(
-    () => (types.data ?? []).map((t) => ({ label: t.name, value: t.id })),
-    [types.data]
-  );
-  const subTypeOptions = useMemo(
-    () => (subTypes.data ?? []).map((s) => ({ label: s.name, value: s.id })),
-    [subTypes.data]
-  );
 
-  // ✅ cascada sin autoselección
+  const typeOptions = useMemo(() => {
+    const real = (realTypes.data ?? []).map((t) => ({
+      label: t.name,
+      value: `r:${t.id}` as OriginId,
+    }));
+
+    const proj = (projTypes.data ?? []).map((s) => ({
+      label: s.name,
+      value: `p:${s.id}` as OriginId,
+    }));
+
+    return [...real, ...proj];
+  }, [realTypes.data, projTypes.data]);
+
+  const subTypeOptions = useMemo(() => {
+    if (!typeParsed) return [];
+    if (typeParsed.origin === "r") {
+      return (realSubTypes.data ?? []).map((s) => ({
+        label: s.name,
+        value: `r:${s.id}` as OriginId,
+      }));
+    }
+    // si elegiste TYPE de proyección, aquí vienen subtypes de proyección
+    return (projSubTypes.data ?? []).map((s) => ({
+      label: s.name, // 👈 opcional: sin "(Proyección)" porque ya se ve arriba
+      value: `p:${s.id}` as OriginId,
+    }));
+  }, [typeParsed, realSubTypes.data, projSubTypes.data]);
+
+  // ===== Cascada =====
   useEffect(() => {
-    setTypeId("");
-    setSubTypeId("");
+    setTypeKey("");
+    setSubTypeKey("");
   }, [departmentId]);
-  useEffect(() => {
-    setSubTypeId("");
-  }, [typeId]);
 
+  useEffect(() => {
+    setSubTypeKey("");
+  }, [typeKey]);
+
+  // ===== Mutations =====
   const createIncome = useCreateIncomeEntry();
+
+  const ensureTypeFromProj = useEnsureIncomeTypeFromProjection(); // ✅
+  const ensureSubFromProj = useEnsureIncomeSubTypeFromProjection();
 
   async function onSubmit() {
     setErrors({});
+
     if (!departmentId) return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
-    if (!typeId) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
-    if (!subTypeId) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
+    if (!typeKey) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
+    if (!subTypeKey) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
     if (!amountStr || amount <= 0) return setErrors((e) => ({ ...e, amount: "Monto requerido" }));
     if (!date) return setErrors((e) => ({ ...e, date: "Fecha requerida" }));
 
-    const payload: CreateIncomeDTO = {
-      incomeSubTypeId: Number(subTypeId),
-      amount,
-      date,
-    };
-
     try {
+      const tParsed = parseOriginId(typeKey);
+      const sParsed = parseOriginId(subTypeKey);
+
+      if (!tParsed) return setErrors((e) => ({ ...e, typeId: "Tipo inválido" }));
+      if (!sParsed) return setErrors((e) => ({ ...e, subTypeId: "Subtipo inválido" }));
+
+      let realIncomeSubTypeId: number;
+
+      // ✅ SOLO AQUÍ creamos (si hace falta) los catálogos reales basados en proyección
+      if (sParsed.origin === "p") {
+        // 1) asegurar type real desde type proyección (por si el backend lo necesita)
+        if (tParsed.origin === "p") {
+          await ensureTypeFromProj.mutate(tParsed.id);
+        }
+
+        // 2) asegurar subtipo real desde subtipo proyección
+        const ensuredSub = await ensureSubFromProj.mutate(sParsed.id);
+        realIncomeSubTypeId = Number((ensuredSub as any).id);
+      } else {
+        realIncomeSubTypeId = sParsed.id;
+      }
+
+      const payload: CreateIncomeDTO = {
+        incomeSubTypeId: realIncomeSubTypeId,
+        amount,
+        date,
+      };
+
       const res = await createIncome.mutate(payload);
+
+      // reset UI
       if ("setValue" in money && typeof (money as any).setValue === "function") {
         (money as any).setValue("");
       }
       setDepartmentId("");
-      setTypeId("");
-      setSubTypeId("");
+      setTypeKey("");
+      setSubTypeKey("");
+
       const d = new Date();
       const yyyy = d.getFullYear();
       const mm = String(d.getMonth() + 1).padStart(2, "0");
       const dd = String(d.getDate()).padStart(2, "0");
       setDate(`${yyyy}-${mm}-${dd}`);
+
       onSuccess?.(res.id);
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el egreso" }));
+      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el ingreso" }));
     }
   }
 
@@ -110,8 +194,8 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Tipo</label>
         <CustomSelect
-          value={typeId}
-          onChange={(value) => setTypeId(value ? Number(value) : "")}
+          value={typeKey}
+          onChange={(value) => setTypeKey(value ? (String(value) as OriginId) : "")}
           options={typeOptions}
           placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
           disabled={!departmentId || disabled}
@@ -123,11 +207,11 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Subtipo</label>
         <CustomSelect
-          value={subTypeId}
-          onChange={(value) => setSubTypeId(value ? Number(value) : "")}
+          value={subTypeKey}
+          onChange={(value) => setSubTypeKey(value ? (String(value) as OriginId) : "")}
           options={subTypeOptions}
-          placeholder={!typeId ? "Seleccione un tipo…" : "Seleccione…"}
-          disabled={!typeId || disabled}
+          placeholder={!typeKey ? "Seleccione un tipo…" : "Seleccione…"}
+          disabled={!typeKey || disabled}
         />
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
@@ -140,13 +224,6 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
           className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          max={(() => {
-            const d = new Date();
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, "0");
-            const dd = String(d.getDate()).padStart(2, "0");
-            return `${yyyy}-${mm}-${dd}`;
-          })()}
           disabled={disabled}
         />
         {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
@@ -165,11 +242,10 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       </div>
 
-      {/* Separador y Botón */}
       <div className="pt-4 border-t border-gray-100">
         <button
           onClick={onSubmit}
-          disabled={disabled || !departmentId || !typeId || !subTypeId || !amountStr || amount <= 0 || !date}
+          disabled={disabled || !departmentId || !typeKey || !subTypeKey || !amountStr || amount <= 0 || !date}
           className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="h-4 w-4" />
