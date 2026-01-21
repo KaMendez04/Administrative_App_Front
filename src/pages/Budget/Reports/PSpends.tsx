@@ -1,38 +1,51 @@
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { pSpendService } from "../../../services/Budget/reportsPSpend/pSpendReportService";
+import { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { pSpendService } from "../../../services/Budget/reportsPSpend/pSpendReportService"
+import { CustomSelect } from "../../../components/CustomSelect"
 
-// util: convierte cualquier cosa en array razonable
-type AnyObj = Record<string, unknown>;
+
+type AnyObj = Record<string, unknown>
 function ensureArray<T = any>(x: unknown): T[] {
-  if (Array.isArray(x)) return x as T[];
+  if (Array.isArray(x)) return x as T[]
   if (x && typeof x === "object") {
-    const o = x as AnyObj;
-    if (Array.isArray(o.data)) return o.data as T[];
-    if (Array.isArray(o.items)) return o.items as T[];
-    const vals = Object.values(o);
-    if (vals.length && vals.every((v) => v && typeof v === "object")) return vals as T[];
+    const o = x as AnyObj
+    if (Array.isArray(o.data)) return o.data as T[]
+    if (Array.isArray(o.items)) return o.items as T[]
+    const vals = Object.values(o)
+    if (vals.length && vals.every((v) => v && typeof v === "object"))
+      return vals as T[]
   }
-  return [];
+  return []
 }
 
 // Formateo CRC
 const crc = (n: number) =>
   new Intl.NumberFormat("es-CR", { style: "currency", currency: "CRC" }).format(
     Number.isFinite(n) ? n : 0
-  );
+  )
 
 // ======= Componente =======
 export default function PSpendProjectionsPage() {
   // ------- filtros (simples en local como en tu ejemplo) -------
-  const [submitted, setSubmitted] = useState<any>({});
-  const [start, setStart] = useState<string | undefined>();
-  const [end, setEnd] = useState<string | undefined>();
-  const [departmentId, setDepartmentId] = useState<number | undefined>();
-  const [spendTypeId, setSpendTypeId] = useState<number | undefined>();
-  const [spendSubTypeId, setSpendSubTypeId] = useState<number | undefined>();
+  const [submitted, setSubmitted] = useState<any>({})
+  const [start, setStart] = useState<string | undefined>()
+  const [end, setEnd] = useState<string | undefined>()
+  const [departmentId, setDepartmentId] = useState<number | undefined>()
+  const [spendTypeId, setSpendTypeId] = useState<number | undefined>()
+  const [spendSubTypeId, setSpendSubTypeId] = useState<number | undefined>()
 
-  const filters = { start, end, departmentId, spendTypeId, spendSubTypeId };
+  const filters = { start, end, departmentId, spendTypeId, spendSubTypeId }
+
+  // Auto-aplicar filtros (sin botones)
+  useEffect(() => {
+    setSubmitted({
+      start: start || undefined,
+      end: end || undefined,
+      departmentId: departmentId || undefined,
+      spendTypeId: spendTypeId || undefined,
+      spendSubTypeId: spendSubTypeId || undefined,
+    })
+  }, [start, end, departmentId, spendTypeId, spendSubTypeId])
 
   // ------- catálogos -------
   // departamentos (siempre)
@@ -41,8 +54,8 @@ export default function PSpendProjectionsPage() {
     queryFn: pSpendService.listDepartments, // <- usa el service de pSpend
     refetchOnMount: "always",
     staleTime: 0,
-  });
-  const departments = ensureArray<any>(departmentsData);
+  })
+  const departments = ensureArray<any>(departmentsData)
 
   // tipos por departamento (habilitado solo si hay depto)
   const { data: typesData = [], isFetching: typesLoading } = useQuery({
@@ -51,58 +64,85 @@ export default function PSpendProjectionsPage() {
     enabled: !!departmentId,
     refetchOnMount: "always",
     staleTime: 0,
-  });
+  })
   const spendTypes = ensureArray<any>(typesData).map((t: any) => ({
     id: t.id ?? t.spendTypeId,
     name: t.name ?? t.spendTypeName,
-  }));
+  }))
 
+  //  subtipos por tipo (habilitado solo si hay tipo)
+  const { data: subTypesData = [], isFetching: subTypesLoading } = useQuery({
+    queryKey: ["pSpendSubTypes", spendTypeId ?? null],
+    queryFn: () => pSpendService.listSpendSubTypes(spendTypeId),
+    enabled: !!spendTypeId,
+    refetchOnMount: "always",
+    staleTime: 0,
+  })
+  const spendSubTypes = ensureArray<any>(subTypesData).map((st: any) => ({
+    id: st.id ?? st.spendSubTypeId,
+    name: st.name ?? st.spendSubTypeName,
+  }))
 
-  // ------- reseteos dependientes (clave para que el select “Tipo” funcione) -------
+  
   useEffect(() => {
-    setSpendTypeId(undefined);
-    setSpendSubTypeId(undefined);
-  }, [departmentId]);
+    setSpendTypeId(undefined)
+    setSpendSubTypeId(undefined)
+  }, [departmentId])
 
   useEffect(() => {
-    setSpendSubTypeId(undefined);
-  }, [spendTypeId]);
+    setSpendSubTypeId(undefined)
+  }, [spendTypeId])
 
-  // ------- reporte (comparativo egresos) -------
+  
   const { data: reportData, isFetching: reportLoading } = useQuery({
     queryKey: ["pSpendCompareReport", submitted],
     queryFn: () => pSpendService.getSpendReport(submitted),
-  });
-  const rows = ensureArray<any>(reportData?.rows);
-  const totals =
-    reportData?.totals ?? { real: 0, projected: 0, difference: 0 };
+  })
+  const rows = ensureArray<any>(reportData?.rows)
+  const totals = reportData?.totals ?? { real: 0, projected: 0, difference: 0 }
 
   // ------- UI: placeholder dd/mm/aaaa en inputs date -------
-  const [forceTextStart, setForceTextStart] = useState(!start);
-  const [forceTextEnd, setForceTextEnd] = useState(!end);
+  const [forceTextStart, setForceTextStart] = useState(!start)
+  const [forceTextEnd, setForceTextEnd] = useState(!end)
 
   // ------- acciones -------
-  const apply = () => setSubmitted({
-  start: start || undefined,
-  end: end || undefined,
-  departmentId: departmentId || undefined,
-  spendTypeId: spendTypeId || undefined,
-  spendSubTypeId: spendSubTypeId || undefined,
-});
-  const clear = () => {
-    setStart(undefined);
-    setEnd(undefined);
-    setDepartmentId(undefined);
-    setSpendTypeId(undefined);
-    setSpendSubTypeId(undefined);
-    setSubmitted({});
-  };
-
-  const handlePreviewPDF = () => pSpendService.previewSpendComparePDF(filters);
-  const handleDownloadPDF = () => pSpendService.downloadSpendComparePDF(filters);
+  const handlePreviewPDF = () => pSpendService.previewSpendComparePDF(filters)
+  const handleDownloadPDF = () => pSpendService.downloadSpendComparePDF(filters)
   const handleExcelComparativo = () =>
-    pSpendService.downloadSpendCompareExcel(filters);
+    pSpendService.downloadSpendCompareExcel(filters)
 
+  //  options para CustomSelect 
+  const departmentOptions = [
+    { value: "", label: depsLoading ? "Cargando..." : "Todos" },
+    ...departments.map((d: any) => ({
+      value: d.id ?? d.departmentId,
+      label: d.name ?? d.departmentName,
+    })),
+  ]
+
+  const typeOptions = [
+    {
+      value: "",
+      label: !departmentId
+        ? "Seleccione un departamento"
+        : typesLoading
+          ? "Cargando..."
+          : "Todos",
+    },
+    ...spendTypes.map((t) => ({ value: t.id, label: t.name })),
+  ]
+
+  const subTypeOptions = [
+    {
+      value: "",
+      label: !spendTypeId
+        ? "Seleccione un tipo"
+        : subTypesLoading
+          ? "Cargando..."
+          : "Todos",
+    },
+    ...spendSubTypes.map((st) => ({ value: st.id, label: st.name })),
+  ]
 
   return (
     <div className="min-h-screen">
@@ -142,70 +182,69 @@ export default function PSpendProjectionsPage() {
           <div className="rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
             <div className="text-sm font-bold text-[#33361D] mb-3">Filtros</div>
 
-            {/* Buscador ancho (placeholder) */}
-            <div className="mb-4">
-              <input
-                placeholder="Buscar por departamento, tipo o subtipo..."
-                className="w-full rounded-2xl border-2 border-[#E4ECD2] bg-white p-3 text-[#33361D] placeholder:text-gray-400 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
-                onChange={() => {}}
-              />
-            </div>
-
-            {/* Grid selects + fechas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               {/* Departamento */}
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
                   Departamento
                 </label>
-                <select
+
+                <CustomSelect
                   value={departmentId ?? ""}
-                  onChange={(e) =>
-                    setDepartmentId(
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                  className="w-full rounded-2xl border-2 border-[#E4ECD2] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
-                >
-                  <option value="">
-                    {depsLoading ? "Cargando..." : "Todos"}
-                  </option>
-                  {departments.map((d: any) => (
-                    <option key={d.id ?? d.departmentId} value={d.id ?? d.departmentId}>
-                      {d.name ?? d.departmentName}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => {
+                    const nextDept = v === "" ? undefined : Number(v)
+                    setDepartmentId(nextDept)
+                    setSpendTypeId(undefined)
+                    setSpendSubTypeId(undefined)
+                  }}
+                  options={departmentOptions}
+                  placeholder="Todos"
+                  disabled={false}
+                  zIndex={50}
+                />
               </div>
 
               {/* Tipo */}
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
                   Tipo
                 </label>
-                <select
-                  disabled={!departmentId}
+
+                <CustomSelect
                   value={spendTypeId ?? ""}
-                  onChange={(e) =>
-                    setSpendTypeId(
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
+                  onChange={(v) => {
+                    const nextType = v === "" ? undefined : Number(v)
+                    setSpendTypeId(nextType)
+                    setSpendSubTypeId(undefined)
+                  }}
+                  options={typeOptions}
+                  placeholder={
+                    !departmentId ? "Seleccione un departamento" : "Todos"
                   }
-                  className="w-full rounded-2xl border-2 border-[#E4ECD2] bg-white p-3 text-[#33361D] disabled:opacity-60 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
-                >
-                  <option value="">
-                    {!departmentId ? "Seleccione un departamento" : (typesLoading ? "Cargando..." : "Todos")}
-                  </option>
-                  {spendTypes.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
+                  disabled={!departmentId}
+                  zIndex={40}
+                />
               </div>
 
+              {/* Subtipo */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
+                  Subtipo
+                </label>
 
-              {/* Fechas */}
+                <CustomSelect
+                  value={spendSubTypeId ?? ""}
+                  onChange={(v) =>
+                    setSpendSubTypeId(v === "" ? undefined : Number(v))
+                  }
+                  options={subTypeOptions}
+                  placeholder={!spendTypeId ? "Seleccione un tipo" : "Todos"}
+                  disabled={!spendTypeId}
+                  zIndex={30}
+                />
+              </div>
+
+              {/* Fecha de inicio */}
               <div>
                 <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
                   Fecha de inicio
@@ -215,12 +254,15 @@ export default function PSpendProjectionsPage() {
                   placeholder="dd/mm/aaaa"
                   value={start ?? ""}
                   onFocus={() => setForceTextStart(false)}
-                  onBlur={(e) => { if (!e.target.value) setForceTextStart(true); }}
+                  onBlur={(e) => {
+                    if (!e.target.value) setForceTextStart(true)
+                  }}
                   onChange={(e) => setStart(e.target.value || undefined)}
                   className="w-full rounded-2xl border-2 border-[#E4ECD2] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
                 />
               </div>
 
+              {/* Fecha de fin */}
               <div>
                 <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
                   Fecha de fin
@@ -230,7 +272,9 @@ export default function PSpendProjectionsPage() {
                   placeholder="dd/mm/aaaa"
                   value={end ?? ""}
                   onFocus={() => setForceTextEnd(false)}
-                  onBlur={(e) => { if (!e.target.value) setForceTextEnd(true); }}
+                  onBlur={(e) => {
+                    if (!e.target.value) setForceTextEnd(true)
+                  }}
                   onChange={(e) => setEnd(e.target.value || undefined)}
                   className="w-full rounded-2xl border-2 border-[#E4ECD2] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
                 />
@@ -241,39 +285,23 @@ export default function PSpendProjectionsPage() {
           {/* Acciones */}
           <div className="rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
             <div className="mt-2 flex flex-col md:flex-row md:items-center gap-3">
-              <div className="flex gap-3">
-                <button
-                  onClick={clear}
-                  className="rounded-2xl border-2 border-[#5B732E] text-[#5B732E] font-semibold px-6 py-3 hover:bg-[#EAEFE0] transition"
-                >
-                  Limpiar
-                </button>
-                <button
-                  onClick={apply}
-                  disabled={reportLoading}
-                  className="rounded-2xl bg-[#5B732E] text-white font-semibold px-6 py-3 hover:bg-[#556B2F] transition disabled:opacity-60 shadow-sm"
-                >
-                  {reportLoading ? "Cargando..." : "Aplicar filtros"}
-                </button>
-              </div>
-
               <div className="md:ml-auto flex flex-wrap gap-3">
                 <button
                   onClick={handlePreviewPDF}
-                  className="rounded-2xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold px-6 py-3 hover:bg-[#FEF6E0] transition"
+                  className="flex-1 min-w-[140px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold hover:bg-[#FEF6E0] transition disabled:opacity-60"
                 >
                   Ver PDF
                 </button>
                 <button
                   onClick={handleDownloadPDF}
-                  className="rounded-2xl bg-[#C19A3D] text-white font-semibold px-6 py-3 hover:bg-[#C6A14B] transition shadow-sm"
+                  className="flex-1 min-w-[160px] md:flex-none px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm"
                 >
                   Descargar PDF
                 </button>
 
                 <button
                   onClick={handleExcelComparativo}
-                  className="rounded-2xl border-2 border-[#2d6a4f] text-white bg-[#376a2d] font-semibold px-6 py-3 hover:bg-[#3c5c35] transition disabled:opacity-60"
+                  className="flex-1 min-w-[170px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#2d6a4f] text-white bg-[#376a2d] font-semibold hover:bg-[#3c5c35] transition disabled:opacity-60"
                 >
                   Descargar Excel
                 </button>
@@ -282,44 +310,90 @@ export default function PSpendProjectionsPage() {
           </div>
 
           {/* Tabla */}
-          <div className="rounded-2xl border border-[#EAEFE0] overflow-hidden">
-            <div className="max-h-[60vh] overflow-auto">
-              <div className="sticky top-0 z-10 bg-[#EAEFE0] px-4 py-3 border-b border-[#E3E6D9]">
-                <div className="grid grid-cols-4 gap-4 text-xs md:text-sm font-bold text-[#33361D]">
-                  <div>Subtipo</div>
-                  <div className="text-right">Real</div>
-                  <div className="text-right">Proyectado</div>
-                  <div className="text-right">Diferencia</div>
-                </div>
+          <div className="rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
+            {/* ===== Header (solo desktop) ===== */}
+            <div className="hidden md:block bg-[#EAEFE0] px-4 py-3">
+              <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-4 text-sm font-bold text-[#33361D]">
+                <div>Subtipo</div>
+                <div className="text-right">Real</div>
+                <div className="text-right">Proyectado</div>
+                <div className="text-right">Diferencia</div>
               </div>
+            </div>
 
-              <div className="bg-white divide-y divide-[#F0F2E6]">
-                {rows.map((r: any, i: number) => (
-                  <div
-                    key={i}
-                    className="grid grid-cols-4 gap-4 px-4 py-3 text-sm text-[#33361D] even:bg-[#FAFBF7] hover:bg-[#F8F9F3] transition"
-                  >
-                    <div className="font-medium">{r.name}</div>
-                    <div className="text-right tabular-nums">{crc(r.real)}</div>
-                    <div className="text-right tabular-nums font-medium text-[#5B732E]">
+            {/* ===== Body ===== */}
+            <div className="bg-white">
+              {rows.map((r: any, i: number) => (
+                <div
+                  key={i}
+                  className="
+                    border-b border-[#EAEFE0]
+                    px-4 py-3
+                    text-sm text-[#33361D]
+                    hover:bg-[#F8F9F3]
+                    transition
+                    grid
+                    grid-cols-1
+                    gap-2
+                    md:grid-cols-[1fr_1fr_1fr_1fr]
+                    md:gap-4
+                  "
+                >
+                  {/* Subtipo */}
+                  <div>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Subtipo
+                    </span>
+                    <span className="font-medium">{r.name}</span>
+                  </div>
+
+                  {/* Real */}
+                  <div className="md:text-right">
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Real
+                    </span>
+                    <span className="tabular-nums whitespace-nowrap text-[#5B732E]">
+                      {crc(r.real)}
+                    </span>
+                  </div>
+
+                  {/* Proyectado */}
+                  <div className="md:text-right">
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Proyectado
+                    </span>
+                    <span className="tabular-nums whitespace-nowrap font-medium text-[#5B732E]">
                       {crc(r.projected)}
-                    </div>
-                    <div className="text-right tabular-nums font-bold text-[#C19A3D]">
-                      {crc(r.difference)}
-                    </div>
+                    </span>
                   </div>
-                ))}
 
-                {rows.length === 0 && !reportLoading && (
-                  <div className="py-10 text-center text-gray-400 font-medium">
-                    Sin resultados
+                  {/* Diferencia */}
+                  <div className="md:text-right">
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Diferencia
+                    </span>
+                    <span className="tabular-nums whitespace-nowrap font-bold text-[#C19A3D]">
+                      {crc(r.difference)}
+                    </span>
                   </div>
-                )}
-              </div>
+                </div>
+              ))}
+
+              {rows.length === 0 && !reportLoading && (
+                <div className="py-10 text-center text-gray-400 font-medium">
+                  Sin resultados
+                </div>
+              )}
+
+              {reportLoading && (
+                <div className="py-10 text-center text-gray-400 font-medium">
+                  Cargando...
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
