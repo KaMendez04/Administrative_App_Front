@@ -44,15 +44,6 @@ export default function ExtraordinayList({ list, loading }: ExtraordinayListProp
         </div>
       ),
     }),
-    columnHelper.accessor("used", {
-      header: "Usado",
-      size: 130,
-      cell: (info) => (
-        <div className="text-center font-medium text-[#33361D]">
-          {crc(Number(info.getValue()))}
-        </div>
-      ),
-    }),
     columnHelper.display({
       id: "saldoRestante",
       header: () => <div className="text-center">Saldo Restante</div>,
