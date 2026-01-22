@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { approveSolicitud } from "../../services/adminSolicitudesService";
 import { toast } from "sonner";
+import { approveSolicitud } from "../../services/Associates/adminSolicitudesService";
 
 export function useApproveSolicitud() {
   const qc = useQueryClient();

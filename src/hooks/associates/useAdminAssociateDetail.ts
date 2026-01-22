@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAssociateBasic } from "../../services/adminAssociatesService";
+import { getAssociateBasic } from "../../services/Associates/adminAssociatesService";
 
 export function useAssociateDetail(id: number | null) {
   return useQuery({

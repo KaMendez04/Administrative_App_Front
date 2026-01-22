@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { Solicitud } from "../../schemas/adminSolicitudes";
 import { FincaAccordion } from "./FincaAccordion";
-import { useDownloadSolicitudPDF } from "../../hooks/associates/useDownloadSolicitudPDF";
 import { Download } from "lucide-react";
+import { useDownloadSolicitudPDF } from "../../hooks/associates/useDownloadSolicitudPDF";
 
 type Props = {
   open: boolean;
@@ -15,11 +15,9 @@ type Tab = 'info' | 'finca';
 
 export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Props) {
   const [selectedTab, setSelectedTab] = useState<Tab>('info');
-  
-  // 🔸 MOVER EL HOOK AQUÍ - ANTES DE CUALQUIER RETURN
-  const downloadPDF = useDownloadSolicitudPDF();
+  const openSolicitudPDF = useDownloadSolicitudPDF();
 
-  // 🔸 Ahora sí los returns condicionales
+
   if (!open) return null;
 
   const formatDate = (dateString: string) => {
@@ -106,30 +104,24 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
 
           {/* BOTÓN DESCARGAR PDF */}
           <div className="flex justify-start">
-            <button
-              onClick={() => {
-                console.log('📄 Generando PDF con solicitud:', solicitud);
-                downloadPDF.mutate({ 
-                  solicitud, 
-                  associate: solicitud.asociado,
-                  fincas: solicitud.asociado?.fincas 
-                });
-              }}
-              disabled={downloadPDF.isPending}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-            >
-              {downloadPDF.isPending ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Cargando datos...
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  Descargar PDF
-                </>
-              )}
-            </button>
+<button
+  onClick={() => openSolicitudPDF.mutate(Number(solicitud?.idSolicitud))}
+  disabled={openSolicitudPDF.isPending}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+>
+  {openSolicitudPDF.isPending ? (
+    <>
+      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+      Generando PDF...
+    </>
+  ) : (
+    <>
+      <Download className="w-4 h-4" />
+      Descargar PDF
+    </>
+  )}
+</button>
+
           </div>
         </div>
 

@@ -9,7 +9,8 @@ import { AssociatesTable, type AssociateRow } from "../../components/associates/
 import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";
 import { ActionButtons } from "../../components/ActionButtons";
-
+import { useDownloadAssociatesPDF } from "../../hooks/associates/useDownloadAssociatesPDF";
+import { Download } from "lucide-react";
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
 export default function AssociatesApprovedPage() {
@@ -17,6 +18,7 @@ export default function AssociatesApprovedPage() {
   const [page, setPage] = useState(1);
   const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>("ACTIVO");
   const limit = 20;
+  const downloadPDF = useDownloadAssociatesPDF();
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
@@ -89,6 +91,30 @@ export default function AssociatesApprovedPage() {
           </div>
         </div>
 
+<button
+  onClick={() =>
+    downloadPDF.mutate({
+      estado: status,
+      search,
+      sort: "createdAt:desc",
+    })
+  }
+  disabled={downloadPDF.isPending}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm mb-6 mt-6 lg:mt-0"
+>
+  {downloadPDF.isPending ? (
+    <>
+      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+      Generando PDF...
+    </>
+  ) : (
+    <>
+      <Download className="w-4 h-4" />
+      Descargar PDF
+    </>
+  )}
+</button>
+ 
         {/* Tabla */}
         <AssociatesTable
           data={tableData}

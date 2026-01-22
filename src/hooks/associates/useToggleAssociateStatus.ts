@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toggleAssociateStatus } from "../../services/adminAssociatesService";
 import { toast } from "sonner";
+import { toggleAssociateStatus } from "../../services/Associates/adminAssociatesService";
 
 export function useToggleAssociateStatus() {
   const qc = useQueryClient();

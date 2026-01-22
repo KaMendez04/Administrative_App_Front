@@ -1,5 +1,8 @@
 import { useCallback, useState } from "react"
 import { PersonalPageInitialState, type PersonalPageType } from "../../models/PersonalPageType"
+import { getPersonalPdfBlob } from "../../services/personalPageService"
+import { downloadBlob } from "../../utils/pdf"
+import { useMutation } from "@tanstack/react-query"
 
 
 // Mapea el objeto de la UI (birthdate) al payload de API (birthDate) para CREATE
@@ -65,5 +68,20 @@ export function usePersonalPageState() {
     setNewPersonalPage,
     openNewPersonalPage,
     closeModals,
+  }
+}
+export function usePersonalPdf() {
+  const m = useMutation({
+    mutationFn: async (id: number) => getPersonalPdfBlob(id),
+  })
+
+  const download = async (id: number, filename = "personal.pdf") => {
+    const blob = await m.mutateAsync(id)
+    downloadBlob(blob, filename)
+  }
+
+  return {
+    download,
+    isDownloading: m.isPending,
   }
 }

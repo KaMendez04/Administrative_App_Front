@@ -10,6 +10,8 @@ import { RequestsTable } from "../../components/associates/RequestTable";
 import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";
 import { ActionButtons } from "../../components/ActionButtons";
+import { Download } from "lucide-react";
+import { useDownloadSolicitudesPDF } from "../../hooks/associates/useDownloadSolicitudesPdfList";
 
 export default function AdminRequestsPage() {
   const [status, setStatus] = useState<"PENDIENTE" | "APROBADO" | "RECHAZADO" | undefined>("PENDIENTE");
@@ -17,6 +19,9 @@ export default function AdminRequestsPage() {
   const [page, setPage] = useState(1);
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const limit = 20;
+
+  // ✅ CAMBIO: hook correcto
+  const downloadPDF = useDownloadSolicitudesPDF();
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
@@ -67,6 +72,31 @@ export default function AdminRequestsPage() {
           </div>
         </div>
 
+    <button
+  onClick={() =>
+    downloadPDF.mutate({
+      estado: status,          // 👈 usa tu state "status"
+      search,                  // 👈 tu state "search"
+      sort: "createdAt:desc",  // 👈 o el sort que estés usando
+    })
+  }
+  disabled={downloadPDF.isPending}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm mb-6 mt-6 lg:mt-0"
+>
+  {downloadPDF.isPending ? (
+    <>
+      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+      Generando PDF...
+    </>
+  ) : (
+    <>
+      <Download className="w-4 h-4" />
+      Descargar PDF
+    </>
+  )}
+</button>
+
+
         {/* Tabla de Solicitudes */}
         <RequestsTable
           data={data?.items ?? []}
@@ -92,7 +122,7 @@ export default function AdminRequestsPage() {
               {data?.total ?? 0} resultados — página {data?.page ?? 1} de{" "}
               {data?.pages ?? 1}
             </span>
-            
+
             <ActionButtons
               showPrevious
               showNext

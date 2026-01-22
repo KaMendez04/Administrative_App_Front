@@ -1,6 +1,6 @@
 import LoginForm from "../components/Login/LoginForm"
 import { useLogin } from "../hooks/useLogin"
-import { ShieldCheck } from "lucide-react"
+import { ArrowRight, ShieldCheck } from "lucide-react"
 
 export default function LoginPage() {
   const loginState = useLogin()
@@ -45,6 +45,17 @@ export default function LoginPage() {
               </p>
             </div>
           </div>
+           <div className="fixed bottom-6 right-6">
+        <button
+          onClick={() => window.history.back()}
+          className="flex items-center gap-2 bg-[#7A8B3D] hover:bg-[#6B7A2E] text-white font-medium px-5 py-2.5 rounded-lg shadow-lg transition-colors duration-200"
+        >
+         
+          Regresar
+           <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+          
 
           {/* mini nota opcional */}
           <p className="mt-6 text-center text-xs text-slate-400">

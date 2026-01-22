@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { listAssociates } from "../../services/adminAssociatesService";
+import { listAssociates } from "../../services/Associates/adminAssociatesService";
 import type { AssociateListParams } from "../../schemas/adminSolicitudes";
 
 export function useAdminAssociatesList(params: AssociateListParams) {

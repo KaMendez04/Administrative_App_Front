@@ -54,6 +54,7 @@ export function FincaAccordion({ finca, isFirst }: Props) {
 
   const tienePropietarioDiferente = Boolean(finca?.propietario?.persona?.cedula);
   const esPropietarioReal = !tienePropietarioDiferente;
+  
 
   const { data: hato, isLoading: loadingHato } = useFincaHato(isOpen ? finca?.idFinca : null);
   const { data: forrajes = [], isLoading: loadingForrajes } = useFincaForrajes(isOpen ? finca?.idFinca : null);
@@ -67,11 +68,26 @@ export function FincaAccordion({ finca, isFirst }: Props) {
   const { data: registrosProductivos, isLoading: loadingRegistros } = useFincaRegistrosProductivos(isOpen ? finca?.idFinca : null);
   const { data: accesos = [], isLoading: loadingAccesos } = useFincaAccesos(isOpen ? finca?.idFinca : null);
   const { data: canales = [], isLoading: loadingCanales } = useFincaCanales(isOpen ? finca?.idFinca : null);
-
   const corriente = finca?.corriente;
   const isLoadingAny = loadingHato || loadingForrajes || loadingFuentes || loadingMetodos || 
     loadingActividades || loadingInfra || loadingTipos || loadingInfraestructuras || 
     loadingEquipos || loadingRegistros || loadingAccesos || loadingCanales;
+    // ---- Apartos (vienen en tabla equipos) ----
+  const normalizarNombre = (v: any) => String(v ?? "").trim().toLowerCase();
+
+  const apartosEquipos = (Array.isArray(otrosEquipos) ? otrosEquipos : []).filter(
+    (oe: any) => normalizarNombre(oe?.nombreEquipo) === "apartos"
+  );
+
+  const otrosEquiposSinApartos = (Array.isArray(otrosEquipos) ? otrosEquipos : []).filter(
+    (oe: any) => normalizarNombre(oe?.nombreEquipo) !== "apartos"
+  );
+
+  const totalApartos = apartosEquipos.reduce((acc: number, oe: any) => {
+    const n = Number(oe?.cantidad);
+    return acc + (Number.isFinite(n) ? n : 0);
+  }, 0);
+
 
   return (
     <details
@@ -311,11 +327,22 @@ export function FincaAccordion({ finca, isFirst }: Props) {
               </Section>
             )}
 
-            {/* Otros equipos */}
-            {Array.isArray(otrosEquipos) && otrosEquipos.length > 0 && (
+                        {/* Cantidad de apartos (viene en Otros Equipos pero separado) */}
+            {Array.isArray(otrosEquipos) && apartosEquipos.length > 0 && (
+              <Section title="Cantidad de apartos de la finca" icon={Fence}>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <ListItem>
+                    <Field label="" value={totalApartos} />
+                  </ListItem>
+                </div>
+              </Section>
+            )}
+
+            {/* Otros equipos (sin apartos) */}
+            {Array.isArray(otrosEquiposSinApartos) && otrosEquiposSinApartos.length > 0 && (
               <Section title="Otros Equipos" icon={Wrench}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {otrosEquipos.map((oe: any, i: number) => (
+                  {otrosEquiposSinApartos.map((oe: any, i: number) => (
                     <ListItem key={oe?.idFincaOtroEquipo ?? i}>
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-medium text-[#33361D]">{oe?.nombreEquipo ?? "—"}</span>

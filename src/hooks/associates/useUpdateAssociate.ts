@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateAssociate } from "../../services/adminAssociatesService";
+import { updateAssociate } from "../../services/Associates/adminAssociatesService";
 import type { UpdateAssociateValues } from "../../schemas/adminSolicitudes";
 import { toast } from "sonner";
 

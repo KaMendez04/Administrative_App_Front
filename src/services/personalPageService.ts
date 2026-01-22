@@ -126,3 +126,10 @@ export async function listPersonalPages(): Promise<PersonalPageType[]> {
   const { data } = await apiConfig.get<PersonalPageType[]>("/personal");
   return data;
 }
+
+export async function getPersonalPdfBlob(id: number): Promise<Blob> {
+  const res = await apiConfig.get<Blob>(`/personal/pdf/${id}`, {
+    responseType: "blob",
+  })
+  return res.data
+}

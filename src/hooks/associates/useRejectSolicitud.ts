@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { rejectSolicitud } from "../../services/adminSolicitudesService";
 import { toast } from "sonner";
+import { rejectSolicitud } from "../../services/Associates/adminSolicitudesService";
 
 export function useRejectSolicitud() {
   const qc = useQueryClient();
