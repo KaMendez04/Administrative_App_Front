@@ -7,6 +7,11 @@ import {
 
 import { CustomSelect } from "../../../components/CustomSelect"
 
+import {
+  usePagination,
+  PaginationBar,
+} from "../../../components/ui/pagination"
+
 const crc = (n: number) =>
   new Intl.NumberFormat("es-CR", {
     style: "currency",
@@ -21,16 +26,13 @@ function uniqSorted(arr: string[]) {
 }
 
 export default function IncomeReportPage() {
-  
   const [start, setStart] = useState<string | undefined>()
   const [end, setEnd] = useState<string | undefined>()
 
-  
   const [department, setDepartment] = useState<string | undefined>()
   const [incomeType, setIncomeType] = useState<string | undefined>()
   const [incomeSubType, setIncomeSubType] = useState<string | undefined>()
 
-  
   const [submitted, setSubmitted] = useState<any>({})
 
   const { data, isFetching } = useIncomeReport(submitted)
@@ -51,7 +53,6 @@ export default function IncomeReportPage() {
     })
   }, [start, end])
 
-  
   useEffect(() => {
     setIncomeType(undefined)
     setIncomeSubType(undefined)
@@ -61,7 +62,6 @@ export default function IncomeReportPage() {
     setIncomeSubType(undefined)
   }, [incomeType])
 
-  
   const departmentOptions = useMemo(() => {
     const depts = uniqSorted(rows.map((r: any) => String(r.department ?? "")))
     return [
@@ -142,6 +142,13 @@ export default function IncomeReportPage() {
     await generateIncomeExcel(exportFilters as any)
   }
 
+  // ✅ paginación mínima (todo lo hace el ui/pagination)
+  const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(
+    filteredRows,
+    10,
+    [department, incomeType, incomeSubType, start, end, rows]
+  )
+
   return (
     <div className="min-h-screen ">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
@@ -165,9 +172,7 @@ export default function IncomeReportPage() {
                 {(totals?.byDepartment ?? []).map((r: any, i: number) => (
                   <li key={i} className="flex justify-between">
                     <span className="font-medium">{r.department}</span>
-                    <span className="font-bold text-[#5B732E]">
-                      {crc(r.total)}
-                    </span>
+                    <span className="font-bold text-[#5B732E]">{crc(r.total)}</span>
                   </li>
                 ))}
               </ul>
@@ -181,9 +186,7 @@ export default function IncomeReportPage() {
                 {(totals?.byType ?? []).map((r: any, i: number) => (
                   <li key={i} className="flex justify-between">
                     <span className="font-medium">{r.type}</span>
-                    <span className="font-bold text-[#C19A3D]">
-                      {crc(r.total)}
-                    </span>
+                    <span className="font-bold text-[#C19A3D]">{crc(r.total)}</span>
                   </li>
                 ))}
               </ul>
@@ -202,9 +205,7 @@ export default function IncomeReportPage() {
                 </label>
                 <CustomSelect
                   value={department ?? ""}
-                  onChange={(v) =>
-                    setDepartment(v === "" ? undefined : String(v))
-                  }
+                  onChange={(v) => setDepartment(v === "" ? undefined : String(v))}
                   options={departmentOptions}
                   placeholder="Todos"
                   zIndex={50}
@@ -218,9 +219,7 @@ export default function IncomeReportPage() {
                 </label>
                 <CustomSelect
                   value={incomeType ?? ""}
-                  onChange={(v) =>
-                    setIncomeType(v === "" ? undefined : String(v))
-                  }
+                  onChange={(v) => setIncomeType(v === "" ? undefined : String(v))}
                   options={typeOptions}
                   placeholder="Todos"
                   disabled={false}
@@ -283,7 +282,6 @@ export default function IncomeReportPage() {
             </div>
           </div>
 
-          
           <div className="mt-6 rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
             <div className="mt-2 flex flex-col md:flex-row md:items-center gap-3">
               <div className="md:ml-auto flex flex-wrap gap-3">
@@ -300,9 +298,7 @@ export default function IncomeReportPage() {
                   disabled={isDownloading || isPdfGenerating}
                   className="flex-1 min-w-[160px] md:flex-none px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm"
                 >
-                  {isDownloading || isPdfGenerating
-                    ? "Descargando…"
-                    : "Descargar PDF"}
+                  {isDownloading || isPdfGenerating ? "Descargando…" : "Descargar PDF"}
                 </button>
 
                 <button
@@ -318,23 +314,23 @@ export default function IncomeReportPage() {
 
           {/* Tabla sin líneas */}
           <div className="mt-6 rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
-          {/* ===== Header (solo desktop) ===== */}
-          <div className="hidden md:block bg-[#EAEFE0] px-4 py-3">
-            <div className="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_0.9fr] gap-4 text-sm font-bold text-[#33361D]">
-              <div>Departamento</div>
-              <div>Tipo</div>
-              <div>Subtipo</div>
-              <div>Fecha</div>
-              <div className="text-right">Monto</div>
+            {/* ===== Header (solo desktop) ===== */}
+            <div className="hidden md:block bg-[#EAEFE0] px-4 py-3">
+              <div className="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_0.9fr] gap-4 text-sm font-bold text-[#33361D]">
+                <div>Departamento</div>
+                <div>Tipo</div>
+                <div>Subtipo</div>
+                <div>Fecha</div>
+                <div className="text-right">Monto</div>
+              </div>
             </div>
-          </div>
 
-          {/* ===== Body ===== */}
-          <div className="bg-white">
-            {filteredRows.map((r: any, i: number) => (
-              <div
-                key={i}
-                className="
+            {/* ===== Body ===== */}
+            <div className="bg-white">
+              {pagedItems.map((r: any, i: number) => (
+                <div
+                  key={i}
+                  className="
                   border-b border-[#EAEFE0]
                   px-4 py-3
                   text-sm text-[#33361D]
@@ -346,69 +342,72 @@ export default function IncomeReportPage() {
                   md:grid-cols-[1.5fr_1.5fr_2fr_1fr_0.9fr]
                   md:gap-4
                 "
-              >
-                {/* Departamento */}
-                <div>
-                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                    Departamento
-                  </span>
-                  <span className="font-medium">{r.department}</span>
+                >
+                  <div>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Departamento
+                    </span>
+                    <span className="font-medium">{r.department}</span>
+                  </div>
+
+                  <div>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Tipo
+                    </span>
+                    <span className="font-medium">{r.incomeType}</span>
+                  </div>
+
+                  <div>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Subtipo
+                    </span>
+                    <span className="font-medium">{r.incomeSubType}</span>
+                  </div>
+
+                  <div>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Fecha
+                    </span>
+                    <span className="font-medium">
+                      {r?.date ? new Date(r.date).toLocaleDateString("es-CR") : "—"}
+                    </span>
+                  </div>
+
+                  <div className="md:text-right">
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Monto
+                    </span>
+                    <span className="font-bold text-[#5B732E] tabular-nums whitespace-nowrap">
+                      {crc(r.amount)}
+                    </span>
+                  </div>
                 </div>
+              ))}
 
-                {/* Tipo */}
-                <div>
-                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                    Tipo
-                  </span>
-                  <span className="font-medium">{r.incomeType}</span>
+              {filteredRows.length === 0 && !isFetching && (
+                <div className="py-8 text-center text-gray-400 font-medium">
+                  Sin resultados
                 </div>
+              )}
 
-                {/* Subtipo */}
-                <div>
-                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                    Subtipo
-                  </span>
-                  <span className="font-medium">{r.incomeSubType}</span>
+              {isFetching && (
+                <div className="py-8 text-center text-gray-400 font-medium">
+                  Cargando...
                 </div>
+              )}
+            </div>
 
-                {/* Fecha */}
-                <div>
-                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                    Fecha
-                  </span>
-                  <span className="font-medium">
-                    {r?.date ? new Date(r.date).toLocaleDateString("es-CR") : "—"}
-                  </span>
-                </div>
-
-                {/* Monto */}
-                <div className="md:text-right">
-                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                    Monto
-                  </span>
-                  <span className="font-bold text-[#5B732E] tabular-nums whitespace-nowrap">
-                    {crc(r.amount)}
-                  </span>
-                </div>
-              </div>
-            ))}
-
-            {/* Estados */}
-            {filteredRows.length === 0 && !isFetching && (
-              <div className="py-8 text-center text-gray-400 font-medium">
-                Sin resultados
-              </div>
-            )}
-
-            {isFetching && (
-              <div className="py-8 text-center text-gray-400 font-medium">
-                Cargando...
+            {!isFetching && filteredRows.length > 0 && totalPages > 1 && (
+              <div className="bg-white px-4 py-4 border-t border-[#EAEFE0]">
+                <PaginationBar
+                  page={page}
+                  totalPages={totalPages}
+                  pageItems={pageItems}
+                  onPageChange={setPage}
+                />
               </div>
             )}
           </div>
-        </div>
-
-
         </div>
       </div>
     </div>
