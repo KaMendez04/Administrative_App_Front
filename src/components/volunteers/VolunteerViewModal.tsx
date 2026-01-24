@@ -5,6 +5,8 @@ import { OrganizacionInfo } from "./OrganizacionInfo";
 import { AreasInteresTab } from "./AreasInteresTab";
 import { DisponibilidadTab } from "./DisponibilidadTab";
 import { SolicitudStatusInfo } from "../SolicitudStatusInfo";
+import { useDownloadVoluntarioDetallePDF } from "@/hooks/Volunteers/useVoluntariosPdf";
+import { Download } from "lucide-react";
 
 interface VolunteerViewModalProps {
   open: boolean;
@@ -22,20 +24,20 @@ export function VolunteerViewModal({
   isLoading,
 }: VolunteerViewModalProps) {
   const [selectedTab, setSelectedTab] = useState<Tab>("info");
+  const openSolicitudPDF = useDownloadVoluntarioDetallePDF();
 
   if (!open) return null;
 
-
   const formatDate = (dateString: string) => {
     if (!dateString) return "—";
-    
+
     const date = new Date(dateString);
-    
+
     return new Intl.DateTimeFormat("es-CR", {
       year: "numeric",
       month: "long",
       day: "numeric",
-      timeZone: "UTC" 
+      timeZone: "UTC",
     }).format(date);
   };
 
@@ -87,11 +89,12 @@ export function VolunteerViewModal({
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] p-6 border-b border-[#EAEFE0] rounded-t-2xl">
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start justify-between">
             <div>
               <h3 className="text-2xl font-bold text-[#33361D]">
                 Detalles de la Solicitud de Voluntariado
               </h3>
+
               <div className="mt-2 flex items-center gap-2">
                 <span
                   className={`px-3 py-1 rounded-lg text-sm font-bold ${
@@ -103,16 +106,6 @@ export function VolunteerViewModal({
                   }`}
                 >
                   {solicitud.estado}
-                </span>
-
-                <span
-                  className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                    solicitud.tipoSolicitante === "INDIVIDUAL"
-                      ? "bg-[#D4E8E0] text-[#2D5F4F]"
-                      : "bg-[#F5E6C5] text-[#8B6C2E]"
-                  }`}
-                >
-                  {solicitud.tipoSolicitante}
                 </span>
 
                 <div className="flex items-center gap-1.5">
@@ -134,7 +127,29 @@ export function VolunteerViewModal({
                   </span>
                 </div>
               </div>
+
+              {/* ✅ Botón debajo de las etiquetas (como en la foto) */}
+              <button
+                onClick={() =>
+                  openSolicitudPDF.mutate(Number(solicitud?.idSolicitudVoluntariado))
+                }
+                disabled={openSolicitudPDF.isPending}
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                {openSolicitudPDF.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Generando PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    Descargar PDF
+                  </>
+                )}
+              </button>
             </div>
+
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition"
@@ -168,6 +183,7 @@ export function VolunteerViewModal({
           >
             Información General
           </button>
+
           {hasAreasInteres && (
             <button
               onClick={() => setSelectedTab("areas")}
@@ -180,6 +196,7 @@ export function VolunteerViewModal({
               Áreas de Interés
             </button>
           )}
+
           {hasDisponibilidad && (
             <button
               onClick={() => setSelectedTab("disponibilidad")}
@@ -196,10 +213,8 @@ export function VolunteerViewModal({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* TAB: INFORMACIÓN GENERAL */}
           {selectedTab === "info" && (
             <div className="space-y-6">
-              {/* Voluntario Individual */}
               {solicitud.tipoSolicitante === "INDIVIDUAL" &&
                 solicitud.voluntario && (
                   <VolunteerIndividualInfo
@@ -208,13 +223,11 @@ export function VolunteerViewModal({
                   />
                 )}
 
-              {/* Organización */}
               {solicitud.tipoSolicitante === "ORGANIZACION" &&
                 solicitud.organizacion && (
                   <OrganizacionInfo organizacion={solicitud.organizacion} />
                 )}
 
-              {/* Estado de la Solicitud */}
               <SolicitudStatusInfo
                 estado={solicitud.estado}
                 fechaSolicitud={solicitud.fechaSolicitud}
@@ -225,7 +238,6 @@ export function VolunteerViewModal({
             </div>
           )}
 
-          {/* TAB: ÁREAS DE INTERÉS */}
           {selectedTab === "areas" && (
             <AreasInteresTab
               areasInteres={
@@ -237,7 +249,6 @@ export function VolunteerViewModal({
             />
           )}
 
-          {/* TAB: DISPONIBILIDAD */}
           {selectedTab === "disponibilidad" && (
             <DisponibilidadTab
               disponibilidades={

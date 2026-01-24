@@ -5,12 +5,13 @@ import {
   type VolunteerListParams,
   type CreateSolicitudVoluntariadoValues,
 } from "../../schemas/volunteerSchemas";
+import { downloadBlob } from "@/utils/pdf";
 
 // ✅ Crear solicitud de voluntariado - SIN validación Zod
 export async function createVolunteerSolicitud(
   data: CreateSolicitudVoluntariadoValues
 ): Promise<SolicitudVoluntariado> {
-  const response = await apiConfig.post("/solicitudes-voluntariado", data);
+  const response = await apiConfig.post("/solicitud-voluntariado", data);
   // ✅ Retornar sin validar para consistencia
   return response.data as SolicitudVoluntariado;
 }
@@ -30,7 +31,7 @@ export async function listVolunteerSolicitudes(
   if (params.sort) queryParams.sort = params.sort;
 
   try {
-    const response = await apiConfig.get("/solicitudes-voluntariado", {
+    const response = await apiConfig.get("/solicitud-voluntariado", {
       params: queryParams,
     });
     
@@ -47,7 +48,7 @@ export async function getVolunteerSolicitud(
   id: number
 ): Promise<SolicitudVoluntariado> {
   try {
-    const response = await apiConfig.get(`/solicitudes-voluntariado/${id}`);
+    const response = await apiConfig.get(`/solicitud-voluntariado/${id}`);
     
     // ✅ Retornar directamente sin validación Zod
     return response.data as SolicitudVoluntariado;
@@ -62,7 +63,7 @@ export async function approveVolunteerSolicitud(
   id: number
 ): Promise<SolicitudVoluntariado> {
   const response = await apiConfig.patch(
-    `/solicitudes-voluntariado/${id}/status`,
+    `/solicitud-voluntariado/${id}/status`,
     {
       estado: "APROBADO",
     }
@@ -77,7 +78,7 @@ export async function rejectVolunteerSolicitud(
   motivo: string
 ): Promise<SolicitudVoluntariado> {
   const response = await apiConfig.patch(
-    `/solicitudes-voluntariado/${id}/status`,
+    `/solicitud-voluntariado/${id}/status`,
     {
       estado: "RECHAZADO",
       motivo,
@@ -89,11 +90,82 @@ export async function rejectVolunteerSolicitud(
 
 // ✅ Eliminar solicitud
 export async function deleteVolunteerSolicitud(id: number): Promise<void> {
-  await apiConfig.delete(`/solicitudes-voluntariado/${id}`);
+  await apiConfig.delete(`/solicitud-voluntariado/${id}`);
 }
 
 // ✅ Estadísticas (opcional)
 export async function getVolunteerSolicitudesStats() {
-  const response = await apiConfig.get("/solicitudes-voluntariado/stats");
+  const response = await apiConfig.get("/solicitud-voluntariado/stats");
   return response.data;
 }
+
+export const voluntariosPdfService = {
+  async getListadoVoluntariosPdf(): Promise<Blob> {
+    const res = await apiConfig.get("/solicitud-voluntariado/pdf-voluntarios", {
+      responseType: "blob",
+      headers: {
+        Accept: "application/pdf",
+      },
+    });
+
+    return res.data as Blob;
+  },
+
+  async downloadListadoVoluntariosPdf(filename = "listado-voluntarios.pdf") {
+    const blob = await this.getListadoVoluntariosPdf();
+    downloadBlob(blob, filename);
+  },
+
+  async openListadoVoluntariosPdf() {
+    const blob = await this.getListadoVoluntariosPdf();
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener,noreferrer");
+    // opcional: revocar después (por si el navegador tarda en cargar)
+    setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+  },
+};
+
+export const solicitudesVoluntariadoPdfService = {
+  async getSolicitudesPdf(): Promise<Blob> {
+    const res = await apiConfig.get("/solicitud-voluntariado/pdf-solicitudes", {
+      responseType: "blob",
+      headers: { Accept: "application/pdf" },
+    });
+
+    return res.data as Blob;
+  },
+
+  async downloadSolicitudesPdf(filename = "solicitudes-de-voluntarios.pdf") {
+    const blob = await this.getSolicitudesPdf();
+    downloadBlob(blob, filename);
+  },
+
+  async openSolicitudesPdf() {
+    const blob = await this.getSolicitudesPdf();
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener,noreferrer");
+    setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+  },
+};
+
+export const voluntarioDetallePdfService = {
+  async getDetallePdf(idSolicitud: number): Promise<Blob> {
+    const res = await apiConfig.get(`/solicitud-voluntariado/${idSolicitud}/pdf`, {
+      responseType: "blob",
+      headers: { Accept: "application/pdf" },
+    });
+    return res.data as Blob;
+  },
+
+  async downloadDetallePdf(idSolicitud: number, filename = `solicitud-${idSolicitud}.pdf`) {
+    const blob = await this.getDetallePdf(idSolicitud);
+    downloadBlob(blob, filename);
+  },
+
+  async openDetallePdf(idSolicitud: number) {
+    const blob = await this.getDetallePdf(idSolicitud);
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener,noreferrer");
+    setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+  },
+};

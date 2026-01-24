@@ -11,6 +11,8 @@ import { useVolunteerApprovedDetail } from "../../hooks/Volunteers/individual/us
 import { EditOrganizationModal } from "../../components/volunteers/organizations/EditOrganizationModal";
 import { EditVolunteerIndividualModal } from "../../components/volunteers/EditVolunteerIndividualModal";
 import { ActionButtons } from "../../components/ActionButtons";
+import { Download } from "lucide-react";
+import { useDownloadListadoVoluntariosPDF } from "@/hooks/Volunteers/useVoluntariosPdf";
 
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
@@ -21,6 +23,8 @@ export default function VolunteersApprovedPage() {
   const [editId, setEditId] = useState<{ id: number; tipo: "INDIVIDUAL" | "ORGANIZACION" } | null>(null);
   const [viewId, setViewId] = useState<{ id: number; tipo: "INDIVIDUAL" | "ORGANIZACION" } | null>(null);
   const limit = 20;
+  const downloadListadoPDF = useDownloadListadoVoluntariosPDF();
+
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
@@ -133,7 +137,7 @@ export default function VolunteersApprovedPage() {
           />
 
           {/* KPIs a la derecha en columna */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 mb-6">
             <KPICard
               label="Total Voluntarios"
               value={unifiedData.length}
@@ -152,6 +156,24 @@ export default function VolunteersApprovedPage() {
             />
           </div>
         </div>
+
+          <button
+      onClick={() => downloadListadoPDF.mutate()}
+      disabled={downloadListadoPDF.isPending}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm mb-6 lg:mt-0 sm:mt-6 md:mt-6"
+    >
+      {downloadListadoPDF.isPending ? (
+        <>
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          Generando PDF...
+        </>
+      ) : (
+        <>
+          <Download className="w-4 h-4" />
+          Descargar PDF
+        </>
+      )}
+    </button>
 
         {/* Tabla Unificada */}
         <UnifiedVolunteersTable

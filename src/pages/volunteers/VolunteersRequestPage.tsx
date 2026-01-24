@@ -10,6 +10,8 @@ import { VolunteerViewModal } from "../../components/volunteers/VolunteerViewMod
 import { RejectDialog } from "../../components/associates/RejectDialog";
 import { StatusFilters } from "../../components/StatusFilters";
 import { ActionButtons } from "../../components/ActionButtons";
+import { useDownloadSolicitudesVoluntariadoPDF } from "@/hooks/Volunteers/useVoluntariosPdf";
+import { Download } from "lucide-react";
 
 export default function VolunteersRequestPage() {
   const [status, setStatus] = useState<
@@ -19,6 +21,7 @@ export default function VolunteersRequestPage() {
   const [page, setPage] = useState(1);
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const limit = 20;
+  const downloadPDF = useDownloadSolicitudesVoluntariadoPDF();
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
@@ -43,7 +46,7 @@ export default function VolunteersRequestPage() {
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
         {/* Filtros y KPIs lado a lado */}
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-1">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 sm:mb-6 lg:mb-0">
           {/* Filtros a la izquierda */}
           <StatusFilters
             status={status}
@@ -59,7 +62,7 @@ export default function VolunteersRequestPage() {
           />
 
           {/* KPIs a la derecha en columna */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 ">
             <KPICard
               label="Total Solicitudes"
               value={data?.total ?? 0}
@@ -68,6 +71,25 @@ export default function VolunteersRequestPage() {
             <KPICard label="Estado" value={status || "Todos"} tone="gold" />
           </div>
         </div>
+
+        <button
+          onClick={() => downloadPDF.mutate()}
+          disabled={downloadPDF.isPending}
+          className="mt-6 md:mt-0 mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        >
+          {downloadPDF.isPending ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Generando PDF...
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4" />
+              Descargar PDF
+            </>
+          )}
+        </button>
+
 
         {/* Tabla de Solicitudes */}
         <VolunteerRequestsTable
