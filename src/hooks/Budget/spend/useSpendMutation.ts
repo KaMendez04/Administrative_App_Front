@@ -15,6 +15,8 @@ import {
   createSpendType,
 } from "../../../services/Budget/SpendService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ensureSpendSubTypeFromProjection } from "../../../services/Budget/SpendService";
+
 
 // Mantiene el contrato: { mutate, loading, error }
 function wrapMutation<TPayload, TResult>(
@@ -72,4 +74,12 @@ export function useCreateSpendEntry() {
     mutationFn: (payload: CreateSpendDTO) => createSpend(payload),
   });
   return wrapMutation<CreateSpendDTO, Spend>(m);
+}
+
+
+export function useEnsureSpendSubTypeFromProjection() {
+  const m = useMutation({
+    mutationFn: (pSpendSubTypeId: number) => ensureSpendSubTypeFromProjection(pSpendSubTypeId),
+  });
+  return wrapMutation<number, any>(m);
 }

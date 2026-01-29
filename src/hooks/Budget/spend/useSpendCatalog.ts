@@ -1,6 +1,8 @@
 import type { Department, SpendSubType, SpendType } from "../../../models/Budget/SpendType";
 import { listDepartments, listSpendSubTypes, listSpendTypes } from "../../../services/Budget/SpendService";
 import { useQuery } from "@tanstack/react-query";
+import type { PSpendSubType, PSpendType } from "../../../models/Budget/SpendType";
+import { listPSpendSubTypes, listPSpendTypes } from "../../../services/Budget/SpendService";
 
 // Mantiene el contrato: { data, loading, error }
 function adaptQuery<T>(q: { data?: T; isPending: boolean; error: unknown }) {
@@ -52,4 +54,39 @@ export function useSpendSubTypes(spendTypeId?: number) {
     staleTime: 5 * 60 * 1000,
   });
   return adaptQuery<SpendSubType[]>(q);
+}
+
+
+
+export function usePSpendTypes(departmentId?: number, fiscalYearId?: number) {
+  const q = useQuery({
+    queryKey: ["pSpendTypes", departmentId ?? "none", fiscalYearId ?? "none"],
+    queryFn: async () => {
+      if (!departmentId) return [] as PSpendType[];
+      const res = await listPSpendTypes(departmentId, fiscalYearId);
+      return res.data as PSpendType[];
+    },
+    enabled: !!departmentId,
+    staleTime: 5 * 60 * 1000,
+  });
+  return adaptQuery<PSpendType[]>(q);
+}
+
+export function usePSpendSubTypes(args?: { departmentId?: number; typeId?: number; fiscalYearId?: number }) {
+  const typeId = args?.typeId;
+  const q = useQuery({
+    queryKey: ["pSpendSubTypes", typeId ?? "none", args?.departmentId ?? "none", args?.fiscalYearId ?? "none"],
+    queryFn: async () => {
+      if (!typeId) return [] as PSpendSubType[];
+      const res = await listPSpendSubTypes({
+        departmentId: args?.departmentId,
+        typeId,
+        fiscalYearId: args?.fiscalYearId,
+      });
+      return res.data as PSpendSubType[];
+    },
+    enabled: !!typeId,
+    staleTime: 5 * 60 * 1000,
+  });
+  return adaptQuery<PSpendSubType[]>(q);
 }

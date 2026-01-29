@@ -5,6 +5,8 @@ import type {
   CreateSpendSubTypeDTO,
   CreateSpendTypeDTO,
   Department,
+  PSpendSubType,
+  PSpendType,
   Spend,
   SpendSubType,
   SpendType,
@@ -92,3 +94,60 @@ export async function createSpend(payload: CreateSpendDTO): Promise<Spend> {
     },
   };
 }
+
+
+/** ============= Proyección (pSpend) ============= */
+export async function listPSpendTypes(
+  departmentId: number,
+  fiscalYearId?: number
+): Promise<ApiList<PSpendType>> {
+  const { data } = await apiConfig.get<any[]>("/p-spend-type", {
+    params: { departmentId, fiscalYearId },
+  });
+
+  const items: PSpendType[] = (data ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    departmentId: t?.department?.id ?? departmentId,
+  }));
+
+  return { data: items };
+}
+
+export async function listPSpendSubTypes(params: {
+  departmentId?: number;
+  typeId: number; // pSpendTypeId
+  fiscalYearId?: number;
+}): Promise<ApiList<PSpendSubType>> {
+  const { data } = await apiConfig.get<any[]>("/p-spend-sub-type", {
+    params,
+  });
+
+  const items: PSpendSubType[] = (data ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+    typeId: s?.type?.id ?? params.typeId,
+  }));
+
+  return { data: items };
+}
+
+/** ============= Ensure real desde proyección ============= */
+export async function ensureSpendTypeFromProjection(pSpendTypeId: number) {
+  const { data } = await apiConfig.post("/spend-type/from-projection", {
+    pSpendTypeId,
+  });
+  return data; // SpendType real
+}
+
+export async function ensureSpendSubTypeFromProjection(pSpendSubTypeId: number) {
+  const { data } = await apiConfig.post("/spend-sub-type/from-projection", {
+    pSpendSubTypeId,
+  });
+  return data; // SpendSubType real
+}
+
+
+
+
+

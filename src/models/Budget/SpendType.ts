@@ -48,3 +48,17 @@ export type ApiList<T> = {
   data: T[];
   total?: number;
 };
+
+
+export type PSpendType = {
+  id: number;
+  name: string;
+  departmentId?: number;
+};
+
+export type PSpendSubType = {
+  id: number;
+  name: string;
+  typeId: number; // pSpendTypeId
+};
+
