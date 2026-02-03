@@ -2,9 +2,12 @@ import React from "react"
 import { Calendar, Coins, ArrowRightLeft, Plus, X } from "lucide-react"
 import { useForm } from "@tanstack/react-form"
 import { AssignExtraordinarySchema } from "../../../schemas/extraordinarySchema"
-import { useAssignExtraordinary, useDepartmentsE, useExtraordinaryList,} from "../../../hooks/Budget/extraordinary/useExtraordinary"
+import {
+  useAssignExtraordinary,
+  useDepartmentsE,
+  useExtraordinaryList,
+} from "../../../hooks/Budget/extraordinary/useExtraordinary"
 import { CustomSelect } from "../../CustomSelect"
-
 
 type Props = {
   className?: string
@@ -41,9 +44,18 @@ export default function AssignExtraordinaryCard({
       const parsed = AssignExtraordinarySchema.safeParse(value)
       if (!parsed.success) return
 
-      // Validar saldo vs monto SOLO al submit
+      // ✅ FIX (estrictamente necesario): recalcular saldo del extraordinario seleccionado dentro del submit
       const amountNumber = Number(String(parsed.data.amount).replace(",", "."))
-      if (Number.isFinite(amountNumber) && amountNumber > remaining) {
+      const selectedExtra = extras.find((e) => e.id === parsed.data.extraordinaryId)
+      const remainingNow = selectedExtra
+        ? Math.max(0, Number(selectedExtra.amount) - Number(selectedExtra.used))
+        : 0
+
+      if (
+        parsed.data.extraordinaryId > 0 &&
+        Number.isFinite(amountNumber) &&
+        amountNumber > remainingNow
+      ) {
         setSaldoInsuficiente(true)
         return
       }
@@ -69,7 +81,7 @@ export default function AssignExtraordinaryCard({
   const Form = form
   const loading = loadingExtras || loadingDepts || assigning
 
-  // saldo disponible del extraordinario seleccionado
+  // saldo disponible del extraordinario seleccionado (para mostrar en UI)
   const remaining = (() => {
     const x = extras.find((e) => e.id === Form.state.values.extraordinaryId)
     if (!x) return 0
@@ -78,7 +90,6 @@ export default function AssignExtraordinaryCard({
     return Math.max(0, amt - used)
   })()
 
-  
   const extraordinaryOptions = React.useMemo(() => {
     return [
       { value: 0, label: "Seleccione…" },
@@ -148,7 +159,6 @@ export default function AssignExtraordinaryCard({
                   Movimiento Extraordinario
                 </label>
 
-                {/* CAMBIO: <select> -> <CustomSelect> */}
                 <CustomSelect
                   value={field.state.value}
                   onChange={(v) => {
@@ -158,7 +168,7 @@ export default function AssignExtraordinaryCard({
                   options={extraordinaryOptions}
                   placeholder="Seleccione…"
                   disabled={loading}
-                  zIndex={30} // para que este dropdown quede por encima
+                  zIndex={30}
                 />
 
                 <p className="mt-1 text-xs text-gray-500">
@@ -220,7 +230,9 @@ export default function AssignExtraordinaryCard({
                 )}
 
                 {saldoInsuficiente && (
-                  <p className="mt-1 text-xs text-red-600">Saldo insuficiente, por favor ingrese un monto válido</p>
+                  <p className="mt-1 text-xs text-red-600">
+                    Saldo insuficiente, por favor ingrese un monto válido
+                  </p>
                 )}
               </div>
             )}
@@ -240,14 +252,13 @@ export default function AssignExtraordinaryCard({
                   Departamento
                 </label>
 
-                {/* CAMBIO: <select> -> <CustomSelect> */}
                 <CustomSelect
                   value={field.state.value}
                   onChange={(v) => field.handleChange(v ? Number(v) : 0)}
                   options={departmentOptions}
                   placeholder="Seleccione…"
                   disabled={loading}
-                  zIndex={20} // por debajo del de extraordinario
+                  zIndex={20}
                 />
 
                 {field.state.meta.errors[0] && (

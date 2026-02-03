@@ -8,6 +8,9 @@ import {
   previewExtraReportPDF,
 } from "../../../services/Budget/reportsExtra/extraReportService"
 
+// ✅ solo llamamos lo que ya tenés
+import { usePagination, PaginationBar } from "../../../components/ui/pagination"
+
 const fmt = (n: number) =>
   new Intl.NumberFormat("es-CR", {
     style: "currency",
@@ -65,6 +68,13 @@ export default function ExtraReportPage() {
   const handleDownloadExcel = async () => {
     await excelMutation.mutateAsync(submitted)
   }
+
+  // ✅ Paginación (mínimo código aquí)
+  const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(
+    rows,
+    10,
+    [start, end, name, data]
+  )
 
   return (
     <div className="min-h-screen">
@@ -184,7 +194,7 @@ export default function ExtraReportPage() {
 
           {/* ===== Body ===== */}
           <div className="bg-white">
-            {(rows ?? []).map((r: any, i: number) => (
+            {pagedItems.map((r: any, i: number) => (
               <div
                 key={i}
                 className="
@@ -247,14 +257,25 @@ export default function ExtraReportPage() {
               </div>
             )}
 
-            {(isLoading && !data) && (
+            {isLoading && !data && (
               <div className="py-10 text-center text-gray-400 font-medium">
                 Cargando...
               </div>
             )}
           </div>
-        </div>
 
+          {/* ✅ Paginación */}
+          {!isFetching && (rows ?? []).length > 0 && totalPages > 1 && (
+            <div className="bg-white px-4 py-4 border-t border-[#EAEFE0]">
+              <PaginationBar
+                page={page}
+                totalPages={totalPages}
+                pageItems={pageItems}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

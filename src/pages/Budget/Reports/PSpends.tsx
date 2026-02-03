@@ -3,14 +3,16 @@ import { useQuery } from "@tanstack/react-query"
 import { pSpendService } from "../../../services/Budget/reportsPSpend/pSpendReportService"
 import { CustomSelect } from "../../../components/CustomSelect"
 
+// ✅ solo llamamos lo que ya tenés
+import { usePagination, PaginationBar } from "../../../components/ui/pagination"
 
 type AnyObj = Record<string, unknown>
 function ensureArray<T = any>(x: unknown): T[] {
   if (Array.isArray(x)) return x as T[]
   if (x && typeof x === "object") {
     const o = x as AnyObj
-    if (Array.isArray(o.data)) return o.data as T[]
-    if (Array.isArray(o.items)) return o.items as T[]
+    if (Array.isArray((o as any).data)) return (o as any).data as T[]
+    if (Array.isArray((o as any).items)) return (o as any).items as T[]
     const vals = Object.values(o)
     if (vals.length && vals.every((v) => v && typeof v === "object"))
       return vals as T[]
@@ -83,7 +85,6 @@ export default function PSpendProjectionsPage() {
     name: st.name ?? st.spendSubTypeName,
   }))
 
-  
   useEffect(() => {
     setSpendTypeId(undefined)
     setSpendSubTypeId(undefined)
@@ -93,7 +94,6 @@ export default function PSpendProjectionsPage() {
     setSpendSubTypeId(undefined)
   }, [spendTypeId])
 
-  
   const { data: reportData, isFetching: reportLoading } = useQuery({
     queryKey: ["pSpendCompareReport", submitted],
     queryFn: () => pSpendService.getSpendReport(submitted),
@@ -111,7 +111,7 @@ export default function PSpendProjectionsPage() {
   const handleExcelComparativo = () =>
     pSpendService.downloadSpendCompareExcel(filters)
 
-  //  options para CustomSelect 
+  //  options para CustomSelect
   const departmentOptions = [
     { value: "", label: depsLoading ? "Cargando..." : "Todos" },
     ...departments.map((d: any) => ({
@@ -143,6 +143,13 @@ export default function PSpendProjectionsPage() {
     },
     ...spendSubTypes.map((st) => ({ value: st.id, label: st.name })),
   ]
+
+  // ✅ Paginación (mínimo código aquí)
+  const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(
+    rows,
+    10,
+    [start, end, departmentId, spendTypeId, spendSubTypeId, reportData]
+  )
 
   return (
     <div className="min-h-screen">
@@ -218,9 +225,7 @@ export default function PSpendProjectionsPage() {
                     setSpendSubTypeId(undefined)
                   }}
                   options={typeOptions}
-                  placeholder={
-                    !departmentId ? "Seleccione un departamento" : "Todos"
-                  }
+                  placeholder={!departmentId ? "Seleccione un departamento" : "Todos"}
                   disabled={!departmentId}
                   zIndex={40}
                 />
@@ -323,7 +328,7 @@ export default function PSpendProjectionsPage() {
 
             {/* ===== Body ===== */}
             <div className="bg-white">
-              {rows.map((r: any, i: number) => (
+              {pagedItems.map((r: any, i: number) => (
                 <div
                   key={i}
                   className="
@@ -391,6 +396,18 @@ export default function PSpendProjectionsPage() {
                 </div>
               )}
             </div>
+
+            {/* ✅ Paginación */}
+            {!reportLoading && rows.length > 0 && totalPages > 1 && (
+              <div className="bg-white px-4 py-4 border-t border-[#EAEFE0]">
+                <PaginationBar
+                  page={page}
+                  totalPages={totalPages}
+                  pageItems={pageItems}
+                  onPageChange={setPage}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
