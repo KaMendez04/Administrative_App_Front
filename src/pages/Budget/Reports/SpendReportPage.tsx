@@ -9,6 +9,9 @@ import {
 
 import { CustomSelect } from "../../../components/CustomSelect"
 
+// ✅ solo llamamos el componente/hook que ya tenés
+import { usePagination, PaginationBar } from "../../../components/ui/pagination"
+
 const crc = (n: number) =>
   new Intl.NumberFormat("es-CR", {
     style: "currency",
@@ -63,7 +66,6 @@ export default function SpendReportPage() {
     setSpendSubTypeName(undefined)
   }, [spendTypeName])
 
-
   const departmentOptions = useMemo(() => {
     const depts = uniqSorted(rows.map((r: any) => String(r.department ?? "")))
     return [
@@ -98,8 +100,9 @@ export default function SpendReportPage() {
       return deptOk && typeOk
     })
 
-  
-    const subs = uniqSorted(filtered.map((r: any) => String(r.spendSubType ?? "")))
+    const subs = uniqSorted(
+      filtered.map((r: any) => String(r.spendSubType ?? ""))
+    )
 
     return [
       { value: "", label: "Todos" },
@@ -107,19 +110,16 @@ export default function SpendReportPage() {
     ]
   }, [rows, departmentName, spendTypeName])
 
-  
   const filteredRows = useMemo(() => {
     return rows.filter((r: any) => {
       const deptOk = departmentName
         ? String(r.department ?? "") === departmentName
         : true
 
-      //  CAMBIO: spendType (no type)
       const typeOk = spendTypeName
         ? String(r.spendType ?? "") === spendTypeName
         : true
 
-      // CAMBIO: spendSubType (no subType)
       const subOk = spendSubTypeName
         ? String(r.spendSubType ?? "") === spendSubTypeName
         : true
@@ -148,6 +148,13 @@ export default function SpendReportPage() {
   const handleDownloadExcel = async () => {
     await excelMutation.mutateAsync(submitted)
   }
+
+  // ✅ Paginación (mínimo código aquí: todo vive en ui/pagination)
+  const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(
+    filteredRows,
+    10,
+    [start, end, departmentName, spendTypeName, spendSubTypeName, rows]
+  )
 
   return (
     <div className="min-h-screen">
@@ -324,7 +331,7 @@ export default function SpendReportPage() {
 
           {/* Body */}
           <div className="bg-white">
-            {filteredRows.map((r: any, i: number) => (
+            {pagedItems.map((r: any, i: number) => (
               <div
                 key={i}
                 className="
@@ -399,6 +406,18 @@ export default function SpendReportPage() {
               </div>
             )}
           </div>
+
+          {/* ✅ Paginación (misma dinámica que antes) */}
+          {!isLoading && filteredRows.length > 0 && totalPages > 1 && (
+            <div className="bg-white px-4 py-4 border-t border-[#EAEFE0]">
+              <PaginationBar
+                page={page}
+                totalPages={totalPages}
+                pageItems={pageItems}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

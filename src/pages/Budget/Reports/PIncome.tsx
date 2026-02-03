@@ -17,6 +17,9 @@ import {
 
 import { CustomSelect } from "../../../components/CustomSelect"
 
+// ✅ solo llamamos lo que ya tenés
+import { usePagination, PaginationBar } from "../../../components/ui/pagination"
+
 type AnyObj = Record<string, unknown>
 function ensureArray<T = any>(x: unknown): T[] {
   if (Array.isArray(x)) return x as T[]
@@ -66,7 +69,6 @@ export default function PIncomeProjectionsPage() {
     })
   }, [start, end, departmentId, incomeTypeId, incomeSubTypeId])
 
-  
   const { data: departmentsData = [] } = useQuery({
     queryKey: ["pIncomeDepartments"],
     queryFn: listDepartments,
@@ -75,7 +77,6 @@ export default function PIncomeProjectionsPage() {
   })
   const departments = ensureArray<any>(departmentsData)
 
-  
   const { data: incomeTypesData = [], isFetching: typesLoading } = useQuery({
     queryKey: ["pIncomeTypes", departmentId ?? null],
     queryFn: () => listPIncomeTypes(departmentId),
@@ -84,12 +85,11 @@ export default function PIncomeProjectionsPage() {
   })
   const incomeTypes = ensureArray<any>(incomeTypesData)
 
-
   const { data: incomeSubTypesData = [], isFetching: subTypesLoading } = useQuery(
     {
       queryKey: ["pIncomeSubTypes", incomeTypeId ?? null],
       queryFn: () => listPIncomeSubTypes(Number(incomeTypeId)),
-      enabled: !!incomeTypeId, 
+      enabled: !!incomeTypeId,
       refetchOnMount: "always",
       staleTime: 0,
     }
@@ -111,7 +111,6 @@ export default function PIncomeProjectionsPage() {
   const handleDownloadPDF = () => downloadIncomeReportPDF(filters)
   const handleExcelComparativo = () => downloadIncomeCompareExcel(filters)
 
-  
   const departmentOptions = [
     { value: "", label: "Todos" },
     ...departments.map((d: any) => ({ value: d.id, label: d.name })),
@@ -120,7 +119,11 @@ export default function PIncomeProjectionsPage() {
   const typeOptions = [
     {
       value: "",
-      label: !departmentId ? "Seleccione un departamento" : typesLoading ? "Cargando..." : "Todos",
+      label: !departmentId
+        ? "Seleccione un departamento"
+        : typesLoading
+          ? "Cargando..."
+          : "Todos",
     },
     ...incomeTypes.map((t: any) => ({ value: t.id, label: t.name })),
   ]
@@ -128,10 +131,21 @@ export default function PIncomeProjectionsPage() {
   const subTypeOptions = [
     {
       value: "",
-      label: !incomeTypeId ? "Seleccione un tipo" : subTypesLoading ? "Cargando..." : "Todos",
+      label: !incomeTypeId
+        ? "Seleccione un tipo"
+        : subTypesLoading
+          ? "Cargando..."
+          : "Todos",
     },
     ...incomeSubTypes.map((st: any) => ({ value: st.id, label: st.name })),
   ]
+
+  // ✅ Paginación (mínimo código aquí)
+  const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(
+    rows,
+    10,
+    [start, end, departmentId, incomeTypeId, incomeSubTypeId, reportQuery.data]
+  )
 
   return (
     <div className="min-h-screen">
@@ -290,23 +304,23 @@ export default function PIncomeProjectionsPage() {
           </div>
 
           {/* Tabla */}
-      <div className="rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
-        {/* ===== Header (solo desktop) ===== */}
-        <div className="hidden md:block bg-[#EAEFE0] px-4 py-3">
-          <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-4 text-sm font-bold text-[#33361D]">
-            <div>Subtipo</div>
-            <div className="text-right">Real</div>
-            <div className="text-right">Proyectado</div>
-            <div className="text-right">Diferencia</div>
-          </div>
-        </div>
+          <div className="rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
+            {/* ===== Header (solo desktop) ===== */}
+            <div className="hidden md:block bg-[#EAEFE0] px-4 py-3">
+              <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-4 text-sm font-bold text-[#33361D]">
+                <div>Subtipo</div>
+                <div className="text-right">Real</div>
+                <div className="text-right">Proyectado</div>
+                <div className="text-right">Diferencia</div>
+              </div>
+            </div>
 
-        {/* ===== Body ===== */}
-        <div className="bg-white">
-          {rows.map((r: any, i: number) => (
-            <div
-              key={i}
-              className="
+            {/* ===== Body ===== */}
+            <div className="bg-white">
+              {pagedItems.map((r: any, i: number) => (
+                <div
+                  key={i}
+                  className="
                 border-b border-[#EAEFE0]
                 px-4 py-3
                 text-sm text-[#33361D]
@@ -318,60 +332,72 @@ export default function PIncomeProjectionsPage() {
                 md:grid-cols-[1fr_1fr_1fr_1fr]
                 md:gap-4
               "
-            >
-              {/* Subtipo */}
-              <div>
-                <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                  Subtipo
-                </span>
-                <span className="font-medium">{r.name}</span>
-              </div>
+                >
+                  {/* Subtipo */}
+                  <div>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Subtipo
+                    </span>
+                    <span className="font-medium">{r.name}</span>
+                  </div>
 
-              {/* Real */}
-              <div className="md:text-right">
-                <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                  Real
-                </span>
-                <span className="tabular-nums whitespace-nowrap">
-                  {crc(r.real)}
-                </span>
-              </div>
+                  {/* Real */}
+                  <div className="md:text-right">
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Real
+                    </span>
+                    <span className="tabular-nums whitespace-nowrap">
+                      {crc(r.real)}
+                    </span>
+                  </div>
 
-              {/* Proyectado */}
-              <div className="md:text-right">
-                <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                  Proyectado
-                </span>
-                <span className="font-medium text-[#5B732E] tabular-nums whitespace-nowrap">
-                  {crc(r.projected)}
-                </span>
-              </div>
+                  {/* Proyectado */}
+                  <div className="md:text-right">
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Proyectado
+                    </span>
+                    <span className="font-medium text-[#5B732E] tabular-nums whitespace-nowrap">
+                      {crc(r.projected)}
+                    </span>
+                  </div>
 
-              {/* Diferencia */}
-              <div className="md:text-right">
-                <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                  Diferencia
-                </span>
-                <span className="font-bold text-[#C19A3D] tabular-nums whitespace-nowrap">
-                  {crc(r.difference)}
-                </span>
-              </div>
+                  {/* Diferencia */}
+                  <div className="md:text-right">
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
+                      Diferencia
+                    </span>
+                    <span className="font-bold text-[#C19A3D] tabular-nums whitespace-nowrap">
+                      {crc(r.difference)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {rows.length === 0 && !reportQuery.isLoading && (
+                <div className="py-10 text-center text-gray-400 font-medium">
+                  Sin resultados
+                </div>
+              )}
+
+              {reportQuery.isLoading && (
+                <div className="py-10 text-center text-gray-400 font-medium">
+                  Cargando...
+                </div>
+              )}
             </div>
-          ))}
 
-          {rows.length === 0 && !reportQuery.isLoading && (
-            <div className="py-10 text-center text-gray-400 font-medium">
-              Sin resultados
-            </div>
-          )}
-
-          {reportQuery.isLoading && (
-            <div className="py-10 text-center text-gray-400 font-medium">
-              Cargando...
-            </div>
-          )}
-        </div>
-      </div>
+            {/* ✅ Paginación */}
+            {!reportQuery.isLoading && rows.length > 0 && totalPages > 1 && (
+              <div className="bg-white px-4 py-4 border-t border-[#EAEFE0]">
+                <PaginationBar
+                  page={page}
+                  totalPages={totalPages}
+                  pageItems={pageItems}
+                  onPageChange={setPage}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
