@@ -8,16 +8,16 @@ import { getCurrentUser } from "../../services/auth";
 import { AssociatesTable, type AssociateRow } from "../../components/associates/associatesTable";
 import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";
-import { ActionButtons } from "../../components/ActionButtons";
 import { useDownloadAssociatesPDF } from "../../hooks/associates/useDownloadAssociatesPDF";
 import { Download } from "lucide-react";
+import { getPageItems, PaginationBar } from "@/components/ui/pagination";
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
 export default function AssociatesApprovedPage() {
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>("ACTIVO");
-  const limit = 20;
+  const limit = 10;
   const downloadPDF = useDownloadAssociatesPDF();
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
@@ -127,21 +127,12 @@ export default function AssociatesApprovedPage() {
         {/* Paginación con ActionButtons */}
         {!isLoading && (
           <div className="flex justify-between items-center mt-6">
-            <span className="text-sm text-[#556B2F] font-medium">
-              {data?.total ?? 0} resultados — página {data?.page ?? 1} de{" "}
-              {data?.pages ?? 1}
-            </span>
-            
-            <ActionButtons
-              showPrevious
-              showNext
-              showText
-              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-              onNext={() => setPage((p) => p + 1)}
-              disablePrevious={page <= 1}
-              disableNext={(data?.pages ?? 1) <= page}
-              previousText="Anterior"
-              nextText="Siguiente"
+           <PaginationBar
+              page={page}
+              totalPages={data?.pages ?? 1}
+              pageItems={getPageItems(page, data?.pages ?? 1)}
+              onPageChange={(p) => setPage(p)}
+              className="justify-center"
             />
           </div>
         )}
