@@ -11,7 +11,7 @@ interface VolunteerRequestsTableProps {
   isLoading: boolean;
   isReadOnly: boolean;
   onView: (id: number) => void;
-  onApprove: (id: number) => void | Promise<void>;
+  onApprove: (solicitud: SolicitudVoluntariadoListItem) => void | Promise<void>;
   onReject: (id: number) => void;
   approvingId: number | null;
 }
@@ -143,24 +143,20 @@ export function VolunteerRequestsTable({
         header: () => <div className="text-center">Acciones</div>,
         size: 150,
         cell: (info) => {
-          const isPending = info.row.original.estado === "PENDIENTE";
-          const solicitudId = info.row.original.idSolicitudVoluntariado;
+          const estado = info.row.original.estado;
+          const solicitud = info.row.original;
+          const solicitudId = solicitud.idSolicitudVoluntariado;
           const isThisApproving = approvingId === solicitudId;
+
+          const canApprove = (estado === "PENDIENTE" || estado === "RECHAZADO") && !isReadOnly;
+          const canReject = (estado === "PENDIENTE") && !isReadOnly; // ✅ SOLO pendientes
 
           return (
             <ActionButtons
               onView={() => onView(solicitudId)}
-              onApprove={
-                isPending && !isReadOnly
-                  ? () => onApprove(solicitudId)
-                  : undefined
-              }
-              onReject={
-                isPending && !isReadOnly
-                  ? () => onReject(solicitudId)
-                  : undefined
-              }
-              showApproveReject={isPending && !isReadOnly}
+              onApprove={canApprove ? () => onApprove(solicitud) : undefined}
+              onReject={canReject ? () => onReject(solicitudId) : undefined} // ✅ RECHAZADO => undefined
+              showApproveReject={canApprove || canReject}
               isApproving={isThisApproving}
               isReadOnly={isReadOnly}
             />

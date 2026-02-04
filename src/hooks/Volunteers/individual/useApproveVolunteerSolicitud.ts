@@ -6,27 +6,23 @@ export function useApproveVolunteerSolicitud() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => approveVolunteerSolicitud(id),
-    onSuccess: (_data, id) => {
-      // Invalidar listas
+    mutationFn: ({ id, motivo }: { id: number; motivo?: string }) =>
+      approveVolunteerSolicitud(id, motivo),
+
+    onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["volunteer-solicitudes"] });
 
-      // Actualizar el detalle en caché sin recargar
-      qc.setQueryData(["volunteer-solicitud-detail", id], (old: any) => {
+      qc.setQueryData(["volunteer-solicitud-detail", vars.id], (old: any) => {
         if (!old) return old;
         return {
           ...old,
           estado: "APROBADO",
           fechaResolucion: new Date().toISOString(),
+          ...(vars.motivo !== undefined ? { motivo: vars.motivo } : {}),
         };
       });
 
       toast.success("Solicitud de voluntariado aprobada correctamente");
-    },
-    onError: (error: any) => {
-      toast.error(
-        error?.message || "Error al aprobar la solicitud de voluntariado"
-      );
     },
   });
 }

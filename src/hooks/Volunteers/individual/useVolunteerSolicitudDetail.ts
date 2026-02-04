@@ -8,7 +8,7 @@ export function useVolunteerSolicitudDetail(id: number | null) {
       if (!id) throw new Error("ID es requerido");
       return getVolunteerSolicitud(id);
     },
-    enabled: !!id,
+    enabled: typeof id === "number" && id > 0,
     staleTime: 300_000, // 5 minutos
     retry: 1,
   });

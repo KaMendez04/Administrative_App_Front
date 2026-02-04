@@ -94,22 +94,24 @@ export const showErrorAlertRegister = (message: string) => {
   });
 };
 
-// 🔔 confirmación genérica
+// confirmación genérica
 export const showConfirmAlert = async (title: string, text: string) => {
   const result = await Swal.fire({
     title,
     text,
     icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: "#708C3E", // verde de tu paleta
-    cancelButtonColor: "#d33",     // rojo suave
-    confirmButtonText: "Sí, cancelar",
-    cancelButtonText: "No, continuar",
+    confirmButtonColor: "#708C3E",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Sí, continuar",
+    cancelButtonText: "Cancelar",
     reverseButtons: false,
     background: "#FAF9F5",
   });
+
   return result.isConfirmed;
 };
+
 
 // confirmación genérica
 export const showConfirmDeleteAlert = async (title: string, text: string) => {
@@ -118,13 +120,33 @@ export const showConfirmDeleteAlert = async (title: string, text: string) => {
     text,
     icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: "#708C3E", // verde de tu paleta
-    cancelButtonColor: "#d33",     // rojo suave
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#708C3E",
     confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "No, continuar",
+    cancelButtonText: "Cancelar",
     reverseButtons: false,
     background: "#FAF9F5",
   });
+
+  return result.isConfirmed;
+};
+
+
+// Confirmar aprobación de solicitud previamente rechazada
+export const showConfirmApproveRejectedAlert = async () => {
+  const result = await Swal.fire({
+    title: "Aprobar solicitud rechazada",
+    text: "¿Estás seguro de querer aprobar a este solicitante que había sido rechazado?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#708C3E",
+    cancelButtonColor: "#8C3A33",
+    confirmButtonText: "Sí, aprobar",
+    cancelButtonText: "Cancelar",
+    background: "#FAF9F5",
+    customClass: { confirmButton: "no-border-button" },
+  });
+
   return result.isConfirmed;
 };
 
@@ -135,15 +157,17 @@ export const showConfirmOutAlert = async (title: string, text: string) => {
     text,
     icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: "#708C3E", // verde de tu paleta
-    cancelButtonColor: "#d33",     // rojo suave
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#708C3E",
     confirmButtonText: "Sí, salir",
-    cancelButtonText: "No, continuar",
+    cancelButtonText: "Cancelar",
     reverseButtons: false,
     background: "#FAF9F5",
   });
+
   return result.isConfirmed;
 };
+
 
 export const showSuccessAlert = (message: string) => {
   return Swal.fire({

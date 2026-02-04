@@ -10,9 +10,9 @@ import { UnifiedVolunteersTable, type UnifiedVolunteerRow } from "../../componen
 import { useVolunteerApprovedDetail } from "../../hooks/Volunteers/individual/useVolunteerApprovedDetail";
 import { EditOrganizationModal } from "../../components/volunteers/organizations/EditOrganizationModal";
 import { EditVolunteerIndividualModal } from "../../components/volunteers/EditVolunteerIndividualModal";
-import { ActionButtons } from "../../components/ActionButtons";
 import { Download } from "lucide-react";
 import { useDownloadListadoVoluntariosPDF } from "@/hooks/Volunteers/useVoluntariosPdf";
+import { getPageItems, PaginationBar } from "@/components/ui/pagination";
 
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
@@ -22,7 +22,7 @@ export default function VolunteersApprovedPage() {
   const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>("ACTIVO");
   const [editId, setEditId] = useState<{ id: number; tipo: "INDIVIDUAL" | "ORGANIZACION" } | null>(null);
   const [viewId, setViewId] = useState<{ id: number; tipo: "INDIVIDUAL" | "ORGANIZACION" } | null>(null);
-  const limit = 20;
+  const limit = 10;
   const downloadListadoPDF = useDownloadListadoVoluntariosPDF();
 
 
@@ -184,23 +184,15 @@ export default function VolunteersApprovedPage() {
           onEdit={(id, tipo) => setEditId({ id, tipo })}
         />
 
-        {/* Paginación con ActionButtons */}
+        {/* Paginación */}
         {!isLoading && (
-          <div className="flex justify-between items-center mt-6">
-            <span className="text-sm text-[#556B2F] font-medium">
-              {unifiedData.length} resultados — página {page} de {totalPages || 1}
-            </span>
-            
-            <ActionButtons
-              showPrevious
-              showNext
-              showText
-              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-              onNext={() => setPage((p) => p + 1)}
-              disablePrevious={page <= 1}
-              disableNext={totalPages <= page}
-              previousText="Anterior"
-              nextText="Siguiente"
+          <div className="flex flex-col gap-3 mt-6">
+            <PaginationBar
+              page={page}
+              totalPages={totalPages || 1}
+              pageItems={getPageItems(page, totalPages || 1)}
+              onPageChange={(p) => setPage(p)}
+              className="justify-center"
             />
           </div>
         )}
