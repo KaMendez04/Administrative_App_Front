@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import RootLayout from './RootLayout'
-
+import CloudinaryMediaPage from "../pages/Cloudinary/CloudinaryMediaPage";
 import Home from './Home'
 import PrincipalEdition from '../pages/editionPage/PrincipalEdition'
 import AboutUsEdition from '../pages/editionPage/AboutUsEdition'
@@ -396,6 +396,14 @@ const notFoundRoute = new NotFoundRoute({
   component: RedirectHome,
 })
 
+//Cloudinary 
+const cloudinaryMediaRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/media",
+  beforeLoad: () => requireRole("ADMIN"),
+  component: CloudinaryMediaPage,
+});
+
 // Ensamblar árbol de rutas
 const routeTree = rootRoute.addChildren([
   // Ramas SIN layout
@@ -443,7 +451,7 @@ const routeTree = rootRoute.addChildren([
       volunteersRequestsRoute,
       volunteersApprovedRoute,
       volunteersIndexRoute,
-
+      cloudinaryMediaRoute,
     ]),
 
     staffManagement,

@@ -1,4 +1,4 @@
-import { Book, Briefcase, DollarSign, FileText, Home, User, Users  } from "lucide-react"
+import { Book, Briefcase, DollarSign, FileText, Home, User, Users, Image } from "lucide-react"
 import type { LucideIcon } from "lucide-react" 
 
 export type SidebarItem = {
@@ -10,7 +10,7 @@ export type SidebarItem = {
 export const sidebarItems: SidebarItem[] = [
   {
     title: "Inicio",
-    href: "/",
+    href: "/Principal",
     icon: Home,
   },
   {
@@ -37,6 +37,11 @@ export const sidebarItems: SidebarItem[] = [
     title: "Personal",
     href: "/staff",
     icon: User,
+  },
+  {
+    title: "Media",
+    href: "/media/cloudinary/upload",
+    icon: Image,
   },
   {
     title: "Manuales",

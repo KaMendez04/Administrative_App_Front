@@ -35,9 +35,14 @@ apiConfig.interceptors.request.use(
     const token = getToken();
     config.headers = config.headers ?? {};
     if (token) (config.headers as any).Authorization = `Bearer ${token}`;
-    if (!(config.headers as any)['Content-Type']) {
-      (config.headers as any)['Content-Type'] = 'application/json';
+
+    const isFormData =
+      typeof FormData !== "undefined" && config.data instanceof FormData;
+
+    if (!isFormData && !(config.headers as any)["Content-Type"]) {
+      (config.headers as any)["Content-Type"] = "application/json";
     }
+
 
     const fyId = localStorage.getItem('cg_currentFYId');
     if (fyId) {

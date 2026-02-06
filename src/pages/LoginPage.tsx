@@ -47,7 +47,7 @@ export default function LoginPage() {
           </div>
            <div className="fixed bottom-6 right-6">
         <button
-          onClick={() => window.history.back()}
+          onClick={() => { window.location.href = "https://cgh-informative.vercel.app/"}}
           className="flex items-center gap-2 bg-[#7A8B3D] hover:bg-[#6B7A2E] text-white font-medium px-5 py-2.5 rounded-lg shadow-lg transition-colors duration-200"
         >
          
