@@ -60,12 +60,14 @@ export async function getVolunteerSolicitud(
 
 // ✅ Aprobar solicitud - SIN validación Zod
 export async function approveVolunteerSolicitud(
-  id: number
+  id: number,
+  motivo?:string
 ): Promise<SolicitudVoluntariado> {
   const response = await apiConfig.patch(
     `/solicitud-voluntariado/${id}/status`,
     {
       estado: "APROBADO",
+      ...(motivo !== undefined ? { motivo } : {}),
     }
   );
   // ✅ Retornar sin validar

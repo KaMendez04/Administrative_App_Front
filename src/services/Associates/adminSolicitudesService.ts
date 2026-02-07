@@ -57,9 +57,10 @@ export async function getSolicitudComplete(id: number): Promise<Solicitud> {
 }
 
 // ✅ Aprobar solicitud
-export async function approveSolicitud(id: number): Promise<any> {
+export async function approveSolicitud(id: number, motivo?: string): Promise<any> {
   const response = await apiConfig.patch(`/solicitudes/${id}/status`, { 
-    estado: "APROBADO" 
+    estado: "APROBADO",
+    ...(motivo && { motivo })
   });
   return response.data;
 }

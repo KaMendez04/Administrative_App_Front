@@ -121,10 +121,10 @@ function PaginationEllipsis({
 }
 
 /* =====================================================================================
-   ✅ LÓGICA (para que las páginas tengan el mínimo código posible)
+    LÓGICA (para que las páginas tengan el mínimo código posible)
    ===================================================================================== */
 
-function getPageItems(current: number, total: number) {
+export function getPageItems(current: number, total: number) {
   if (total <= 7) {
     return Array.from({ length: total }, (_, i) => i + 1)
   }

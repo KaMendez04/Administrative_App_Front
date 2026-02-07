@@ -1,20 +1,20 @@
-// CustomSelect.tsx
-import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from "@headlessui/react";
-import { Check, ChevronDown } from "lucide-react";
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from "@headlessui/react"
+import { Check, ChevronDown } from "lucide-react"
 
 type Option = {
-  value: string | number;
-  label: string;
-};
+  value: string | number
+  label: string
+}
 
 type CustomSelectProps = {
-  value: string | number | "";
-  onChange: (value: string | number | "") => void;
-  options: Option[];
-  placeholder?: string;
-  disabled?: boolean;
-  zIndex?: number;
-};
+  value: string | number
+  onChange: (value: string | number) => void
+  options: Option[]
+  placeholder?: string
+  disabled?: boolean
+  zIndex?: number
+  buttonClassName?: string
+}
 
 export function CustomSelect({
   value,
@@ -23,35 +23,36 @@ export function CustomSelect({
   placeholder = "Selecciona una opción",
   disabled = false,
   zIndex = 10,
+  buttonClassName = "",
 }: CustomSelectProps) {
-  // Normalizamos para que no falle por "1" vs 1 y para soportar ""
-  const v = value === "" ? "" : String(value);
+  const selected = options.find((opt) => opt.value === value)
 
-  const selected = options.find((opt) => String(opt.value) === v);
+  const baseBtn =
+    "relative w-full cursor-pointer rounded-lg bg-white text-left border shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+
+  // ✅ defaults actuales tuyos (por si no mandás nada)
+  const defaultBtn =
+    "py-2.5 pl-4 pr-10 border-[#E6E1D6] hover:border-[#5B732E] focus:outline-none focus:ring-2 focus:ring-[#5B732E]/20 focus:border-[#5B732E]"
 
   return (
     <div className="relative">
-      <Listbox
-        value={v}
-        onChange={(val: string) => {
-          // si eligió placeholder (no debería venir desde options, pero por seguridad)
-          if (val === "") return onChange("");
-
-          // devolvemos el mismo tipo que en options si existe
-          const match = options.find((o) => String(o.value) === String(val));
-          onChange(match ? match.value : val);
-        }}
-        disabled={disabled}
-      >
+      <Listbox value={value} onChange={onChange} disabled={disabled}>
         {({ open }) => (
           <>
-            <ListboxButton className="relative w-full cursor-pointer rounded-xl bg-white py-3 pl-4 pr-10 text-left border border-[#E6E1D6] shadow-sm hover:border-[#5B732E] focus:outline-none focus:ring-2 focus:ring-[#5B732E]/20 focus:border-[#5B732E] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-              <span className={`block truncate text-sm ${!selected ? "text-gray-400" : "text-[#2E321B] font-medium"}`}>
+            <ListboxButton className={`${baseBtn} ${defaultBtn} ${buttonClassName}`}>
+              <span
+                className={`block truncate text-sm ${
+                  !selected ? "text-gray-400" : "text-[#2E321B] font-medium"
+                }`}
+              >
                 {selected ? selected.label : placeholder}
               </span>
+
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <ChevronDown
-                  className={`h-4 w-4 text-[#708C3E] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                  className={`h-4 w-4 text-[#708C3E] transition-transform duration-200 ${
+                    open ? "rotate-180" : ""
+                  }`}
                   aria-hidden="true"
                 />
               </span>
@@ -59,33 +60,35 @@ export function CustomSelect({
 
             <ListboxOptions
               modal={false}
-              className="absolute mt-2 w-full max-h-60 overflow-auto rounded-xl bg-white py-2 shadow-xl border border-[#E6E1D6] focus:outline-none"
+              className="absolute mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white py-2 shadow-xl border border-[#E6E1D6] focus:outline-none"
               style={{ zIndex }}
             >
-              {options.map((option) => {
-                const optVal = String(option.value);
-
-                return (
-                  <ListboxOption
-                    key={optVal}
-                    value={optVal}
-                    className="relative cursor-pointer select-none py-2.5 px-4 mx-2 rounded-lg transition-all duration-150 data-[focus]:bg-[#E6EDC8] text-[#2E321B] text-sm"
-                  >
-                    {({ selected }) => (
-                      <div className="flex items-center justify-between">
-                        <span className={`block truncate ${selected ? "font-semibold text-[#5B732E]" : "font-normal"}`}>
-                          {option.label}
-                        </span>
-                        {selected && <Check className="h-4 w-4 text-[#6F8C1F] flex-shrink-0 ml-3" aria-hidden="true" />}
-                      </div>
-                    )}
-                  </ListboxOption>
-                );
-              })}
+              {options.map((option) => (
+                <ListboxOption
+                  key={option.value}
+                  value={option.value}
+                  className="relative cursor-pointer select-none py-2.5 px-4 mx-2 rounded-lg transition-all duration-150 data-[focus]:bg-[#E6EDC8] text-[#2E321B] text-sm"
+                >
+                  {({ selected }) => (
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`block truncate ${
+                          selected ? "font-semibold text-[#5B732E]" : "font-normal"
+                        }`}
+                      >
+                        {option.label}
+                      </span>
+                      {selected && (
+                        <Check className="h-4 w-4 text-[#6F8C1F] flex-shrink-0 ml-3" aria-hidden="true" />
+                      )}
+                    </div>
+                  )}
+                </ListboxOption>
+              ))}
             </ListboxOptions>
           </>
         )}
       </Listbox>
     </div>
-  );
+  )
 }

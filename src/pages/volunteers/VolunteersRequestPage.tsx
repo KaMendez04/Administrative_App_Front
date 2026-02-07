@@ -9,9 +9,11 @@ import { VolunteerRequestsTable } from "../../components/volunteers/VolunteerReq
 import { VolunteerViewModal } from "../../components/volunteers/VolunteerViewModal";
 import { RejectDialog } from "../../components/associates/RejectDialog";
 import { StatusFilters } from "../../components/StatusFilters";
-import { ActionButtons } from "../../components/ActionButtons";
 import { useDownloadSolicitudesVoluntariadoPDF } from "@/hooks/Volunteers/useVoluntariosPdf";
 import { Download } from "lucide-react";
+import { ApproveRejectedDialog } from "@/components/volunteers/ApproveRejectedDialog";
+import { showConfirmApproveRejectedAlert } from "@/utils/alerts";
+import { getPageItems, PaginationBar } from "@/components/ui/pagination";
 
 export default function VolunteersRequestPage() {
   const [status, setStatus] = useState<
@@ -20,7 +22,7 @@ export default function VolunteersRequestPage() {
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const [approvingId, setApprovingId] = useState<number | null>(null);
-  const limit = 20;
+  const limit = 10;
   const downloadPDF = useDownloadSolicitudesVoluntariadoPDF();
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
@@ -36,11 +38,14 @@ export default function VolunteersRequestPage() {
 
   const approve = useApproveVolunteerSolicitud();
   const reject = useRejectVolunteerSolicitud();
-
+  const [approveRejected, setApproveRejected] = useState<{
+    id: number;
+    motivo?: string;
+  } | null>(null);
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
   const { data: viewDetail, isLoading: isLoadingDetail } =
-    useVolunteerSolicitudDetail(viewId ?? 0);
+    useVolunteerSolicitudDetail(viewId ?? null);
 
   return (
     <div className="min-h-screen">
@@ -97,36 +102,38 @@ export default function VolunteersRequestPage() {
           isLoading={isLoading}
           isReadOnly={isReadOnly}
           onView={setViewId}
-          onApprove={async (id) => {
-            setApprovingId(id);
-            try {
-              await approve.mutateAsync(id);
-            } finally {
-              setApprovingId(null);
-            }
-          }}
+          onApprove={async (sol) => {
+              if (sol.estado === "RECHAZADO") {
+                const ok = await showConfirmApproveRejectedAlert();
+                if (!ok) return;
+
+                setApproveRejected({
+                  id: sol.idSolicitudVoluntariado,
+                  motivo: sol.motivo ?? undefined,
+                });
+                return;
+              }
+
+              setApprovingId(sol.idSolicitudVoluntariado);
+              try {
+                await approve.mutateAsync({ id: sol.idSolicitudVoluntariado });
+              } finally {
+                setApprovingId(null);
+              }
+            }}
           onReject={setRejectId}
           approvingId={approvingId}
         />
 
-        {/* Paginación con ActionButtons */}
+        {/* Paginación */}
         {!isLoading && (
-          <div className="flex justify-between items-center mt-6">
-            <span className="text-sm text-[#556B2F] font-medium">
-              {data?.total ?? 0} resultados — página {data?.page ?? 1} de{" "}
-              {data?.pages ?? 1}
-            </span>
-            
-            <ActionButtons
-              showPrevious
-              showNext
-              showText
-              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-              onNext={() => setPage((p) => p + 1)}
-              disablePrevious={page <= 1}
-              disableNext={(data?.pages ?? 1) <= page}
-              previousText="Anterior"
-              nextText="Siguiente"
+          <div className="flex flex-col gap-3 mt-6">
+            <PaginationBar
+              page={page}
+              totalPages={data?.pages ?? 1}
+              pageItems={getPageItems(page, data?.pages ?? 1)}
+              onPageChange={(p) => setPage(p)}
+              className="justify-center"
             />
           </div>
         )}
@@ -141,6 +148,23 @@ export default function VolunteersRequestPage() {
             setRejectId(null);
           }}
         />
+
+        <ApproveRejectedDialog
+          open={approveRejected != null}
+          initialMotivo={approveRejected?.motivo ?? ""}
+          onClose={() => setApproveRejected(null)}
+          onConfirm={async (motivo) => {
+            if (!approveRejected) return;
+            setApprovingId(approveRejected.id);
+            try {
+              await approve.mutateAsync({ id: approveRejected.id, motivo });
+            } finally {
+              setApprovingId(null);
+              setApproveRejected(null);
+            }
+          }}
+        />
+
 
         <VolunteerViewModal
           open={viewId != null}

@@ -9,23 +9,22 @@ import { getCurrentUser } from "../../services/auth";
 import { RequestsTable } from "../../components/associates/RequestTable";
 import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";
-import { ActionButtons } from "../../components/ActionButtons";
 import { Download } from "lucide-react";
 import { useDownloadSolicitudesPDF } from "../../hooks/associates/useDownloadSolicitudesPdfList";
+import { showConfirmApproveRejectedAlert } from "@/utils/alerts";
+import { ApproveRejectedDialog } from "@/components/volunteers/ApproveRejectedDialog";
+import { getPageItems, PaginationBar } from "@/components/ui/pagination";
 
 export default function AdminRequestsPage() {
   const [status, setStatus] = useState<"PENDIENTE" | "APROBADO" | "RECHAZADO" | undefined>("PENDIENTE");
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const [approvingId, setApprovingId] = useState<number | null>(null);
-  const limit = 20;
+  const limit = 10;
 
-  // ✅ CAMBIO: hook correcto
   const downloadPDF = useDownloadSolicitudesPDF();
-
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
-
   const { data, isLoading } = useAdminSolicitudesList({
     status,
     search,
@@ -36,6 +35,10 @@ export default function AdminRequestsPage() {
 
   const approve = useApproveSolicitud();
   const reject = useRejectSolicitud();
+  const [approveRejected, setApproveRejected] = useState<{
+    id: number;
+    motivo?: string;
+  } | null>(null);
 
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
@@ -72,30 +75,29 @@ export default function AdminRequestsPage() {
           </div>
         </div>
 
-    <button
-  onClick={() =>
-    downloadPDF.mutate({
-      estado: status,          // 👈 usa tu state "status"
-      search,                  // 👈 tu state "search"
-      sort: "createdAt:desc",  // 👈 o el sort que estés usando
-    })
-  }
-  disabled={downloadPDF.isPending}
-  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm mb-6 mt-6 lg:mt-0"
->
-  {downloadPDF.isPending ? (
-    <>
-      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-      Generando PDF...
-    </>
-  ) : (
-    <>
-      <Download className="w-4 h-4" />
-      Descargar PDF
-    </>
-  )}
-</button>
-
+        <button
+          onClick={() =>
+            downloadPDF.mutate({
+              estado: status,        
+              search,                  
+              sort: "createdAt:desc",  
+            })
+          }
+          disabled={downloadPDF.isPending}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm mb-6 mt-6 lg:mt-0"
+        >
+          {downloadPDF.isPending ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Generando PDF...
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4" />
+              Descargar PDF
+            </>
+          )}
+        </button>
 
         {/* Tabla de Solicitudes */}
         <RequestsTable
@@ -103,14 +105,25 @@ export default function AdminRequestsPage() {
           isLoading={isLoading}
           isReadOnly={isReadOnly}
           onView={setViewId}
-          onApprove={async (id) => {
-            setApprovingId(id);
-            try {
-              await approve.mutateAsync(id);
-            } finally {
-              setApprovingId(null);
-            }
-          }}
+          onApprove={async (sol) => {
+          if (sol.estado === "RECHAZADO") {
+            const ok = await showConfirmApproveRejectedAlert();
+            if (!ok) return;
+
+            setApproveRejected({
+              id: sol.idSolicitud,
+              motivo: (sol as any).motivo ?? undefined, 
+            });
+            return;
+          }
+
+          setApprovingId(sol.idSolicitud);
+          try {
+            await approve.mutateAsync({ id: sol.idSolicitud });
+          } finally {
+            setApprovingId(null);
+          }
+        }}
           onReject={setRejectId}
           approvingId={approvingId}
         />
@@ -118,21 +131,12 @@ export default function AdminRequestsPage() {
         {/* Paginación con ActionButtons */}
         {!isLoading && (
           <div className="flex justify-between items-center mt-6">
-            <span className="text-sm text-[#556B2F] font-medium">
-              {data?.total ?? 0} resultados — página {data?.page ?? 1} de{" "}
-              {data?.pages ?? 1}
-            </span>
-
-            <ActionButtons
-              showPrevious
-              showNext
-              showText
-              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-              onNext={() => setPage((p) => p + 1)}
-              disablePrevious={page <= 1}
-              disableNext={(data?.pages ?? 1) <= page}
-              previousText="Anterior"
-              nextText="Siguiente"
+            <PaginationBar
+              page={page}
+              totalPages={data?.pages ?? 1}
+              pageItems={getPageItems(page, data?.pages ?? 1)}
+              onPageChange={(p) => setPage(p)}
+              className="justify-center"
             />
           </div>
         )}
@@ -144,6 +148,23 @@ export default function AdminRequestsPage() {
           onConfirm={async (motivo) => {
             if (rejectId) await reject.mutateAsync({ id: rejectId, motivo });
             setRejectId(null);
+          }}
+        />
+
+        <ApproveRejectedDialog
+          open={approveRejected != null}
+          initialMotivo={approveRejected?.motivo ?? ""}
+          onClose={() => setApproveRejected(null)}
+          onConfirm={async (motivo) => {
+            if (!approveRejected) return;
+
+            setApprovingId(approveRejected.id);
+            try {
+              await approve.mutateAsync({ id: approveRejected.id, motivo });
+            } finally {
+              setApprovingId(null);
+              setApproveRejected(null);
+            }
           }}
         />
 
