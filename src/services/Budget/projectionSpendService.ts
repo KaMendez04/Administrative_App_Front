@@ -44,6 +44,18 @@ export async function createPSpendType(payload: {
   };
 }
 
+export async function updatePSpendType(
+  id: number,
+  payload: { name?: string; departmentId?: number }
+): Promise<PSpendType> {
+  const { data } = await apiConfig.patch<any>(`/p-spend-type/${id}`, payload);
+  return {
+    id: data.id,
+    name: data.name,
+    departmentId: data?.department?.id ?? data?.departmentId ?? payload.departmentId,
+  };
+}
+
 /** ============= P-SubTypes (proyección) ============= */
 export async function listPSpendSubTypes(
   pSpendTypeId: number
@@ -83,6 +95,20 @@ export async function createPSpendSubType(payload: {
   };
 }
 
+export async function updatePSpendSubType(
+  id: number,
+  payload: { name?: string; typeId?: number }
+): Promise<PSpendSubType> {
+  const { data } = await apiConfig.patch<any>(`/p-spend-sub-type/${id}`, payload);
+
+  return {
+    id: data.id,
+    name: data.name,
+    // el back responde con `type`
+    pSpendTypeId: data?.type?.id ?? payload.typeId!,
+  };
+}
+
 /** ============= Crear Proyección de Egreso ============= */
 export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
   const body = {
@@ -104,5 +130,4 @@ export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
       pSpendTypeId: data?.subType?.type?.id,
     },
   };
-
 }

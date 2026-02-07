@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
+import { CustomSelect } from "../../CustomSelect";
+import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
+
 import {
   useDepartments,
   useSpendSubTypes,
@@ -7,26 +10,35 @@ import {
   usePSpendTypes,
   usePSpendSubTypes,
 } from "../../../hooks/Budget/spend/useSpendCatalog";
-import { useCreateSpendEntry, useEnsureSpendSubTypeFromProjection } from "../../../hooks/Budget/spend/useSpendMutation";
+
+import {
+  useCreateSpendEntry,
+  useEnsureSpendSubTypeFromProjection,
+} from "../../../hooks/Budget/spend/useSpendMutation";
+
 import type { CreateSpendDTO } from "../../../models/Budget/SpendType";
-import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
-import { CustomSelect } from "../../CustomSelect";
 
 type Props = {
   onSuccess?: (createdId: number) => void;
   disabled?: boolean;
-  fiscalYearId?: number; // opcional si ya lo tenés en UI
+  fiscalYearId?: number;
 };
 
-function parseSelectValue(v: string) {
-  const [origin, idStr] = v.split(":");
-  return { origin, id: Number(idStr) };
+type OriginId = `r:${number}` | `p:${number}`;
+
+function parseOriginId(v: string | number | ""): { origin: "r" | "p"; id: number } | null {
+  if (!v) return null;
+  const s = String(v);
+  const [origin, raw] = s.split(":");
+  const id = Number(raw);
+  if ((origin !== "r" && origin !== "p") || !Number.isFinite(id)) return null;
+  return { origin: origin as "r" | "p", id };
 }
 
 export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) {
   const [departmentId, setDepartmentId] = useState<number | "">("");
-  const [typeValue, setTypeValue] = useState<string>("");     // "r:ID" | "p:ID"
-  const [subTypeValue, setSubTypeValue] = useState<string>(""); // "r:ID" | "p:ID"
+  const [typeKey, setTypeKey] = useState<OriginId | "">("");
+  const [subTypeKey, setSubTypeKey] = useState<OriginId | "">("");
 
   const money = useMoneyInput("");
   const amountStr: string = ((money as any).value ?? "") as string;
@@ -42,97 +54,119 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // ===== Queries =====
   const dept = useDepartments();
-  const typesR = useSpendTypes(typeof departmentId === "number" ? departmentId : undefined);
-  const typesP = usePSpendTypes(typeof departmentId === "number" ? departmentId : undefined, fiscalYearId);
 
-  const parsedType = useMemo(() => (typeValue ? parseSelectValue(typeValue) : null), [typeValue]);
+  const realTypes = useSpendTypes(typeof departmentId === "number" ? departmentId : undefined);
+  const projTypes = usePSpendTypes(
+    typeof departmentId === "number" ? departmentId : undefined,
+    fiscalYearId
+  );
 
-  // Subtypes: reales o proyección según el tipo seleccionado
-  const subTypesR = useSpendSubTypes(parsedType?.origin === "r" ? parsedType.id : undefined);
+  const typeParsed = parseOriginId(typeKey);
 
-  const subTypesP = usePSpendSubTypes(
-    parsedType?.origin === "p"
+  const realSubTypes = useSpendSubTypes(typeParsed?.origin === "r" ? typeParsed.id : undefined);
+
+  const projSubTypes = usePSpendSubTypes(
+    typeParsed?.origin === "p"
       ? {
           departmentId: typeof departmentId === "number" ? departmentId : undefined,
-          typeId: parsedType.id, // pSpendTypeId
+          typeId: typeParsed.id,
           fiscalYearId,
         }
       : undefined
   );
 
+  // ===== Options =====
   const departmentOptions = useMemo(
     () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
     [dept.data]
   );
 
   const typeOptions = useMemo(() => {
-    const r = (typesR.data ?? []).map((t) => ({ label: t.name, value: `r:${t.id}` }));
-    const p = (typesP.data ?? []).map((t) => ({
-  label: t.name,
-  value: `p:${t.id}`,
-  }));
+    const r = (realTypes.data ?? []).map((t) => ({
+      label: t.name,
+      value: `r:${t.id}` as OriginId,
+    }));
+
+    const p = (projTypes.data ?? []).map((t) => ({
+      label: t.name,
+      value: `p:${t.id}` as OriginId,
+    }));
+
     return [...r, ...p];
-  }, [typesR.data, typesP.data]);
+  }, [realTypes.data, projTypes.data]);
 
   const subTypeOptions = useMemo(() => {
-    if (!parsedType) return [];
-    if (parsedType.origin === "r") {
-      return (subTypesR.data ?? []).map((s) => ({ label: s.name, value: `r:${s.id}` }));
+    if (!typeParsed) return [];
+    if (typeParsed.origin === "r") {
+      return (realSubTypes.data ?? []).map((s) => ({
+        label: s.name,
+        value: `r:${s.id}` as OriginId,
+      }));
     }
-    return (subTypesP.data ?? []).map((s) => ({
-    label: s.name,
-    value: `p:${s.id}`,
-  }));
-  }, [parsedType, subTypesR.data, subTypesP.data]);
+    return (projSubTypes.data ?? []).map((s) => ({
+      label: s.name,
+      value: `p:${s.id}` as OriginId,
+    }));
+  }, [typeParsed, realSubTypes.data, projSubTypes.data]);
 
+  // ===== Cascada =====
   useEffect(() => {
-    setTypeValue("");
-    setSubTypeValue("");
+    setTypeKey("");
+    setSubTypeKey("");
   }, [departmentId]);
 
   useEffect(() => {
-    setSubTypeValue("");
-  }, [typeValue]);
+    setSubTypeKey("");
+  }, [typeKey]);
 
+  // ===== Mutations =====
   const createSpend = useCreateSpendEntry();
-  const ensureSubType = useEnsureSpendSubTypeFromProjection();
+  const ensureSubFromProj = useEnsureSpendSubTypeFromProjection();
 
   async function onSubmit() {
     setErrors({});
 
     if (!departmentId) return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
-    if (!typeValue) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
-    if (!subTypeValue) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
+    if (!typeKey) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
+    if (!subTypeKey) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
     if (!amountStr || amount <= 0) return setErrors((e) => ({ ...e, amount: "Monto requerido" }));
     if (!date) return setErrors((e) => ({ ...e, date: "Fecha requerida" }));
 
-    let spendSubTypeId: number;
-
-    const st = parseSelectValue(subTypeValue);
-    if (st.origin === "r") {
-      spendSubTypeId = st.id;
-    } else {
-      // viene de proyección -> ensure
-      const real = await ensureSubType.mutate(st.id);
-      spendSubTypeId = Number(real.id);
-    }
-
-    const payload: CreateSpendDTO = {
-      spendSubTypeId,
-      amount,
-      date,
-    };
-
     try {
+      const tParsed = parseOriginId(typeKey);
+      const sParsed = parseOriginId(subTypeKey);
+
+      if (!tParsed) return setErrors((e) => ({ ...e, typeId: "Tipo inválido" }));
+      if (!sParsed) return setErrors((e) => ({ ...e, subTypeId: "Subtipo inválido" }));
+
+      let realSpendSubTypeId: number;
+
+      // ✅ si el subtipo viene de proyección -> ensure (igual que Income)
+      if (sParsed.origin === "p") {
+
+        const ensuredSub = await ensureSubFromProj.mutate(sParsed.id);
+        realSpendSubTypeId = Number((ensuredSub as any).id);
+      } else {
+        realSpendSubTypeId = sParsed.id;
+      }
+
+      const payload: CreateSpendDTO = {
+        spendSubTypeId: realSpendSubTypeId,
+        amount,
+        date,
+      };
+
       const res = await createSpend.mutate(payload);
 
+      // reset UI
       if ("setValue" in money && typeof (money as any).setValue === "function") {
         (money as any).setValue("");
       }
       setDepartmentId("");
-      setTypeValue("");
-      setSubTypeValue("");
+      setTypeKey("");
+      setSubTypeKey("");
 
       const d = new Date();
       const yyyy = d.getFullYear();
@@ -165,8 +199,8 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Tipo</label>
         <CustomSelect
-          value={typeValue}
-          onChange={(value) => setTypeValue(value ? String(value) : "")}
+          value={typeKey}
+          onChange={(value) => setTypeKey(value ? (String(value) as OriginId) : "")}
           options={typeOptions}
           placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
           disabled={!departmentId || disabled}
@@ -178,11 +212,11 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Subtipo</label>
         <CustomSelect
-          value={subTypeValue}
-          onChange={(value) => setSubTypeValue(value ? String(value) : "")}
+          value={subTypeKey}
+          onChange={(value) => setSubTypeKey(value ? (String(value) as OriginId) : "")}
           options={subTypeOptions}
-          placeholder={!typeValue ? "Seleccione un tipo…" : "Seleccione…"}
-          disabled={!typeValue || disabled}
+          placeholder={!typeKey ? "Seleccione un tipo…" : "Seleccione…"}
+          disabled={!typeKey || disabled}
         />
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
@@ -195,13 +229,6 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
           className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          max={(() => {
-            const d = new Date();
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, "0");
-            const dd = String(d.getDate()).padStart(2, "0");
-            return `${yyyy}-${mm}-${dd}`;
-          })()}
           disabled={disabled}
         />
         {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
@@ -223,7 +250,7 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
       <div className="pt-4 border-t border-gray-100">
         <button
           onClick={onSubmit}
-          disabled={disabled || !departmentId || !typeValue || !subTypeValue || !amountStr || amount <= 0 || !date}
+          disabled={disabled || !departmentId || !typeKey || !subTypeKey || !amountStr || amount <= 0 || !date}
           className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="h-4 w-4" />

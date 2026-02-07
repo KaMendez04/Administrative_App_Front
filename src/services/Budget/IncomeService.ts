@@ -1,3 +1,4 @@
+// src/services/Budget/IncomeService.ts
 import type {
   ApiList,
   CreateDepartmentDTO,
@@ -9,7 +10,7 @@ import type {
   IncomeSubType,
   IncomeType,
 } from "../../models/Budget/IncomeType";
-import apiConfig from "../apiConfig"; 
+import apiConfig from "../apiConfig";
 
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");
@@ -21,9 +22,17 @@ export async function createDepartment(payload: CreateDepartmentDTO): Promise<De
   return data;
 }
 
+/** ✅ UPDATE Department */
+export async function updateDepartment(
+  id: number,
+  payload: { name?: string }
+): Promise<Department> {
+  const { data } = await apiConfig.patch<Department>(`/department/${id}`, payload);
+  return data;
+}
+
 export async function listIncomeTypes(departmentId?: number): Promise<ApiList<IncomeType>> {
   const { data } = await apiConfig.get<any[]>("/income-type");
-  // Map a modelo plano { id, name, departmentId }
   let items: IncomeType[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
@@ -42,6 +51,18 @@ export async function createIncomeType(payload: CreateIncomeTypeDTO): Promise<In
   };
 }
 
+/** ✅ UPDATE IncomeType */
+export async function updateIncomeType(
+  id: number,
+  payload: { name?: string; departmentId?: number }
+): Promise<IncomeType> {
+  const { data } = await apiConfig.patch<any>(`/income-type/${id}`, payload);
+  return {
+    id: data.id,
+    name: data.name,
+    departmentId: data?.department?.id ?? data?.departmentId ?? payload.departmentId,
+  };
+}
 
 export async function listIncomeSubTypes(incomeTypeId: number): Promise<ApiList<IncomeSubType>> {
   const { data } = await apiConfig.get<any[]>("/income-sub-type", {
@@ -64,16 +85,28 @@ export async function createIncomeSubType(payload: CreateIncomeSubTypeDTO): Prom
   };
 }
 
+/** ✅ UPDATE IncomeSubType */
+export async function updateIncomeSubType(
+  id: number,
+  payload: { name?: string; incomeTypeId?: number }
+): Promise<IncomeSubType> {
+  const { data } = await apiConfig.patch<any>(`/income-sub-type/${id}`, payload);
+  return {
+    id: data.id,
+    name: data.name,
+    incomeTypeId: data?.incomeType?.id ?? data?.incomeTypeId ?? payload.incomeTypeId!,
+  };
+}
+
 export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
   const body = {
     incomeSubTypeId: payload.incomeSubTypeId,
-    amount: Number(payload.amount).toFixed(2), // igual que en ingresos
-    date: payload.date,                         // 'YYYY-MM-DD'
+    amount: Number(payload.amount).toFixed(2),
+    date: payload.date,
   };
 
   const { data } = await apiConfig.post<any>("/income", body);
 
-  // Devolvemos con la misma forma que IncomeService
   return {
     id: data.id,
     amount: data.amount,

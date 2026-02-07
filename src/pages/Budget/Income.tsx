@@ -1,39 +1,57 @@
+// src/pages/Budget/Income.tsx
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import IncomeForm from "../../components/Budget/Income/IncomeForm";
-import CatalogModal from "../../components/Budget/Income/CatalogModal";
+import CatalogModalIncome from "@/components/Budget/Income/CatalogModalIncome";
+
 
 export default function IncomePage() {
   const [openCatalog, setOpenCatalog] = useState(false);
+  const [openEditCatalog, setOpenEditCatalog] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f3f8ef] relative z-0">
+    <div className="min-h-screen bg-[#f3f8ef]">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
         <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
+          {/* Botones arriba a la derecha */}
+          <div className="absolute top-6 right-6 flex items-center gap-3">
+            {/* ✏️ Editar catálogo */}
+            <button
+              onClick={() => setOpenEditCatalog(true)}
+              className="rounded-full bg-[#6B7A3A] p-3 text-white shadow hover:opacity-90"
+              aria-label="Editar catálogo"
+              title="Editar catálogo"
+            >
+              <Pencil className="h-6 w-6" />
+            </button>
 
+            {/* ➕ Agregar catálogo */}
+            <button
+              onClick={() => setOpenCatalog(true)}
+              className="rounded-full bg-[#708C3E] p-3 text-white shadow hover:bg-[#5e732f]"
+              aria-label="Abrir catálogo"
+              title="Agregar al catálogo"
+            >
+              <Plus className="h-6 w-6" />
+            </button>
+          </div>
 
-          {/* Botón + (abre catálogo) */}
-          <button
-            onClick={() => setOpenCatalog(true)}
-            className="absolute top-6 right-6 rounded-full bg-[#708C3E] p-3 text-white shadow hover:bg-[#5e732f]"
-            aria-label="Abrir catálogo"
-          >
-            <Plus className="h-6 w-6" />
-          </button>
-
-          {/* Formulario principal */}
-          <IncomeForm
-            onSuccess={() => {
-              // aquí podrías mostrar un toast / refrescar listas, etc.
-            }}
-          />
+          <IncomeForm onSuccess={() => {}} />
         </div>
       </div>
 
-      {/* Modal catálogo: Departamento / Tipo / Subtipo */}
-      <CatalogModal
+      {/* Modal: AGREGAR */}
+      <CatalogModalIncome
         open={openCatalog}
         onClose={() => setOpenCatalog(false)}
+        mode="create"
+      />
+
+      {/* Modal: EDITAR */}
+      <CatalogModalIncome
+        open={openEditCatalog}
+        onClose={() => setOpenEditCatalog(false)}
+        mode="edit"
       />
     </div>
   );

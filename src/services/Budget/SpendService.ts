@@ -12,10 +12,7 @@ import type {
   SpendType,
 } from "../../models/Budget/SpendType";
 
-// 👇 Usa la MISMA ruta que en IncomeService:
-import apiConfig from "../apiConfig"; 
-// Si en tu repo real IncomeService usa "../../apiConfig", cambia esta línea a:
-// import apiConfig from "../../apiConfig";
+import apiConfig from "../apiConfig";
 
 /** ============= Departamentos ============= */
 export async function listDepartments(): Promise<ApiList<Department>> {
@@ -28,15 +25,16 @@ export async function createDepartment(payload: CreateDepartmentDTO): Promise<De
   return data;
 }
 
-/** ============= Spend Types ============= */
+/** ============= Spend Types (reales) ============= */
 export async function listSpendTypes(departmentId?: number): Promise<ApiList<SpendType>> {
   const { data } = await apiConfig.get<any[]>("/spend-type");
-  // Map a modelo plano { id, name, departmentId }
+
   let items: SpendType[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
     departmentId: t?.department?.id,
   }));
+
   if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
   return { data: items };
 }
@@ -50,16 +48,18 @@ export async function createSpendType(payload: CreateSpendTypeDTO): Promise<Spen
   };
 }
 
-/** ============= Spend SubTypes ============= */
+/** ============= Spend SubTypes (reales) ============= */
 export async function listSpendSubTypes(spendTypeId: number): Promise<ApiList<SpendSubType>> {
   const { data } = await apiConfig.get<any[]>("/spend-sub-type", {
     params: { spendTypeId },
   });
+
   const items: SpendSubType[] = (data ?? []).map((s) => ({
     id: s.id,
     name: s.name,
     spendTypeId: s?.spendType?.id ?? spendTypeId,
   }));
+
   return { data: items };
 }
 
@@ -76,13 +76,12 @@ export async function createSpendSubType(payload: CreateSpendSubTypeDTO): Promis
 export async function createSpend(payload: CreateSpendDTO): Promise<Spend> {
   const body = {
     spendSubTypeId: payload.spendSubTypeId,
-    amount: Number(payload.amount).toFixed(2), // igual que en ingresos
-    date: payload.date,                         // 'YYYY-MM-DD'
+    amount: Number(payload.amount).toFixed(2),
+    date: payload.date,
   };
 
   const { data } = await apiConfig.post<any>("/spend", body);
 
-  // Devolvemos con la misma forma que IncomeService
   return {
     id: data.id,
     amount: data.amount,
@@ -94,7 +93,6 @@ export async function createSpend(payload: CreateSpendDTO): Promise<Spend> {
     },
   };
 }
-
 
 /** ============= Proyección (pSpend) ============= */
 export async function listPSpendTypes(
@@ -119,9 +117,7 @@ export async function listPSpendSubTypes(params: {
   typeId: number; // pSpendTypeId
   fiscalYearId?: number;
 }): Promise<ApiList<PSpendSubType>> {
-  const { data } = await apiConfig.get<any[]>("/p-spend-sub-type", {
-    params,
-  });
+  const { data } = await apiConfig.get<any[]>("/p-spend-sub-type", { params });
 
   const items: PSpendSubType[] = (data ?? []).map((s) => ({
     id: s.id,
@@ -134,20 +130,49 @@ export async function listPSpendSubTypes(params: {
 
 /** ============= Ensure real desde proyección ============= */
 export async function ensureSpendTypeFromProjection(pSpendTypeId: number) {
-  const { data } = await apiConfig.post("/spend-type/from-projection", {
-    pSpendTypeId,
-  });
+  const { data } = await apiConfig.post("/spend-type/from-projection", { pSpendTypeId });
   return data; // SpendType real
 }
 
 export async function ensureSpendSubTypeFromProjection(pSpendSubTypeId: number) {
-  const { data } = await apiConfig.post("/spend-sub-type/from-projection", {
-    pSpendSubTypeId,
-  });
+  const { data } = await apiConfig.post("/spend-sub-type/from-projection", { pSpendSubTypeId });
   return data; // SpendSubType real
 }
 
 
+/** ============= Update Departamento ============= */
+export async function updateDepartment(
+  id: number,
+  payload: { name?: string }
+): Promise<Department> {
+  const { data } = await apiConfig.patch<Department>(`/department/${id}`, payload);
+  return data;
+}
 
+/** ============= Update Spend Type ============= */
+export async function updateSpendType(
+  id: number,
+  payload: { name?: string; departmentId?: number }
+): Promise<SpendType> {
+  const { data } = await apiConfig.patch<any>(`/spend-type/${id}`, payload);
 
+  return {
+    id: data.id,
+    name: data.name,
+    departmentId: data?.department?.id ?? data?.departmentId ?? payload.departmentId,
+  };
+}
 
+/** ============= Update Spend SubType ============= */
+export async function updateSpendSubType(
+  id: number,
+  payload: { name?: string; spendTypeId?: number }
+): Promise<SpendSubType> {
+  const { data } = await apiConfig.patch<any>(`/spend-sub-type/${id}`, payload);
+
+  return {
+    id: data.id,
+    name: data.name,
+    spendTypeId: data?.spendType?.id ?? data?.spendTypeId ?? payload.spendTypeId!,
+  };
+}

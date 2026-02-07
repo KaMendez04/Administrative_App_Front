@@ -13,6 +13,9 @@ import {
   createIncome,
   createIncomeSubType,
   createIncomeType,
+  updateDepartment,
+  updateIncomeType,
+  updateIncomeSubType,
 } from "../../../services/Budget/IncomeService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -73,4 +76,45 @@ export function useCreateIncomeEntry() {
     mutationFn: (payload: CreateIncomeDTO) => createIncome(payload),
   });
   return wrapMutation<CreateIncomeDTO, Income>(m);
+}
+
+// ✅ Update Departamento
+export function useUpdateDepartment() {
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: ({ id, name }: { id: number; name: string }) =>
+      updateDepartment(id, { name }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["departments"] });
+    },
+  });
+  return wrapMutation<{ id: number; name: string }, Department>(m);
+}
+
+// ✅ Update Tipo de Ingreso
+export function useUpdateIncomeType() {
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (p: { id: number; name?: string; departmentId?: number }) =>
+      updateIncomeType(p.id, { name: p.name, departmentId: p.departmentId }),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["incomeTypes"] });
+      qc.invalidateQueries({ queryKey: ["incomeTypes", vars.departmentId ?? "none"] });
+    },
+  });
+  return wrapMutation<{ id: number; name?: string; departmentId?: number }, IncomeType>(m);
+}
+
+// ✅ Update Subtipo de Ingreso
+export function useUpdateIncomeSubType() {
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: (p: { id: number; name?: string; incomeTypeId?: number }) =>
+      updateIncomeSubType(p.id, { name: p.name, incomeTypeId: p.incomeTypeId }),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["incomeSubTypes"] });
+      qc.invalidateQueries({ queryKey: ["incomeSubTypes", vars.incomeTypeId ?? "none"] });
+    },
+  });
+  return wrapMutation<{ id: number; name?: string; incomeTypeId?: number }, IncomeSubType>(m);
 }
