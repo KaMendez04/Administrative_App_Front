@@ -1,7 +1,7 @@
 import type { AssignExtraordinaryDto } from "../../../models/Budget/extraordinary/AssignInterface";
 import type { Extraordinary } from "../../../models/Budget/extraordinary/extraordinaryInterface";
 import type { Department } from "../../../models/Budget/IncomeType";
-import apiConfig from "../../apiConfig";
+import apiConfig from "../../../apiConfig/apiConfig";
 
 export async function listExtraordinary(): Promise<Extraordinary[]> {
   const { data } = await apiConfig.get<Extraordinary[]>("/extraordinary");

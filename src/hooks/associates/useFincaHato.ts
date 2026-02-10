@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import apiConfig from "../../services/apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 import type { Hato } from "../../types/finca";
 
 export function useFincaHato(idFinca: number | null) {

@@ -4,7 +4,7 @@ import { useOrganizationsApprovedList } from "../../hooks/Volunteers/organizatio
 import { useOrganizationDetail } from "../../hooks/Volunteers/organizations/useOrganizationDetail";
 import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";
-import { getCurrentUser } from "../../services/auth";
+import { getCurrentUser } from "../../auth/auth";
 import { ApprovedVolunteerViewModal } from "../../components/volunteers/ApprovedVolunteerViewModal";
 import { UnifiedVolunteersTable, type UnifiedVolunteerRow } from "../../components/volunteers/UnifiedVolunteersTable";
 import { useVolunteerApprovedDetail } from "../../hooks/Volunteers/individual/useVolunteerApprovedDetail";

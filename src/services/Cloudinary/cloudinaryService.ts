@@ -1,5 +1,5 @@
 import type { CloudinaryAsset } from "@/models/Cloudinary/CloudinaryType";
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 
 function ensureArray<T = any>(x: any): T[] {
   if (Array.isArray(x)) return x;

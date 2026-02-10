@@ -1,4 +1,4 @@
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 import type { EventEdition, EventInput } from "../../models/editionSection/EventEditionType";
 
 // GET /event

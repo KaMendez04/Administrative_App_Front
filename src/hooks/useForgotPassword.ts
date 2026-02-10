@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { forgotPasswordService } from "../services/forgotPasswordService"
 import type { ForgotPasswordFormValues } from "../models/ForgotPasswordTypes"
+import { forgotPasswordService } from "@/auth/forgotPasswordService"
 
 
 export function useForgotPassword() {

@@ -12,7 +12,7 @@ import type {
   SpendType,
 } from "../../models/Budget/SpendType";
 
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 
 /** ============= Departamentos ============= */
 export async function listDepartments(): Promise<ApiList<Department>> {

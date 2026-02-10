@@ -4,7 +4,7 @@ import {
   type AreaInteres,
   type Disponibilidad,
 } from "../../schemas/volunteerSchemas";
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 import { z } from "zod";
 
 // ============= ÁREAS DE INTERÉS =============

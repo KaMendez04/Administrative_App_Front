@@ -1,7 +1,7 @@
 
 import type { Department, IncomeFilters, IncomeSubType, IncomeType, ReportIncome } from "../../../models/Budget/IncomeType";
 
-import apiConfig from "../../apiConfig";
+import apiConfig from "../../../apiConfig/apiConfig";
 
 
 export async function listDepartments(): Promise<Department[]> {

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { listSolicitudes } from "../../services/adminSolicitudesService";
 import { useQuery } from "@tanstack/react-query";
-import { getCurrentUser, getToken } from "../../services/auth";
+import { getCurrentUser, getToken } from "../../auth/auth";
 import { useNotifications } from "../../components/Notification/NotificationContext";
 
 const NOTIFIED_KEY = 'associates_initial_notified';

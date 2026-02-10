@@ -1,5 +1,5 @@
 import type { SpendSubType, SpendType } from "../../../models/Budget/extraordinary/transactions";
-import apiConfig from "../../apiConfig";
+import apiConfig from "../../../apiConfig/apiConfig";
 
 export async function fetchSpendTypes(departmentId?: number): Promise<SpendType[]> {
     const url = departmentId ? `/spend-type?departmentId=${departmentId}` : "/spend-type";

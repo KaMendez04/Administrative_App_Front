@@ -1,6 +1,6 @@
 import type { PdfListParams } from "../../models/AssociatePdfType";
 import { SolicitudListResponseSchema, SolicitudSchema, type AdminListParams, type Solicitud, type SolicitudListResponse } from "../../schemas/adminSolicitudes";
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 
 
 // ✅ Listado ligero (para tablas)

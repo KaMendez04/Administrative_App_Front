@@ -1,20 +1,30 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { ChevronLeft } from "lucide-react"
 import { Link, useRouterState } from "@tanstack/react-router"
 import { sidebarItems } from "../models/SidebarType"
-import { getCurrentUser } from "../services/auth"
+import { useAuth } from "@/auth/AuthProvider"
+import { canAccess } from "@/auth/role"
 
-export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
+type Props = {
+  isOpen: boolean
+  setIsOpen: (v: boolean) => void
+  isMobile: boolean
+}
+
+export function AppSidebar({ isOpen, setIsOpen, isMobile }: Props) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const sidebarRef = useRef<HTMLDivElement>(null)
 
-  // Rol actual
-  const role = getCurrentUser()?.role?.name?.toUpperCase()
-  const isAdmin = role === "ADMIN"
+  const { user } = useAuth()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isMobile && isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+      if (
+        isMobile &&
+        isOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false)
       }
     }
@@ -41,13 +51,13 @@ export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
     )
   }
 
-  //Oculta enlaces de edición pública para JUNTA
-  const filteredItems = sidebarItems.filter((item) => {
-    if (isAdmin) return true
-    const href = String(item.href )
-    // Oculta todo lo que cuelgue /edition/principal
-    return !(href === "/edition/principal")
-  })
+  const filteredItems = useMemo(() => {
+    return sidebarItems.filter((item: any) => {
+      // si un item no define roles => visible para cualquier logueado
+      if (!item.roles || item.roles.length === 0) return !!user
+      return canAccess(user, item.roles)
+    })
+  }, [user])
 
   return (
     <>
@@ -57,6 +67,7 @@ export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
           onClick={() => setIsOpen(false)}
         />
       )}
+
       <div
         ref={sidebarRef}
         className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 ${
@@ -79,7 +90,7 @@ export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
 
         {/* Links */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
-          {filteredItems.map((item) => (
+          {filteredItems.map((item: any) => (
             <SidebarLink key={item.title} {...item} />
           ))}
         </nav>
@@ -89,6 +100,7 @@ export function AppSidebar({ isOpen, setIsOpen, isMobile }: any) {
           <button
             onClick={() => setIsOpen(false)}
             className="flex rounded-full gap-2 px-2 py-2 bg-[#708C3E] text-white hover:bg-[#5d741c] transition-all text-sm font-medium shadow"
+            aria-label="Cerrar sidebar"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>

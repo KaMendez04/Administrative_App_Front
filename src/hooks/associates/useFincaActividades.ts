@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import apiConfig from "../../services/apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 import type { ActividadAgropecuaria } from "../../types/finca";
 
 export function useFincaActividades(idFinca: number | null) {

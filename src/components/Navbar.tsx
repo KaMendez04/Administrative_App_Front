@@ -1,7 +1,7 @@
 import { Menu, User } from "lucide-react";
 import React from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { getCurrentUser, clearSession } from "../services/auth";
+import { getCurrentUser, clearSession } from "../auth/auth";
 import { showConfirmOutAlert } from "../utils/alerts";
 import { NotificationDropdown } from "./Notification/NotificationDropdown";
 

@@ -1,10 +1,12 @@
 import { Book, Briefcase, DollarSign, FileText, Home, User, Users, Image } from "lucide-react"
-import type { LucideIcon } from "lucide-react" 
+import type { LucideIcon } from "lucide-react"
+import type { AppRole } from "@/auth/guards"
 
 export type SidebarItem = {
   title: string
   href: string
-  icon: LucideIcon 
+  icon: LucideIcon
+  roles?: AppRole[] 
 }
 
 export const sidebarItems: SidebarItem[] = [
@@ -12,46 +14,48 @@ export const sidebarItems: SidebarItem[] = [
     title: "Inicio",
     href: "/Principal",
     icon: Home,
-  },
-  {
-    title: "Informativa",
-    href: "/edition/principal",
-    icon: FileText,
+    roles: ["ADMIN", "JUNTA"],
   },
   {
     title: "Voluntariado",
     href: "/volunteers",
     icon: Users,
+    roles: ["ADMIN", "JUNTA"],
   },
   {
     title: "Asociados",
     href: "/associates",
     icon: Briefcase,
+    roles: ["ADMIN", "JUNTA"],
   },
   {
     title: "Presupuesto",
     href: "/budget",
     icon: DollarSign,
-  },
-  {
-    title: "Personal",
-    href: "/staff",
-    icon: User,
-  },
-  {
-    title: "Media",
-    href: "/media/cloudinary/upload",
-    icon: Image,
+    roles: ["ADMIN", "JUNTA"], 
   },
   {
     title: "Manuales",
     href: "/manuals",
     icon: Book,
+    roles: ["ADMIN", "JUNTA"],
   },
-
+  {
+    title: "Informativa",
+    href: "/edition/principal",
+    icon: FileText,
+    roles: ["ADMIN"],
+  },
+  {
+    title: "Personal",
+    href: "/staff",
+    icon: User,
+    roles: ["ADMIN", "JUNTA"],
+  },
+  {
+    title: "Media",
+    href: "/media",
+    icon: Image,
+    roles: ["ADMIN", "JUNTA"],
+  },
 ]
- {/*
-    title: "Historial",
-    href: "/historial",
-    icon: History,*/
-  }

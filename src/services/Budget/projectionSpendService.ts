@@ -6,7 +6,7 @@ import type {
   PSpendType,
   CreatePSpendDTO,
 } from "../../models/Budget/PSpendType";
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 
 /** ============= Departamentos ============= */
 export async function listDepartments(): Promise<ApiList<Department>> {

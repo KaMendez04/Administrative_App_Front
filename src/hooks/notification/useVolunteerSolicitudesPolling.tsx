@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getCurrentUser, getToken } from '../../services/auth';
+import { getCurrentUser, getToken } from '../../auth/auth';
 import { useNotifications } from '../../components/Notification/NotificationContext';
 import { listVolunteerSolicitudes } from '../../services/Volunteers/volunteerService';
 

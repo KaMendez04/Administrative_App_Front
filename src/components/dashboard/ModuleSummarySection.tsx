@@ -1,5 +1,5 @@
 import { Globe, Users, UserCheck, DollarSign } from "lucide-react"
-import { getCurrentUser } from "../../services/auth"
+import { getCurrentUser } from "../../auth/auth"
 import { useModuleCounts } from "../../hooks/dashboard/useModuleCounts"
 import { crc } from "../../utils/crcDateUtil"
 import { ModuleCard } from "./moduleCard"

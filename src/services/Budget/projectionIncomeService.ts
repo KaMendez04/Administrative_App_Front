@@ -1,5 +1,5 @@
 import type { ApiList, CreateDepartmentDTO, CreatePIncomeDTO, CreatePIncomeSubTypeDTO, CreatePIncomeTypeDTO, Department, PIncome, PIncomeSubType, PIncomeType } from "../../models/Budget/incomeProjectionType";
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 
 
 export async function listDepartments(): Promise<Department[]> {

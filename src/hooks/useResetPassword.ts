@@ -2,7 +2,7 @@ import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { useNavigate } from "@tanstack/react-router"
 import { ResetPasswordFormSchema } from "../schemas/resetPasswordSchema";
-import { resetPassword } from "../services/authResetService";
+import { resetPassword } from "@/auth/authResetService";
 
 
 //acá es el resetear contraseña
