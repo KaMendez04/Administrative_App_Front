@@ -10,8 +10,7 @@ import { postLogin } from "@/auth/loginService";
 import type { ApiError } from "@/apiConfig/apiConfig";
 import { useAuth } from "@/auth/AuthProvider";
 
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-
+import { useNavigate, useSearch } from "@tanstack/react-router";
 
 function pickSafeTo(from: unknown, fallback = "/Principal") {
   if (typeof from === "string" && from.startsWith("/")) return from;
@@ -22,9 +21,8 @@ export function useLogin() {
   const navigate = useNavigate();
   const { loginWithSession } = useAuth();
 
-  const from = useRouterState({
-    select: (s) => (s.location.search as any)?.from,
-  });
+  const search = useSearch({ from: "/login" });
+  const from = search.from;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -72,7 +70,8 @@ export function useLogin() {
 
       await showSuccessAlertLogin("Contraseña correcta, ingresando al sistema...");
 
-      navigate({ to: pickSafeTo(from, "/Principal"), replace: true });
+      const destination = pickSafeTo(from, "/Principal");
+      navigate({ to: destination, replace: true });
     } catch (err: unknown) {
       const e = err as ApiError;
 

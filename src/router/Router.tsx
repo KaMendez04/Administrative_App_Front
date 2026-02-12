@@ -54,38 +54,16 @@ import VolunteersSubnav from "../pages/volunteers/VolunteersSubnav";
 import VolunteersRequestPage from "../pages/volunteers/VolunteersRequestPage";
 import VolunteersApprovedPage from "../pages/volunteers/VolunteersApprovedPage";
 
-import { requireRole } from "@/auth/guards";
+import { requireRole, getLocationHref } from "@/auth/guards";
 import type { RouterContext } from "./routerContext";
-
-// ================================
-// NotFound “bonito” (router-level)
-// ================================
-function DefaultNotFound() {
-  return (
-    <div className="mx-auto max-w-lg px-6 py-16">
-      <h1 className="text-2xl font-semibold">Página no encontrada</h1>
-      <p className="mt-2 text-muted-foreground">
-        La ruta no existe o no tienes acceso.
-      </p>
-      <button
-        onClick={() => window.location.assign("/Principal")}
-        className="mt-6 inline-flex items-center rounded-lg bg-[#708C3E] px-4 py-2 text-sm font-medium text-white hover:bg-[#5d741c]"
-      >
-        Volver al inicio
-      </button>
-    </div>
-  );
-}
+import { DefaultNotFound } from "@/common/DefaultNotFound";
 
 // ================================
 // Root
 // ================================
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
-  // ✅ Si algo no existe, mandamos al inicio interno
-  notFoundComponent: () => {
-    throw redirect({ to: "/Principal" });
-  },
+  notFoundComponent: DefaultNotFound,
 });
 
 // ================================
@@ -95,6 +73,12 @@ const loginRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/login",
   component: LoginPage,
+  // ✅ FIXED: Validar el search params
+  validateSearch: (search: Record<string, unknown>): { from?: string } => {
+    return {
+      from: typeof search.from === 'string' ? search.from : undefined,
+    };
+  },
 });
 
 const forgotPasswordRoute = new Route({
@@ -122,12 +106,14 @@ const appLayoutRoute = new Route({
   getParentRoute: () => rootRoute,
   id: "app",
   component: Home,
-  beforeLoad: ({ context, location }) =>
-    requireRole(
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(
       context,
       ["ADMIN", "JUNTA"],
-      location.pathname + location.search
-    ),
+      locationHref
+    );
+  },
 });
 
 // ================================
@@ -159,16 +145,20 @@ const changePasswordRoute = new Route({
 const staffRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/staff",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN", "JUNTA"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
   component: StaffManagementPage,
 });
 
 const cloudinaryMediaRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/media",
- beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN", "JUNTA"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
   component: CloudinaryMediaPage,
 });
 
@@ -178,8 +168,10 @@ const cloudinaryMediaRoute = new Route({
 const editionLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/edition",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
   component: () => <Outlet />,
 });
 
@@ -249,40 +241,50 @@ const budgetIndexRoute = new Route({
 const budgetProjectionIncomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/pincome",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
   component: PIncome,
 });
 
 const budgetProjectionExpensesRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/pexpense",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
   component: PExpenses,
 });
 
 const budgetExpensesRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/expenses",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
   component: SpendPage,
 });
 
 const budgetIncomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/income",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
   component: Income,
 });
 
 const budgetExtraRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/extra",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
   component: Extraordinary,
 });
 
@@ -290,12 +292,13 @@ const budgetExtraRoute = new Route({
 const budgetReportsRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/reports",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN", "JUNTA"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
   component: Reports,
 });
 
-// index /budget/reports -> /budget/reports/income
 const budgetReportsIndexRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
   path: "/",
@@ -317,7 +320,6 @@ const budgetReportsSpendRoute = new Route({
   component: SpendReportPage,
 });
 
-// ✅ Proyecciones (reportes)
 const budgetReportsProjectionIncomeRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
   path: "/ProjectionIncome",
@@ -330,7 +332,6 @@ const budgetReportsProjectionSpendsRoute = new Route({
   component: PSpendProjectionsPage,
 });
 
-// ✅ Compat (ANTES apuntaban a /projection-income que no existe)
 const budgetReportsPIncomeCompatRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
   path: "/pincome",
@@ -359,8 +360,10 @@ const budgetReportsExtraRoute = new Route({
 const associatesLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/associates",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN", "JUNTA"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
   component: () => (
     <>
       <AssociatesSubnav />
@@ -396,8 +399,10 @@ const associatesApprovedRoute = new Route({
 const volunteersLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/volunteers",
-  beforeLoad: ({ context, location }) =>
-    requireRole(context, ["ADMIN", "JUNTA"], location.pathname + location.search),
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
   component: () => (
     <>
       <VolunteersSubnav />
