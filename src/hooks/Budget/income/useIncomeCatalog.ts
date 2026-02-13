@@ -1,6 +1,7 @@
 import type { Department, IncomeSubType, IncomeType } from "../../../models/Budget/IncomeType";
 import { listDepartments, listIncomeSubTypes, listIncomeTypes } from "../../../services/Budget/IncomeService";
 import { useQuery } from "@tanstack/react-query";
+import { listIncomes } from "../../../services/Budget/IncomeService";
 
 // Mantiene el contrato: { data, loading, error }
 function adaptQuery<T>(q: { data?: T; isPending: boolean; error: unknown }) {
@@ -52,4 +53,18 @@ export function useIncomeSubTypes(incomeTypeId?: number) {
     staleTime: 5 * 60 * 1000,
   });
   return adaptQuery<IncomeSubType[]>(q);
+}
+
+export function useIncomesList(incomeSubTypeId?: number) {
+  const q = useQuery({
+    queryKey: ["incomeList", incomeSubTypeId ?? "all"],
+    queryFn: async () => listIncomes(incomeSubTypeId),
+    staleTime: 30 * 1000,
+  });
+
+  return {
+    data: (q.data ?? []) as any[],
+    loading: q.isPending,
+    error: (q.error as any)?.message ?? null,
+  };
 }

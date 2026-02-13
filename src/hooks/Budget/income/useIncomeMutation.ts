@@ -18,6 +18,7 @@ import {
   updateIncomeSubType,
 } from "../../../services/Budget/IncomeService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateIncome } from "../../../services/Budget/IncomeService";
 
 // Mantiene el contrato: { mutate, loading, error }
 function wrapMutation<TPayload, TResult>(
@@ -117,4 +118,35 @@ export function useUpdateIncomeSubType() {
     },
   });
   return wrapMutation<{ id: number; name?: string; incomeTypeId?: number }, IncomeSubType>(m);
+}
+
+
+
+export function useUpdateIncome() {
+  const qc = useQueryClient();
+
+  const m = useMutation({
+    mutationFn: ({
+      id,
+      amount,
+      incomeSubTypeId,
+      date,
+    }: {
+      id: number;
+      amount?: number;
+      incomeSubTypeId?: number;
+      date?: string;
+    }) =>
+      updateIncome(id, { amount, incomeSubTypeId, date }),
+
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["incomeList"] });
+      // (si tu lista usa otro queryKey, lo ajustamos cuando vea tu IncomeList)
+    },
+  });
+
+  return wrapMutation<
+    { id: number; amount?: number; incomeSubTypeId?: number; date?: string },
+    any
+  >(m);
 }

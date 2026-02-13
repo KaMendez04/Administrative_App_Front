@@ -118,3 +118,31 @@ export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
     },
   };
 }
+
+
+export async function updateIncome(
+  id: number,
+  payload: { amount?: number; incomeSubTypeId?: number; date?: string }
+) {
+  const body: any = {};
+
+  if (payload.amount !== undefined) {
+    body.amount = Number(payload.amount).toFixed(2);
+  }
+  if (payload.incomeSubTypeId !== undefined) {
+    body.incomeSubTypeId = payload.incomeSubTypeId;
+  }
+  if (payload.date !== undefined) {
+    body.date = payload.date;
+  }
+
+  const { data } = await apiConfig.patch<any>(`/income/${id}`, body);
+  return data;
+}
+
+export async function listIncomes(incomeSubTypeId?: number) {
+  const { data } = await apiConfig.get<any[]>("/income", {
+    params: incomeSubTypeId ? { incomeSubTypeId } : undefined,
+  });
+  return data;
+}
