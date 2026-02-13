@@ -27,10 +27,14 @@ export function useAboutUsEdit() {
 
       // Mapear por título (slug) a los 3 campos
       const map = new Map(list.map(i => [slugifyTitle(i.title), i]))
-      const whoWeAreValue = map.get(SECTION_DEFS[0].slug)?.description ?? ""
-      const missionValue = map.get(SECTION_DEFS[1].slug)?.description ?? ""
-      const visionValue = map.get(SECTION_DEFS[2].slug)?.description ?? ""
-      
+      const whoSlug = slugifyTitle(SECTION_DEFS[0].title)
+      const missionSlug = slugifyTitle(SECTION_DEFS[1].title)
+      const visionSlug = slugifyTitle(SECTION_DEFS[2].title)
+
+      const whoWeAreValue = map.get(whoSlug)?.description ?? ""
+      const missionValue = map.get(missionSlug)?.description ?? ""
+      const visionValue = map.get(visionSlug)?.description ?? ""
+
       setWhoWeAre(whoWeAreValue)
       setMission(missionValue)
       setVision(visionValue)

@@ -93,7 +93,7 @@ export default function AboutUsEdition() {
                   <textarea
                     id="whoWeAre"
                     rows={4}
-                    value={whoWeAre}
+                    value={whoWeAre ?? ""}          // ✅ aquí
                     onChange={(e) => setWhoWeAre(e.target.value)}
                     maxLength={MAX}
                     disabled={saving}
