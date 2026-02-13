@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Plus, Pencil } from "lucide-react";
 import IncomeForm from "../../components/Budget/Income/IncomeForm";
 import CatalogModalIncome from "@/components/Budget/Income/CatalogModalIncome";
-
+import IncomeList from "@/components/Budget/Income/IncomeList"; // ✅ NUEVO
 
 export default function IncomePage() {
   const [openCatalog, setOpenCatalog] = useState(false);
@@ -15,7 +15,6 @@ export default function IncomePage() {
         <div className="relative rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-6 md:p-10">
           {/* Botones arriba a la derecha */}
           <div className="absolute top-6 right-6 flex items-center gap-3">
-            {/* ✏️ Editar catálogo */}
             <button
               onClick={() => setOpenEditCatalog(true)}
               className="rounded-full bg-[#6B7A3A] p-3 text-white shadow hover:opacity-90"
@@ -25,7 +24,6 @@ export default function IncomePage() {
               <Pencil className="h-6 w-6" />
             </button>
 
-            {/* ➕ Agregar catálogo */}
             <button
               onClick={() => setOpenCatalog(true)}
               className="rounded-full bg-[#708C3E] p-3 text-white shadow hover:bg-[#5e732f]"
@@ -37,22 +35,16 @@ export default function IncomePage() {
           </div>
 
           <IncomeForm onSuccess={() => {}} />
+
+          {/* ✅ Lista debajo */}
+          <div className="mt-8">
+            <IncomeList />
+          </div>
         </div>
       </div>
 
-      {/* Modal: AGREGAR */}
-      <CatalogModalIncome
-        open={openCatalog}
-        onClose={() => setOpenCatalog(false)}
-        mode="create"
-      />
-
-      {/* Modal: EDITAR */}
-      <CatalogModalIncome
-        open={openEditCatalog}
-        onClose={() => setOpenEditCatalog(false)}
-        mode="edit"
-      />
+      <CatalogModalIncome open={openCatalog} onClose={() => setOpenCatalog(false)} mode="create" />
+      <CatalogModalIncome open={openEditCatalog} onClose={() => setOpenEditCatalog(false)} mode="edit" />
     </div>
   );
 }
