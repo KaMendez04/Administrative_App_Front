@@ -62,3 +62,10 @@ export type PSpendSubType = {
   typeId: number; // pSpendTypeId
 };
 
+// src/models/Budget/SpendType.ts
+export type UpdateSpendDTO = {
+  id: number
+  spendSubTypeId?: number
+  amount?: number
+  date?: string
+}

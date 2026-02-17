@@ -13,6 +13,7 @@ import {
   createPSpendSubType,
   updatePSpendType,
   updatePSpendSubType,
+  updatePSpend,
 } from "../../../services/Budget/projectionSpendService";
 
 import {
@@ -112,4 +113,19 @@ export function useUpdateDepartment() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["departments"] }),
   });
   return wrapMutation<{ id: number; name: string }, Department>(m);
+}
+
+export function useUpdatePSpend() {
+  const qc = useQueryClient()
+
+  const m = useMutation({
+    mutationFn: (p: { id: number; amount?: number; subTypeId?: number; date?: string }) =>
+      updatePSpend(p.id, { amount: p.amount, subTypeId: p.subTypeId, date: p.date }),
+
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pSpendList"] })
+    },
+  })
+
+  return wrapMutation<{ id: number; amount?: number; subTypeId?: number; date?: string }, any>(m)
 }

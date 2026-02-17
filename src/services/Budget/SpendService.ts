@@ -176,3 +176,45 @@ export async function updateSpendSubType(
     spendTypeId: data?.spendType?.id ?? data?.spendTypeId ?? payload.spendTypeId!,
   };
 }
+
+
+export async function listSpend(): Promise<ApiList<Spend>> {
+  const { data } = await apiConfig.get<any[]>("/spend");
+
+  const items: Spend[] = (data ?? []).map((row) => ({
+    id: row.id,
+    amount: row.amount,
+    date: row.date,
+    spendSubType: {
+      id: row?.spendSubType?.id,
+      name: row?.spendSubType?.name ?? "",
+      spendTypeId: row?.spendSubType?.spendType?.id,
+    },
+  }));
+
+  return { data: items };
+}
+
+// ✅ Update egreso (editar monto / subtipo / fecha si quisieras)
+export async function updateSpend(
+  id: number,
+  payload: { spendSubTypeId?: number; amount?: number; date?: string }
+): Promise<Spend> {
+  const body: any = {};
+  if (payload.spendSubTypeId !== undefined) body.spendSubTypeId = payload.spendSubTypeId;
+  if (payload.amount !== undefined) body.amount = Number(payload.amount).toFixed(2);
+  if (payload.date !== undefined) body.date = payload.date;
+
+  const { data } = await apiConfig.patch<any>(`/spend/${id}`, body);
+
+  return {
+    id: data.id,
+    amount: data.amount,
+    date: data.date,
+    spendSubType: {
+      id: data?.spendSubType?.id ?? body.spendSubTypeId,
+      name: data?.spendSubType?.name ?? "",
+      spendTypeId: data?.spendSubType?.spendType?.id,
+    },
+  };
+}
