@@ -28,6 +28,18 @@ export function getCurrentUser(): User | null {
   }
 }
 
+function getStorageWithToken(): Storage | null {
+  if (localStorage.getItem(TOKEN_KEY)) return localStorage
+  if (sessionStorage.getItem(TOKEN_KEY)) return sessionStorage
+  return null
+}
+
+export function setCurrentUser(user: User) {
+  const storage = getStorageWithToken()
+  if (!storage) return
+  storage.setItem(USER_KEY, JSON.stringify(user))
+}
+
 export function authHeader(): Record<string, string> {
   const t = getToken();
   return t ? { Authorization: `Bearer ${t}` } : {};

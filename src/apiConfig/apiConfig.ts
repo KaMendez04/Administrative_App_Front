@@ -13,7 +13,6 @@ const apiConfig = axios.create({
 // =====================
 const LS_FY_ID = "cg_currentFYId";
 
-// Evita enviar token a endpoints públicos de auth (opcional pero ordenado)
 const NO_AUTH_PATHS = [
   "/auth/login",
   "/auth/request-reset-password",

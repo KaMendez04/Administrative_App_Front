@@ -1,4 +1,3 @@
-// src/router/Router.tsx
 import {
   Router,
   Route,
@@ -14,7 +13,7 @@ import Home from "./Home";
 import LoginPage from "../pages/LoginPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
-import ForbiddenPage from "@/common/ForbiddenPage";
+import ForbiddenPage from "@/components/common/ForbiddenPage";
 
 import ManualPage from "../pages/ManualPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage";
@@ -56,7 +55,11 @@ import VolunteersApprovedPage from "../pages/volunteers/VolunteersApprovedPage";
 
 import { requireRole, getLocationHref } from "@/auth/guards";
 import type { RouterContext } from "./routerContext";
-import { DefaultNotFound } from "@/common/DefaultNotFound";
+import { DefaultNotFound } from "@/components/common/DefaultNotFound";
+import ConfirmEmailChangePage from "@/pages/ConfirmEmailChangePage";
+import SettingsAccountPage from "@/pages/settings/SettingsAccountPage";
+import SettingsUsersPage from "@/pages/settings/SettingsUsersPage";
+import SettingsLayoutPage from "@/pages/settings/SettingsLayoutPage";
 
 // ================================
 // Root
@@ -138,6 +141,53 @@ const changePasswordRoute = new Route({
   path: "/account/change-password",
   component: ChangePasswordPage,
 });
+
+const confirmEmailChangeRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/confirm-email-change",
+  component: ConfirmEmailChangePage,
+  validateSearch: (search: Record<string, unknown>): { token?: string } => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
+});
+
+const settingsLayoutRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/settings",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location)
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref)
+  },
+  component: SettingsLayoutPage,
+})
+
+const settingsIndexRoute = new Route({
+  getParentRoute: () => settingsLayoutRoute,
+  path: "/",
+  beforeLoad: () => {
+    throw redirect({ to: "/settings/account" })
+  },
+})
+
+const settingsAccountRoute = new Route({
+  getParentRoute: () => settingsLayoutRoute,
+  path: "/account",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
+  component: SettingsAccountPage,
+})
+
+const settingsUsersRoute = new Route({
+  getParentRoute: () => settingsLayoutRoute,
+  path: "/users",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
+  component: SettingsUsersPage,
+})
 
 // ================================
 // Solo ADMIN
@@ -440,6 +490,7 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   forgotPasswordRoute,
   resetPasswordRoute,
+  confirmEmailChangeRoute,
   forbiddenRoute,
 
   // privadas
@@ -490,6 +541,12 @@ const routeTree = rootRoute.addChildren([
       volunteersIndexRoute,
       volunteersRequestsRoute,
       volunteersApprovedRoute,
+    ]),
+
+    settingsLayoutRoute.addChildren([
+      settingsIndexRoute,
+      settingsAccountRoute,
+      settingsUsersRoute,
     ]),
   ]),
 ]);

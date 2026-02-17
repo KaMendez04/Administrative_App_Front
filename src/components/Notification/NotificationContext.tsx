@@ -41,7 +41,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
 
   const addNotification = (notification: AddNotificationType) => {
-    console.log("🔔 Agregando notificación:", notification)
     
     const newNotification: Notification = {
       id: `${Date.now()}-${Math.random()}`,
@@ -53,12 +52,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
 
     setNotifications((prev) => {
-      console.log("📋 Notificaciones previas:", prev.length)
-      console.log("📋 Nuevas notificaciones:", [...prev, newNotification].length)
       return [newNotification, ...prev]
     })
-
-    console.log("🔔 Mostrando toast...")
     
     toast.custom(
       () => (
@@ -75,9 +70,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         position: "top-right",
       },
     )
-    
-    console.log("✅ Toast mostrado")
-  }
+      }
 
   const markAsRead = (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))

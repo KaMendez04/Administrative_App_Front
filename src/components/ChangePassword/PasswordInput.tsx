@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Eye, EyeOff } from "lucide-react"
+import { Input } from "../ui/input"
 
 interface PasswordInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange"> {
@@ -12,11 +13,12 @@ export function PasswordInput({ value, onChange, ...props }: PasswordInputProps)
 
   return (
     <div className="relative">
-      <input
+      <Input
         type={show ? "text" : "password"}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         {...props}
+        className="bg-[white] border-[#DCD6C9] focus-visible:ring-[#708C3E]/30 focus-visible:ring-2 focus-visible:ring-offset-0 rounded-md"
       />
       <button
         type="button"
