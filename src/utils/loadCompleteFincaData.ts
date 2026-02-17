@@ -1,4 +1,4 @@
-import apiConfig from "../services/apiConfig";
+import apiConfig from "../apiConfig/apiConfig";
 
 export const loadCompleteFincaData = async (idFinca: number) => {
   try {

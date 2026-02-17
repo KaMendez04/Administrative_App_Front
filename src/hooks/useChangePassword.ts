@@ -2,7 +2,7 @@ import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { ChangePasswordSchema } from "../schemas/changePassword.schema"
 import type { ChangePassword } from "../models/ChangePasswordType";
-import { changePassword } from "../services/changePassword";
+import { changePassword } from "@/auth/changePassword";
 
 export type BannerState = { type: "success" | "error"; text: string } | null
 

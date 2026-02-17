@@ -1,5 +1,5 @@
 import { AssociateListResponseSchema, AssociateSchema, type Associate, type AssociateListParams, type AssociateListResponse, type UpdateAssociateValues } from "../../schemas/adminSolicitudes";
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 
 // ✅ Listado ligero (para tablas)
 export async function listAssociates(params: AssociateListParams): Promise<AssociateListResponse> {

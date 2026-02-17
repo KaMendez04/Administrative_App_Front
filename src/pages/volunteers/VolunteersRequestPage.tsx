@@ -3,7 +3,7 @@ import { useVolunteerSolicitudesList } from "../../hooks/Volunteers/individual/u
 import { useApproveVolunteerSolicitud } from "../../hooks/Volunteers/individual/useApproveVolunteerSolicitud";
 import { useRejectVolunteerSolicitud } from "../../hooks/Volunteers/individual/useRejectVolunteerSolicitud";
 import { useVolunteerSolicitudDetail } from "../../hooks/Volunteers/individual/useVolunteerSolicitudDetail";
-import { getCurrentUser } from "../../services/auth";
+import { getCurrentUser } from "../../auth/auth";
 import { KPICard } from "../../components/KPICard";
 import { VolunteerRequestsTable } from "../../components/volunteers/VolunteerRequestsTable";
 import { VolunteerViewModal } from "../../components/volunteers/VolunteerViewModal";

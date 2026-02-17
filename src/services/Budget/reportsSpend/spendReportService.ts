@@ -1,5 +1,5 @@
 import type { SpendFiltersResolved, SpendSummary, SpendTableRow } from "../../../models/Budget/reports/spend";
-import api from "../../apiConfig";
+import api from "../../../apiConfig/apiConfig";
 
 // Obtener tabla + resumen
 export async function fetchSpendFull(filters: SpendFiltersResolved): Promise<{

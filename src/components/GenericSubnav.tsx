@@ -3,7 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 
-import { getCurrentUser } from "../services/auth"
+import { getCurrentUser } from "../auth/auth"
 import type { RoleCode } from "../types/roles"
 
 export type NavItem = {

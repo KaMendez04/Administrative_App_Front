@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import apiConfig from "../../../services/apiConfig";
+import apiConfig from "../../../apiConfig/apiConfig";
 import { showErrorAlertRegister, showSuccessAlertRegister } from "../../../utils/alerts";
 import type { Organizacion } from "../../../schemas/volunteerSchemas";
 import { UpdateOrganizacionSchema, UpdateRepresentanteSchema } from "../../../schemas/updateVolunteerSchema";

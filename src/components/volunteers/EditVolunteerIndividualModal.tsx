@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { VoluntarioIndividual } from "../../schemas/volunteerSchemas";
-import apiConfig from "../../services/apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 import {
   showSuccessAlertRegister,
   showErrorAlertRegister,

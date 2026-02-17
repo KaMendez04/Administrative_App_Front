@@ -1,4 +1,4 @@
-import apiConfig from "../../apiConfig";
+import apiConfig from "../../../apiConfig/apiConfig";
 
 export async function fetchExtraFull(filters:{start?:string;end?:string;name?:string}) {
   const { data } = await apiConfig.get("/report-extra/full", { params: {

@@ -5,7 +5,7 @@ import { useApproveSolicitud } from "../../hooks/associates/useApproveSolicitud"
 import { useRejectSolicitud } from "../../hooks/associates/useRejectSolicitud";
 import { RejectDialog } from "../../components/associates/RejectDialog";
 import { SolicitudViewModal } from "../../components/associates/SolicitudViewModal";
-import { getCurrentUser } from "../../services/auth";
+import { getCurrentUser } from "../../auth/auth";
 import { RequestsTable } from "../../components/associates/RequestTable";
 import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";

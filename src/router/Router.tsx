@@ -1,190 +1,275 @@
 import {
   Router,
-  RootRoute,
   Route,
   Outlet,
   lazyRouteComponent,
-  NotFoundRoute,
-  useNavigate,
-} from '@tanstack/react-router'
-import { useEffect } from 'react'
-import RootLayout from './RootLayout'
+  redirect,
+  createRootRouteWithContext,
+} from "@tanstack/react-router";
+
+import RootLayout from "./RootLayout";
+import Home from "./Home";
+
+import LoginPage from "../pages/LoginPage";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import ResetPasswordPage from "../pages/ResetPasswordPage";
+import ForbiddenPage from "@/components/common/ForbiddenPage";
+
+import ManualPage from "../pages/ManualPage";
+import ChangePasswordPage from "../pages/ChangePasswordPage";
+
 import CloudinaryMediaPage from "../pages/Cloudinary/CloudinaryMediaPage";
-import Home from './Home'
-import PrincipalEdition from '../pages/editionPage/PrincipalEdition'
-import AboutUsEdition from '../pages/editionPage/AboutUsEdition'
-import FAQEdition from '../pages/editionPage/FAQ/FAQEdition'
-import VolunteersEdition from '../pages/editionPage/VolunteersEdition'
-import AssociatesEdition from '../pages/editionPage/AssociatesEdition'
-import StaffManagementPage from '../pages/PersonalPage'
-import LoginPage from '../pages/LoginPage'
-import EventEdition from '../pages/editionPage/EventEdition'
-import ServicesEdition from '../pages/editionPage/ServicesEdition'
-import ForgotPasswordPage from '../pages/ForgotPasswordPage'
-import ResetPasswordPage from '../pages/ResetPasswordPage'
-import VolunteersPage from '../pages/volunteers/VolunteersSubnav'
-import ManualPage from '../pages/ManualPage'
-import ChangePasswordPage from '../pages/ChangePasswordPage'
-import BudgetSubnav from '../pages/Budget/Navbar/BudgetSubnav'
-import Initial from '../pages/Budget/Initial'
-import Income from '../pages/Budget/Income'
-import Extraordinary from '../pages/Budget/Extraordinary'
-import Reports from '../pages/Budget/Reports/index'
-import PIncome from '../pages/Budget/PIncome'
-import PExpenses from '../pages/Budget/PSpend'
-import SpendPage from '../pages/Budget/SpendPage'
-import IncomeReportPage from '../pages/Budget/Reports/IncomeReportPage'
+import StaffManagementPage from "../pages/PersonalPage";
 
-import { getCurrentUser } from '../services/auth'
-import { redirect } from '@tanstack/react-router'
-import SpendReportPage from '../pages/Budget/Reports/SpendReportPage'
-import PSpends from '../pages/Budget/Reports/PSpends'
-import PIncomeProjectionsPage from '../pages/Budget/Reports/PIncome'
-import ExtraReportPage from '../pages/Budget/Reports/extraReportPage'
-import AssociatesSubnav from '../pages/associates/AssociatesSubnav'
-import AssociatesApprovedPage from '../pages/associates/AssociatesApprovedPage'
-import AdminRequestsPage from '../pages/associates/AdminRequestPage'
-import VolunteersSubnav from '../pages/volunteers/VolunteersSubnav'
-import VolunteersApprovedPage from '../pages/volunteers/VolunteersApprovedPage'
-import VolunteersRequestPage from '../pages/volunteers/VolunteersRequestPage'
+import AboutUsEdition from "../pages/editionPage/AboutUsEdition";
+import FAQEdition from "../pages/editionPage/FAQ/FAQEdition";
+import PrincipalEdition from "../pages/editionPage/PrincipalEdition";
+import ServicesEdition from "../pages/editionPage/ServicesEdition";
+import VolunteersEdition from "../pages/editionPage/VolunteersEdition";
+import AssociatesEdition from "../pages/editionPage/AssociatesEdition";
+import EventEdition from "../pages/editionPage/EventEdition";
 
+import BudgetSubnav from "../pages/Budget/Navbar/BudgetSubnav";
+import Initial from "../pages/Budget/Initial";
+import Income from "../pages/Budget/Income";
+import Extraordinary from "../pages/Budget/Extraordinary";
+import PIncome from "../pages/Budget/PIncome";
+import PExpenses from "../pages/Budget/PSpend";
+import SpendPage from "../pages/Budget/SpendPage";
+import Reports from "../pages/Budget/Reports/index";
+import IncomeReportPage from "../pages/Budget/Reports/IncomeReportPage";
+import SpendReportPage from "../pages/Budget/Reports/SpendReportPage";
 
-function requireRole(allowed: "ADMIN" | "JUNTA") {
-    const role = (getCurrentUser()?.role?.name?? "").toUpperCase()
-    if (!allowed.includes(role as any)) {
-      throw redirect({
-        to: "/unauthorized",
-        search: { from: location.pathname },
-      })
-    }
-}
+// ✅ nombres reales
+import PSpendProjectionsPage from "../pages/Budget/Reports/PSpends";
+import PIncomeProjectionsPage from "../pages/Budget/Reports/PIncome";
+import ExtraReportPage from "../pages/Budget/Reports/extraReportPage";
 
-// Root vacío (NO layout). Desde aquí colgamos:
-// - appLayout (con Home)
-// - rutas sin layout (login, forgot-password, reset-password)
+import AssociatesSubnav from "../pages/associates/AssociatesSubnav";
+import AdminRequestsPage from "../pages/associates/AdminRequestPage";
+import AssociatesApprovedPage from "../pages/associates/AssociatesApprovedPage";
 
-// Root con React Query Provider (layout raíz)
-const rootRoute = new RootRoute({
+import VolunteersSubnav from "../pages/volunteers/VolunteersSubnav";
+import VolunteersRequestPage from "../pages/volunteers/VolunteersRequestPage";
+import VolunteersApprovedPage from "../pages/volunteers/VolunteersApprovedPage";
+
+import { requireRole, getLocationHref } from "@/auth/guards";
+import type { RouterContext } from "./routerContext";
+import { DefaultNotFound } from "@/components/common/DefaultNotFound";
+import ConfirmEmailChangePage from "@/pages/ConfirmEmailChangePage";
+import SettingsAccountPage from "@/pages/settings/SettingsAccountPage";
+import SettingsUsersPage from "@/pages/settings/SettingsUsersPage";
+import SettingsLayoutPage from "@/pages/settings/SettingsLayoutPage";
+
+// ================================
+// Root
+// ================================
+const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
-})
+  notFoundComponent: DefaultNotFound,
+});
 
-// Layout general con Navbar + Sidebar
+// ================================
+// Públicas
+// ================================
+const loginRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/login",
+  component: LoginPage,
+  // ✅ FIXED: Validar el search params
+  validateSearch: (search: Record<string, unknown>): { from?: string } => {
+    return {
+      from: typeof search.from === 'string' ? search.from : undefined,
+    };
+  },
+});
+
+const forgotPasswordRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/forgot-password",
+  component: ForgotPasswordPage,
+});
+
+const resetPasswordRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/reset-password",
+  component: ResetPasswordPage,
+});
+
+const forbiddenRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/403",
+  component: ForbiddenPage,
+});
+
+// ================================
+// Layout privado (interno)
+// ================================
 const appLayoutRoute = new Route({
   getParentRoute: () => rootRoute,
-  id: 'app', // opcional, útil para debugging
+  id: "app",
   component: Home,
-})
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(
+      context,
+      ["ADMIN", "JUNTA"],
+      locationHref
+    );
+  },
+});
 
-// Rutas que usan el layout (Home)
-const routePaths = { root: '/Principal' }
-
+// ================================
+// Principal
+// ================================
 const principalRoute = new Route({
   getParentRoute: () => appLayoutRoute,
-  path: routePaths.root,
-  component: lazyRouteComponent(() => import('../pages/Principal')),
+  path: "/Principal",
+  component: lazyRouteComponent(() => import("../pages/Principal")),
+});
+
+// Manual
+const manualRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/manuals",
+  component: ManualPage,
+});
+
+// Cuenta
+const changePasswordRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/account/change-password",
+  component: ChangePasswordPage,
+});
+
+const confirmEmailChangeRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/confirm-email-change",
+  component: ConfirmEmailChangePage,
+  validateSearch: (search: Record<string, unknown>): { token?: string } => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
+});
+
+const settingsLayoutRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/settings",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location)
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref)
+  },
+  component: SettingsLayoutPage,
 })
 
-// Grupo /edition dentro del layout
+const settingsIndexRoute = new Route({
+  getParentRoute: () => settingsLayoutRoute,
+  path: "/",
+  beforeLoad: () => {
+    throw redirect({ to: "/settings/account" })
+  },
+})
+
+const settingsAccountRoute = new Route({
+  getParentRoute: () => settingsLayoutRoute,
+  path: "/account",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
+  component: SettingsAccountPage,
+})
+
+const settingsUsersRoute = new Route({
+  getParentRoute: () => settingsLayoutRoute,
+  path: "/users",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
+  component: SettingsUsersPage,
+})
+
+// ================================
+// Solo ADMIN
+// ================================
+const staffRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/staff",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
+  component: StaffManagementPage,
+});
+
+const cloudinaryMediaRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/media",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
+  component: CloudinaryMediaPage,
+});
+
+// ================================
+// Edition (solo ADMIN)
+// ================================
 const editionLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
-  path: '/edition',
-  beforeLoad: () => requireRole("ADMIN"),
+  path: "/edition",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
   component: () => <Outlet />,
-})
+});
 
 const aboutUsEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/about',
+  path: "/about",
   component: AboutUsEdition,
-})
+});
 
 const faqEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/faq',
+  path: "/faq",
   component: FAQEdition,
-})
+});
 
 const principalEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/principal',
+  path: "/principal",
   component: PrincipalEdition,
-})
+});
 
 const servicesEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/servicios',
+  path: "/servicios",
   component: ServicesEdition,
-})
+});
 
 const volunteersEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/volunteers',
+  path: "/volunteers",
   component: VolunteersEdition,
-})
+});
 
 const associatesEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/associates',
+  path: "/associates",
   component: AssociatesEdition,
-})
+});
 
 const eventsEdition = new Route({
   getParentRoute: () => editionLayoutRoute,
-  path: '/events',
+  path: "/events",
   component: EventEdition,
-})
+});
 
-const staffManagement = new Route({
-  getParentRoute: () => appLayoutRoute,
-  path: '/staff',
-  component: StaffManagementPage,
-})
-
-// ✅ NUEVO: Ruta de Cambiar Contraseña (con layout)
-const changePasswordRoute = new Route({
-  getParentRoute: () => appLayoutRoute,
-  path: '/account/change-password',
-  component: ChangePasswordPage,
-})
-
-// Rutas SIN layout (no muestran Navbar/Sidebar)
-const loginRoute = new Route({
-  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
-  path: '/login',
-  component: LoginPage,
-})
-
-const associatesPage = new Route({
-  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
-  path: '/associates',
-  component: AssociatesSubnav,
-})
-
-const volunteersPage = new Route({
-  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
-  path: '/volunteers',
-  component: VolunteersPage,
-})
-
-const manualPage = new Route({
-  getParentRoute: () => rootRoute, // <- importante: cuelga del root vacío
-  path: '/manuals',
-  component: ManualPage,
-})
-
-const forgotPasswordRoute = new Route({
-  getParentRoute: () => rootRoute, // <- también sin layout
-  path: '/forgot-password',
-  component: ForgotPasswordPage,
-})
-
-// ✅ Se mantiene sin layout (root)
-const resetPasswordRoute = new Route({
-  getParentRoute: () => rootRoute,
-  path: '/reset-password',
-  component: ResetPasswordPage,
-})
-
+// ================================
+// Budget
+// ================================
 const budgetLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/budget",
@@ -194,269 +279,282 @@ const budgetLayoutRoute = new Route({
       <Outlet />
     </>
   ),
-})
+});
 
-
-const budgetHomeRoute = new Route({
+const budgetIndexRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
-  path: "/", // index
+  path: "/",
   component: Initial,
-})
+});
 
+// ADMIN-only (editar)
 const budgetProjectionIncomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/pincome",
-  beforeLoad: () => requireRole("ADMIN"),
-  component: PIncome
-})
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
+  component: PIncome,
+});
 
 const budgetProjectionExpensesRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
-  path: "/PExpense",
-  beforeLoad: () => requireRole("ADMIN"),
-  component: PExpenses
-})
+  path: "/pexpense",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
+  component: PExpenses,
+});
 
 const budgetExpensesRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/expenses",
-  beforeLoad: () => requireRole("ADMIN"),
-  component: SpendPage, // ← esta es la que queremos
-})
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
+  component: SpendPage,
+});
 
 const budgetIncomeRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/income",
-  beforeLoad: () => requireRole("ADMIN"),
-  component: Income
-})
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
+  component: Income,
+});
 
 const budgetExtraRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/extra",
-  beforeLoad: () => requireRole("ADMIN"),
-  component: Extraordinary
-})
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
+  component: Extraordinary,
+});
 
+// Reportes (ADMIN + JUNTA)
 const budgetReportsRoute = new Route({
   getParentRoute: () => budgetLayoutRoute,
   path: "/reports",
-  component:  Reports
-})
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
+  component: Reports,
+});
 
 const budgetReportsIndexRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
-  path: '/',                   // index de /budget/reports
-  component: IncomeReportPage, // render directo del reporte de ingresos
+  path: "/",
+  beforeLoad: () => {
+    throw redirect({ to: "/budget/reports/income" });
+  },
+  component: IncomeReportPage,
 });
 
 const budgetReportsIncomeRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
-  path: 'income', // -> /budget/reports/income
+  path: "/income",
   component: IncomeReportPage,
-})
+});
 
 const budgetReportsSpendRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
-  path: 'spend', // -> /budget/reports/spend
+  path: "/spend",
   component: SpendReportPage,
-})
+});
 
-const budgetReportsPSpendRoute = new Route({
+const budgetReportsProjectionIncomeRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
-  path: 'pspend', // -> /budget/reports/spend
-  component: PSpends,
-})
-
-const budgetReportsPIncomeRoute = new Route({
-  getParentRoute: () => budgetReportsRoute,
-  path: 'pincome', // -> /budget/reports/spend
-  component: PIncome,
-})
-
-const budgetReportPIncomeRoute = new Route({
-  getParentRoute: () => budgetReportsRoute,
-  path: 'ProjectionIncome', // -> /budget/reports/projection
+  path: "/ProjectionIncome",
   component: PIncomeProjectionsPage,
-})
+});
 
-const budgetReportsPSpendsRoute = new Route({
+const budgetReportsProjectionSpendsRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
-  path: 'ProjectionSpends', // -> /budget/reports/projection
-  component: PSpends,
-})
+  path: "/ProjectionSpends",
+  component: PSpendProjectionsPage,
+});
+
+const budgetReportsPIncomeCompatRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: "/pincome",
+  beforeLoad: () => {
+    throw redirect({ to: "/budget/reports/ProjectionIncome" });
+  },
+});
+
+const budgetReportsPSpendCompatRoute = new Route({
+  getParentRoute: () => budgetReportsRoute,
+  path: "/pspend",
+  beforeLoad: () => {
+    throw redirect({ to: "/budget/reports/ProjectionSpends" });
+  },
+});
 
 const budgetReportsExtraRoute = new Route({
   getParentRoute: () => budgetReportsRoute,
-  path: 'Extraordinary', // -> /budget/reports/projection
+  path: "/extraordinary",
   component: ExtraReportPage,
-})
+});
 
-// Layout para Associates con subnav
+// ================================
+// Associates (ADMIN + JUNTA)
+// ================================
 const associatesLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/associates",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
   component: () => (
     <>
       <AssociatesSubnav />
       <Outlet />
     </>
   ),
-})
+});
 
-// Componente que redirige automáticamente a /requests
-function AssociatesIndexRedirect() {
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    navigate({ to: '/associates/requests', replace: true });
-  }, [navigate]);
-  
-  return null;
-}
-
-// Ruta index: /associates (redirige a /associates/requests)
 const associatesIndexRoute = new Route({
   getParentRoute: () => associatesLayoutRoute,
   path: "/",
-  component: AssociatesIndexRedirect,
+  beforeLoad: () => {
+    throw redirect({ to: "/associates/requests" });
+  },
+  component: AdminRequestsPage,
 });
 
-// Ruta: /associates/requests
 const associatesRequestsRoute = new Route({
   getParentRoute: () => associatesLayoutRoute,
   path: "/requests",
   component: AdminRequestsPage,
-})
+});
 
-// Ruta: /associates/approved
 const associatesApprovedRoute = new Route({
   getParentRoute: () => associatesLayoutRoute,
   path: "/approved",
   component: AssociatesApprovedPage,
-})
+});
 
-
-// Layout para Volunteers con subnav
+// ================================
+// Volunteers (ADMIN + JUNTA)
+// ================================
 const volunteersLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/volunteers",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN", "JUNTA"], locationHref);
+  },
   component: () => (
     <>
       <VolunteersSubnav />
       <Outlet />
     </>
   ),
-})
+});
 
-// Componente que redirige automáticamente a /requests
-function VolunteersIndexRedirect() {
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    navigate({ to: '/volunteers/requests', replace: true });
-  }, [navigate]);
-
-  return null;
-}
-  
-// Ruta index: /volunteers (redirige a /volunteers/requests)
 const volunteersIndexRoute = new Route({
   getParentRoute: () => volunteersLayoutRoute,
   path: "/",
-  component: VolunteersIndexRedirect,
+  beforeLoad: () => {
+    throw redirect({ to: "/volunteers/requests" });
+  },
+  component: VolunteersRequestPage,
 });
 
-// Ruta: /volunteers/requests
 const volunteersRequestsRoute = new Route({
   getParentRoute: () => volunteersLayoutRoute,
   path: "/requests",
   component: VolunteersRequestPage,
-})
+});
 
-// Ruta: /volunteers/approved
 const volunteersApprovedRoute = new Route({
   getParentRoute: () => volunteersLayoutRoute,
   path: "/approved",
   component: VolunteersApprovedPage,
-})
-
-
-// Fallback: si alguna ruta no existe, redirige a "/Principal"
-function RedirectHome() {
-  const navigate = useNavigate()
-  useEffect(() => {
-    navigate({ to: '/Principal', replace: true })
-  }, [navigate])
-  return null
-}
-
-const notFoundRoute = new NotFoundRoute({
-  getParentRoute: () => rootRoute,
-  component: RedirectHome,
-})
-
-//Cloudinary 
-const cloudinaryMediaRoute = new Route({
-  getParentRoute: () => appLayoutRoute,
-  path: "/media",
-  beforeLoad: () => requireRole("ADMIN"),
-  component: CloudinaryMediaPage,
 });
 
-// Ensamblar árbol de rutas
+// ================================
+// Route tree
+// ================================
 const routeTree = rootRoute.addChildren([
-  // Ramas SIN layout
+  // públicas
   loginRoute,
   forgotPasswordRoute,
-  resetPasswordRoute, 
+  resetPasswordRoute,
+  confirmEmailChangeRoute,
+  forbiddenRoute,
 
-  
-
-  // Rama CON layout (Home)
+  // privadas
   appLayoutRoute.addChildren([
     principalRoute,
+    manualRoute,
+    changePasswordRoute,
+    staffRoute,
+    cloudinaryMediaRoute,
+
     editionLayoutRoute.addChildren([
       aboutUsEdition,
-      associatesPage,
-      volunteersPage,
-      manualPage, 
       faqEdition,
       principalEdition,
       servicesEdition,
       volunteersEdition,
       associatesEdition,
       eventsEdition,
-      budgetLayoutRoute,
-      budgetHomeRoute,
+    ]),
+
+    budgetLayoutRoute.addChildren([
+      budgetIndexRoute,
       budgetProjectionIncomeRoute,
       budgetProjectionExpensesRoute,
       budgetExpensesRoute,
       budgetIncomeRoute,
       budgetExtraRoute,
-      budgetReportsRoute,
-      budgetReportsIndexRoute,   // index -> redirect a income
-      budgetReportsIncomeRoute,  // /budget/reports/income
-      budgetReportsSpendRoute,   // /budget/reports/spend
-      budgetReportsPSpendsRoute, 
-      budgetReportPIncomeRoute,
-      budgetReportsPSpendRoute,
-      budgetReportsPIncomeRoute,
-      budgetReportsExtraRoute,
-      associatesLayoutRoute,
-      associatesRequestsRoute,
-      associatesApprovedRoute,
-      associatesIndexRoute,
-      volunteersLayoutRoute,
-      volunteersRequestsRoute,
-      volunteersApprovedRoute,
-      volunteersIndexRoute,
-      cloudinaryMediaRoute,
+
+      budgetReportsRoute.addChildren([
+        budgetReportsIndexRoute,
+        budgetReportsIncomeRoute,
+        budgetReportsSpendRoute,
+        budgetReportsProjectionIncomeRoute,
+        budgetReportsProjectionSpendsRoute,
+        budgetReportsPIncomeCompatRoute,
+        budgetReportsPSpendCompatRoute,
+        budgetReportsExtraRoute,
+      ]),
     ]),
 
-    staffManagement,
-    changePasswordRoute, // 👈 nueva ruta con layout
-  ]),
-])
+    associatesLayoutRoute.addChildren([
+      associatesIndexRoute,
+      associatesRequestsRoute,
+      associatesApprovedRoute,
+    ]),
 
-export const router = new Router({ routeTree, notFoundRoute })
+    volunteersLayoutRoute.addChildren([
+      volunteersIndexRoute,
+      volunteersRequestsRoute,
+      volunteersApprovedRoute,
+    ]),
+
+    settingsLayoutRoute.addChildren([
+      settingsIndexRoute,
+      settingsAccountRoute,
+      settingsUsersRoute,
+    ]),
+  ]),
+]);
+
+export const router = new Router({
+  routeTree,
+  context: {
+    auth: { user: null, token: null },
+  },
+  defaultNotFoundComponent: DefaultNotFound,
+});

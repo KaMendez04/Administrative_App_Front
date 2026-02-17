@@ -1,4 +1,4 @@
-import api from "../../apiConfig";
+import api from "../../../apiConfig/apiConfig";
 
 // Helpers muy tolerantes: si name viene vacío => undefined
 export async function resolveDepartmentIdByName(name?: string): Promise<number | undefined> {

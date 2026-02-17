@@ -1,4 +1,4 @@
-import apiConfig from "./apiConfig";
+import apiConfig from "../apiConfig/apiConfig";
 
 export const forgotPasswordService = {
   async requestReset(email: string): Promise<{ ok: boolean; status: number; message?: string }> {

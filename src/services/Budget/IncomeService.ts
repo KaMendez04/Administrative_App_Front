@@ -10,7 +10,7 @@ import type {
   IncomeSubType,
   IncomeType,
 } from "../../models/Budget/IncomeType";
-import apiConfig from "../apiConfig";
+import apiConfig from "../../apiConfig/apiConfig";
 
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");

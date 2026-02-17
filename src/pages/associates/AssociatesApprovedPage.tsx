@@ -4,7 +4,7 @@ import { AssociateEditDrawer } from "../../components/associates/AssociateEditDr
 import { AssociateViewModal } from "../../components/associates/AssociateViewModal";
 import { useAdminAssociatesList } from "../../hooks/associates/useAdminAssociateList";
 import { useAssociateDetail } from "../../hooks/associates/useAdminAssociateDetail";
-import { getCurrentUser } from "../../services/auth";
+import { getCurrentUser } from "../../auth/auth";
 import { AssociatesTable, type AssociateRow } from "../../components/associates/associatesTable";
 import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";

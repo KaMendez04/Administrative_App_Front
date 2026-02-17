@@ -7,7 +7,7 @@ import { PersonalPageInfoModal } from "../components/Personal/PersonalPageInfoMo
 import { EditPersonalPageModal } from "../components/Personal/EditPersonalPageModal";
 import { personalApi } from "../services/personalPageService";
 import { fetchCedulaData } from "../services/cedulaService";
-import { getCurrentUser } from "../services/auth";
+import { getCurrentUser } from "../auth/auth";
 import type { PersonalPageType } from "../models/PersonalPageType";
 import { PersonalTable } from "../components/Personal/PersonalPageTable";
 import { ActionButtons } from "../components/ActionButtons";
