@@ -19,6 +19,7 @@ import {
   updateSpendType,
   updateSpendSubType,
   ensureSpendSubTypeFromProjection,
+  updateSpend,
 } from "../../../services/Budget/SpendService";
 
 function wrapMutation<TPayload, TResult>(
@@ -109,4 +110,20 @@ export function useEnsureSpendSubTypeFromProjection() {
     mutationFn: (pSpendSubTypeId: number) => ensureSpendSubTypeFromProjection(pSpendSubTypeId),
   });
   return wrapMutation<number, any>(m);
+}
+
+
+export function useUpdateSpend() {
+  const qc = useQueryClient();
+
+  const m = useMutation({
+    mutationFn: (p: { id: number; spendSubTypeId?: number; amount?: number; date?: string }) =>
+      updateSpend(p.id, { spendSubTypeId: p.spendSubTypeId, amount: p.amount, date: p.date }),
+
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["spendList"] });
+    },
+  });
+
+  return wrapMutation<{ id: number; spendSubTypeId?: number; amount?: number; date?: string }, any>(m);
 }

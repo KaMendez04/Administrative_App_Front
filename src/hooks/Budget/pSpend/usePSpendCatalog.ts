@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Department, PSpendType, PSpendSubType } from "../../../models/Budget/PSpendType";
-import { listDepartments, listPSpendTypes, listPSpendSubTypes } from "../../../services/Budget/projectionSpendService";
+import { listDepartments, listPSpendTypes, listPSpendSubTypes, listPSpends } from "../../../services/Budget/projectionSpendService";
 
 function adaptQuery<T>(q: { data?: T; isPending: boolean; error: unknown }) {
   return {
@@ -46,4 +46,20 @@ export function usePSpendSubTypes(pSpendTypeId?: number) {
     staleTime: 5 * 60 * 1000,
   });
   return adaptQuery<PSpendSubType[]>(q);
+}
+
+
+
+export function usePSpendsList(subTypeId?: number) {
+  const q = useQuery({
+    queryKey: ["pSpendList", subTypeId ?? "all"],
+    queryFn: async () => listPSpends(subTypeId),
+    staleTime: 30 * 1000,
+  });
+
+  return {
+    data: (q.data ?? []) as any[],
+    loading: q.isPending,
+    error: (q.error as any)?.message ?? null,
+  };
 }

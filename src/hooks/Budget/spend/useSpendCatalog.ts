@@ -6,6 +6,7 @@ import type {
   SpendType,
   PSpendSubType,
   PSpendType,
+  Spend,
 } from "../../../models/Budget/SpendType";
 
 import {
@@ -14,6 +15,7 @@ import {
   listSpendTypes,
   listPSpendSubTypes,
   listPSpendTypes,
+  listSpend,
 } from "../../../services/Budget/SpendService";
 
 // Mantiene el contrato: { data, loading, error }
@@ -98,4 +100,14 @@ export function usePSpendSubTypes(args?: { departmentId?: number; typeId?: numbe
   });
 
   return adaptQuery<PSpendSubType[]>(q);
+}
+
+
+export function useSpendsList() {
+  const q = useQuery({
+    queryKey: ["spendList"],
+    queryFn: async () => (await listSpend()).data as Spend[],
+    staleTime: 0,
+  });
+  return adaptQuery<Spend[]>(q);
 }

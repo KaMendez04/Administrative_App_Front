@@ -131,3 +131,25 @@ export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
     },
   };
 }
+
+
+export async function listPSpends(subTypeId?: number) {
+  const { data } = await apiConfig.get<any[]>("/p-spend", {
+    params: subTypeId ? { subTypeId } : undefined,
+  });
+  return data;
+}
+
+export async function updatePSpend(
+  id: number,
+  payload: { amount?: number; subTypeId?: number; date?: string }
+) {
+  const body: any = {}
+
+  if (payload.amount !== undefined) body.amount = Number(payload.amount)
+  if (payload.subTypeId !== undefined) body.subTypeId = payload.subTypeId
+  if (payload.date !== undefined) body.date = payload.date
+
+  const { data } = await apiConfig.patch<any>(`/p-spend/${id}`, body)
+  return data
+}
