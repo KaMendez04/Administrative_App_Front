@@ -38,38 +38,45 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
           </div>
         ) : (
           <div className="space-y-3 p-3 bg-[#F8F9F3]">
-            {rows.map((row) => (
-              <div
-                key={row.id}
-                className="rounded-xl border border-[#EAEFE0] bg-white p-3"
-              >
-                <div className="space-y-2">
-                  {row.getVisibleCells().map((cell) => {
-                    const header = cell.column.columnDef.header;
+            {rows.map((row) => {
+              const isTotal = !!(row.original as any)?.__isTotal;
 
-                    return (
-                      <div key={cell.id} className="grid grid-cols-12 gap-2 items-start">
-                        {/* Label */}
-                        <div className="col-span-5 text-[11px] font-bold text-[#5B732E] uppercase tracking-wider">
-                          {header
-                            ? String(
-                                typeof header === "function"
-                                  ? "Campo"
-                                  : header
-                              )
-                            : "Campo"}
-                        </div>
+              return (
+                <div
+                  key={row.id}
+                  className={[
+                    "rounded-xl border border-[#EAEFE0] p-3",
+                    isTotal ? "bg-[#F8F9F3] font-bold" : "bg-white",
+                  ].join(" ")}
+                >
+                  <div className="space-y-2">
+                    {row.getVisibleCells().map((cell) => {
+                      const header = cell.column.columnDef.header;
 
-                        {/* Value */}
-                        <div className="col-span-7 text-sm text-[#2E321B] whitespace-normal break-words">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      return (
+                        <div key={cell.id} className="grid grid-cols-12 gap-2 items-start">
+                          {/* Label */}
+                          <div className="col-span-5 text-[11px] font-bold text-[#5B732E] uppercase tracking-wider">
+                            {header
+                              ? String(
+                                  typeof header === "function"
+                                    ? "Campo"
+                                    : header
+                                )
+                              : "Campo"}
+                          </div>
+
+                          {/* Value */}
+                          <div className="col-span-7 text-sm text-[#2E321B] whitespace-normal break-words">
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -104,26 +111,36 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
                 </td>
               </tr>
             ) : (
-              rows.map((row) => (
-                <tr key={row.id} className="border-b border-[#EAEFE0]">
-                  {row.getVisibleCells().map((cell) => {
-                    const raw = cell.getValue();
-                    const isString = typeof raw === "string";
+              rows.map((row) => {
+                const isTotal = !!(row.original as any)?.__isTotal;
 
-                    return (
-                      <td
-                        key={cell.id}
-                        className="px-4 py-3 text-center text-sm align-top"
-                        title={isString ? raw : undefined}
-                      >
-                        <div className="whitespace-normal break-words">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))
+                return (
+                  <tr
+                    key={row.id}
+                    className={[
+                      "border-b border-[#EAEFE0]",
+                      isTotal ? "bg-[#F8F9F3] font-bold" : "",
+                    ].join(" ")}
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      const raw = cell.getValue();
+                      const isString = typeof raw === "string";
+
+                      return (
+                        <td
+                          key={cell.id}
+                          className="px-4 py-3 text-center text-sm align-top"
+                          title={isString ? (raw as string) : undefined}
+                        >
+                          <div className="whitespace-normal break-words">
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

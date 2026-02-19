@@ -84,7 +84,7 @@ export function CustomSelect({
 
             <ListboxOptions
               modal={false}
-              className={`absolute w-full select-panel hide-scrollbar-force bg-white shadow-xl border border-[#E6E1D6] focus:outline-none overscroll-contain ${s.optionsPanel} ${optionsClassName}`}
+              className={`absolute w-full select-panel bg-white shadow-xl border border-[#E6E1D6] focus:outline-none overscroll-contain max-h-60 overflow-y-auto scrollbar-none ${s.optionsPanel} ${optionsClassName}`}
               style={{ zIndex }}
             >
               {options.map((option) => (

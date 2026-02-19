@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Plus } from "lucide-react";
 import { CustomSelect } from "../../CustomSelect";
 
@@ -12,11 +13,12 @@ import {
   useCreateDepartment,
   useCreateSpendType,
   useCreateSpendSubType,
-  // si aún no los tenés, te los dejo abajo en el punto 3
   useUpdateDepartment,
   useUpdateSpendType,
   useUpdateSpendSubType,
 } from "../../../hooks/Budget/spend/useSpendMutation";
+
+import SpendList from "./SpendList";
 
 type Props = {
   open: boolean;
@@ -24,6 +26,7 @@ type Props = {
   mode?: "create" | "edit";
   defaultDepartmentId?: number;
   defaultSpendTypeId?: number;
+  inline?: boolean;
 };
 
 export default function CatalogModalSpend({
@@ -32,7 +35,35 @@ export default function CatalogModalSpend({
   mode = "create",
   defaultDepartmentId,
   defaultSpendTypeId,
+  inline = false,
 }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  // modal interno "Editar monto"
+  const [openAmountModal, setOpenAmountModal] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  // Bloqueo scroll (solo modal real)
+  useEffect(() => {
+    if (!open || inline) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open, inline]);
+
+  // ESC (solo modal real)
+  useEffect(() => {
+    if (!open || inline) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose, inline]);
+
   // ===== EDIT: Departamento =====
   const [editDepartmentId, setEditDepartmentId] = useState<number | "">("");
   const [editDepartmentName, setEditDepartmentName] = useState("");
@@ -62,7 +93,7 @@ export default function CatalogModalSpend({
   // ===== Queries base =====
   const dept = useDepartments();
   const departmentOptions = useMemo(
-    () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
+    () => (dept.data ?? []).map((d: any) => ({ label: d.name, value: d.id })),
     [dept.data]
   );
 
@@ -71,7 +102,7 @@ export default function CatalogModalSpend({
     mode === "create" && typeof departmentId === "number" ? departmentId : undefined
   );
   const typeOptions = useMemo(
-    () => (types.data ?? []).map((t) => ({ label: t.name, value: t.id })),
+    () => (types.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [types.data]
   );
 
@@ -80,16 +111,18 @@ export default function CatalogModalSpend({
     mode === "edit" && typeof editTypeDepartmentId === "number" ? editTypeDepartmentId : undefined
   );
   const editTypeOptions = useMemo(
-    () => (editTypes.data ?? []).map((t) => ({ label: t.name, value: t.id })),
+    () => (editTypes.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [editTypes.data]
   );
 
   // ===== EDIT: Tipos para editar Subtipo dependen de editSubTypeDepartmentId =====
   const editSubTypesTypes = useSpendTypes(
-    mode === "edit" && typeof editSubTypeDepartmentId === "number" ? editSubTypeDepartmentId : undefined
+    mode === "edit" && typeof editSubTypeDepartmentId === "number"
+      ? editSubTypeDepartmentId
+      : undefined
   );
   const editSubTypesTypeOptions = useMemo(
-    () => (editSubTypesTypes.data ?? []).map((t) => ({ label: t.name, value: t.id })),
+    () => (editSubTypesTypes.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [editSubTypesTypes.data]
   );
 
@@ -98,20 +131,20 @@ export default function CatalogModalSpend({
     mode === "edit" && typeof editSubTypeTypeId === "number" ? editSubTypeTypeId : undefined
   );
   const editSubTypeOptions = useMemo(
-    () => (subTypesEdit.data ?? []).map((s) => ({ label: s.name, value: s.id })),
+    () => (subTypesEdit.data ?? []).map((s: any) => ({ label: s.name, value: s.id })),
     [subTypesEdit.data]
   );
 
-  // ===== Inicialización al abrir =====
+  // ===== Reset al abrir (create/edit) =====
   useEffect(() => {
     if (!open) return;
 
     setErrors({});
+
+    // reset create
     setNewDepartment("");
     setNewType("");
     setNewSubType("");
-
-    // reset create
     setDepartmentId("");
     setTypeId("");
 
@@ -121,12 +154,15 @@ export default function CatalogModalSpend({
     setEditTypeDepartmentId("");
     setEditTypeId("");
     setEditTypeName("");
-
     setEditSubTypeDepartmentId("");
     setEditSubTypeTypeId("");
     setEditSubTypeId("");
     setEditSubTypeName("");
 
+    // cerrar modal de monto
+    setOpenAmountModal(false);
+
+    // defaults SOLO aplican a create
     if (mode === "create" && defaultDepartmentId) {
       setDepartmentId(defaultDepartmentId);
       setTypeId(defaultSpendTypeId ?? "");
@@ -181,7 +217,8 @@ export default function CatalogModalSpend({
     try {
       const created = await mCreateDept.mutate({ name: newDepartment.trim() });
       setNewDepartment("");
-      if ((created as any)?.id) setDepartmentId((created as any).id);
+      const id = (created as any)?.id;
+      if (id) setDepartmentId(id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el departamento" }));
     }
@@ -197,7 +234,8 @@ export default function CatalogModalSpend({
         departmentId: Number(departmentId),
       });
       setNewType("");
-      if ((created as any)?.id) setTypeId((created as any).id);
+      const id = (created as any)?.id;
+      if (id) setTypeId(id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo crear el tipo" }));
     }
@@ -270,39 +308,32 @@ export default function CatalogModalSpend({
   }
 
   if (!open) return null;
+  if (!inline && !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
-      <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100">
-        <div className="flex items-center justify-between border-b p-4 md:p-5">
-          <h2 className="text-lg font-semibold text-gray-900">Catálogo de Egresos</h2>
-          <button onClick={onClose} className="rounded-full p-2 text-gray-600 hover:bg-gray-100" aria-label="Cerrar">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+  const inner = (
+    <>
+      <div className="grid gap-6 p-4 md:p-6">
+        {/* ===================== CREATE ===================== */}
+        {mode === "create" && (
+          <>
+            {/* Departamento (create) */}
+            <section className="grid gap-2">
+              <label className="text-sm font-medium text-gray-800">Departamento</label>
 
-        <div className="grid gap-6 p-4 md:p-6">
-          {/* ===== Departamento ===== */}
-          <section className="grid gap-2">
-            <label className="text-sm font-medium text-gray-800">
-              {mode === "edit" ? "Editar Departamento" : "Departamento"}
-            </label>
-
-            {mode === "create" && (
-              <div className="flex flex-col gap-2 md:flex-row">
-                <div className="flex-1">
+              <div className="flex flex-col gap-2 md:flex-row md:items-start">
+                <div className="min-w-0 flex-1">
                   <CustomSelect
                     value={departmentId}
-                    onChange={(value) => setDepartmentId(value ? Number(value) : "")}
+                    onChange={(value: any) => setDepartmentId(value ? Number(value) : "")}
                     options={departmentOptions}
                     placeholder="Seleccione…"
-                    zIndex={60}
+                    zIndex={60 as any}
                   />
                 </div>
 
-                <div className="flex w-full gap-2 md:w-auto">
+                <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
                   <input
-                    className="flex-1 rounded-xl border border-gray-200 px-3 py-2"
+                    className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
                     placeholder="Nuevo departamento"
                     value={newDepartment}
                     onChange={(e) => setNewDepartment(e.target.value)}
@@ -312,7 +343,7 @@ export default function CatalogModalSpend({
                     type="button"
                     onClick={handleCreateDepartment}
                     disabled={mCreateDept.loading || !newDepartment.trim()}
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                     title="Crear departamento"
                   >
                     <Plus className="h-4 w-4" />
@@ -320,23 +351,102 @@ export default function CatalogModalSpend({
                   </button>
                 </div>
               </div>
-            )}
 
-            {mode === "edit" && (
-              <div className="flex flex-col gap-2 md:flex-row">
-                <div className="flex-1">
+              {errors.departmentId && <p className="text-xs text-red-600">{errors.departmentId}</p>}
+              {errors.dept && <p className="text-xs text-red-600">{errors.dept}</p>}
+            </section>
+
+            {/* Tipo (create) */}
+            <section className="grid gap-2">
+              <label className="text-sm font-medium text-gray-800">Tipo de Egresos</label>
+
+              <div className="flex flex-col gap-2 md:flex-row md:items-start">
+                <div className="min-w-0 flex-1">
                   <CustomSelect
-                    value={editDepartmentId}
-                    onChange={(value) => setEditDepartmentId(value ? Number(value) : "")}
-                    options={departmentOptions}
-                    placeholder="Seleccione…"
-                    zIndex={60}
+                    value={typeId}
+                    onChange={(value: any) => setTypeId(value ? Number(value) : "")}
+                    options={typeOptions}
+                    placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
+                    disabled={!departmentId}
+                    zIndex={60 as any}
                   />
                 </div>
 
-                <div className="flex w-full gap-2 md:w-auto">
+                <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
                   <input
-                    className="flex-1 rounded-xl border border-gray-200 px-3 py-2"
+                    className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
+                    placeholder="Nuevo tipo"
+                    value={newType}
+                    onChange={(e) => setNewType(e.target.value)}
+                    disabled={!departmentId}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateType}
+                    disabled={mCreateType.loading || !newType.trim() || !departmentId}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
+                    title="Crear tipo"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Agregar
+                  </button>
+                </div>
+              </div>
+
+              {errors.typeId && <p className="text-xs text-red-600">{errors.typeId}</p>}
+              {errors.type && <p className="text-xs text-red-600">{errors.type}</p>}
+            </section>
+
+            {/* Subtipo (create) */}
+            <section className="grid gap-2">
+              <label className="text-sm font-medium text-gray-800">Subtipo</label>
+
+              <div className="flex w-full flex-col gap-2 md:flex-row">
+                <input
+                  className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
+                  placeholder="Nuevo subtipo"
+                  value={newSubType}
+                  onChange={(e) => setNewSubType(e.target.value)}
+                  disabled={!typeId}
+                />
+                <button
+                  type="button"
+                  onClick={handleCreateSubType}
+                  disabled={mCreateSub.loading || !newSubType.trim() || !typeId}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
+                  title="Crear subtipo"
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar
+                </button>
+              </div>
+
+              {errors.subType && <p className="text-xs text-red-600">{errors.subType}</p>}
+            </section>
+          </>
+        )}
+
+        {/* ===================== EDIT ===================== */}
+        {mode === "edit" && (
+          <>
+            {/* Editar Departamento */}
+            <section className="grid gap-2">
+              <label className="text-sm font-medium text-gray-800">Editar Departamento</label>
+
+              <div className="flex flex-col gap-2 md:flex-row md:items-start">
+                <div className="min-w-0 flex-1">
+                  <CustomSelect
+                    value={editDepartmentId}
+                    onChange={(value: any) => setEditDepartmentId(value ? Number(value) : "")}
+                    options={departmentOptions}
+                    placeholder="Seleccione…"
+                    zIndex={60 as any}
+                  />
+                </div>
+
+                <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
+                  <input
+                    className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
                     placeholder="Nuevo nombre"
                     value={editDepartmentName}
                     onChange={(e) => setEditDepartmentName(e.target.value)}
@@ -346,46 +456,46 @@ export default function CatalogModalSpend({
                     type="button"
                     onClick={handleUpdateDepartment}
                     disabled={mUpdateDept.loading || !editDepartmentId || !editDepartmentName.trim()}
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                     title="Guardar cambios"
                   >
                     Guardar
                   </button>
                 </div>
               </div>
-            )}
 
-            {errors.departmentId && <p className="text-xs text-red-600">{errors.departmentId}</p>}
-            {errors.dept && <p className="text-xs text-red-600">{errors.dept}</p>}
-            {errors.editDept && <p className="text-xs text-red-600">{errors.editDept}</p>}
-          </section>
+              {errors.editDept && <p className="text-xs text-red-600">{errors.editDept}</p>}
+            </section>
 
-          {/* ===== EDIT: Tipo ===== */}
-          {mode === "edit" && (
+            {/* Editar Tipo */}
             <section className="grid gap-2">
               <label className="text-sm font-medium text-gray-800">Editar Tipo</label>
 
               <div className="grid gap-2 md:grid-cols-3">
-                <CustomSelect
-                  value={editTypeDepartmentId}
-                  onChange={(value) => setEditTypeDepartmentId(value ? Number(value) : "")}
-                  options={departmentOptions}
-                  placeholder="Departamento…"
-                  zIndex={60}
-                />
+                <div className="min-w-0">
+                  <CustomSelect
+                    value={editTypeDepartmentId}
+                    onChange={(value: any) => setEditTypeDepartmentId(value ? Number(value) : "")}
+                    options={departmentOptions}
+                    placeholder="Departamento…"
+                    zIndex={60 as any}
+                  />
+                </div>
 
-                <CustomSelect
-                  value={editTypeId}
-                  onChange={(value) => setEditTypeId(value ? Number(value) : "")}
-                  options={editTypeOptions}
-                  placeholder={!editTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
-                  disabled={!editTypeDepartmentId}
-                  zIndex={60}
-                />
+                <div className="min-w-0">
+                  <CustomSelect
+                    value={editTypeId}
+                    onChange={(value: any) => setEditTypeId(value ? Number(value) : "")}
+                    options={editTypeOptions}
+                    placeholder={!editTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
+                    disabled={!editTypeDepartmentId}
+                    zIndex={60 as any}
+                  />
+                </div>
 
-                <div className="flex gap-2">
+                <div className="flex w-full flex-col gap-2 md:flex-row">
                   <input
-                    className="flex-1 rounded-xl border border-gray-200 px-3 py-2 disabled:bg-gray-100"
+                    className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
                     placeholder="Nuevo nombre"
                     value={editTypeName}
                     onChange={(e) => setEditTypeName(e.target.value)}
@@ -395,7 +505,7 @@ export default function CatalogModalSpend({
                     type="button"
                     onClick={handleUpdateType}
                     disabled={mUpdateType.loading || !editTypeDepartmentId || !editTypeId || !editTypeName.trim()}
-                    className="inline-flex items-center rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
+                    className="inline-flex w-full items-center justify-center rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                     title="Guardar cambios"
                   >
                     Guardar
@@ -405,44 +515,48 @@ export default function CatalogModalSpend({
 
               {errors.editType && <p className="text-xs text-red-600">{errors.editType}</p>}
             </section>
-          )}
 
-          {/* ===== EDIT: Subtipo ===== */}
-          {mode === "edit" && (
+            {/* Editar Subtipo */}
             <section className="grid gap-2">
               <label className="text-sm font-medium text-gray-800">Editar Subtipo</label>
 
               <div className="grid gap-2 md:grid-cols-3">
-                <CustomSelect
-                  value={editSubTypeDepartmentId}
-                  onChange={(value) => setEditSubTypeDepartmentId(value ? Number(value) : "")}
-                  options={departmentOptions}
-                  placeholder="Departamento…"
-                  zIndex={60}
-                />
+                <div className="min-w-0">
+                  <CustomSelect
+                    value={editSubTypeDepartmentId}
+                    onChange={(value: any) => setEditSubTypeDepartmentId(value ? Number(value) : "")}
+                    options={departmentOptions}
+                    placeholder="Departamento…"
+                    zIndex={60 as any}
+                  />
+                </div>
 
-                <CustomSelect
-                  value={editSubTypeTypeId}
-                  onChange={(value) => setEditSubTypeTypeId(value ? Number(value) : "")}
-                  options={editSubTypesTypeOptions}
-                  placeholder={!editSubTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
-                  disabled={!editSubTypeDepartmentId}
-                  zIndex={60}
-                />
+                <div className="min-w-0">
+                  <CustomSelect
+                    value={editSubTypeTypeId}
+                    onChange={(value: any) => setEditSubTypeTypeId(value ? Number(value) : "")}
+                    options={editSubTypesTypeOptions}
+                    placeholder={!editSubTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
+                    disabled={!editSubTypeDepartmentId}
+                    zIndex={60 as any}
+                  />
+                </div>
 
-                <CustomSelect
-                  value={editSubTypeId}
-                  onChange={(value) => setEditSubTypeId(value ? Number(value) : "")}
-                  options={editSubTypeOptions}
-                  placeholder={!editSubTypeTypeId ? "Seleccione tipo…" : "Subtipo…"}
-                  disabled={!editSubTypeTypeId}
-                  zIndex={60}
-                />
+                <div className="min-w-0">
+                  <CustomSelect
+                    value={editSubTypeId}
+                    onChange={(value: any) => setEditSubTypeId(value ? Number(value) : "")}
+                    options={editSubTypeOptions}
+                    placeholder={!editSubTypeTypeId ? "Seleccione tipo…" : "Subtipo…"}
+                    disabled={!editSubTypeTypeId}
+                    zIndex={60 as any}
+                  />
+                </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex w-full flex-col gap-2 md:flex-row">
                 <input
-                  className="flex-1 rounded-xl border border-gray-200 px-3 py-2 disabled:bg-gray-100"
+                  className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
                   placeholder="Nuevo nombre del subtipo"
                   value={editSubTypeName}
                   onChange={(e) => setEditSubTypeName(e.target.value)}
@@ -458,7 +572,7 @@ export default function CatalogModalSpend({
                     !editSubTypeId ||
                     !editSubTypeName.trim()
                   }
-                  className="inline-flex items-center rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                   title="Guardar cambios"
                 >
                   Guardar
@@ -466,91 +580,93 @@ export default function CatalogModalSpend({
               </div>
 
               {errors.editSubType && <p className="text-xs text-red-600">{errors.editSubType}</p>}
+
+              {/* botón debajo del ÚLTIMO INPUT (igual que ingresos) */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setOpenAmountModal(true)}
+                  disabled={typeof editSubTypeId !== "number"}
+                  className="inline-flex w-full items-center justify-center rounded-xl border border-[#6B7A3A]/30 bg-white px-4 py-2.5 text-sm font-semibold text-[#33361D] shadow-sm hover:bg-gray-50 disabled:opacity-50 md:w-auto"
+                >
+                  Editar monto y fecha
+                </button>
+              </div>
             </section>
-          )}
+          </>
+        )}
 
-          {/* ===== CREATE: Tipo + Subtipo ===== */}
-          {mode === "create" && (
-            <>
-              {/* Tipo */}
-              <section className="grid gap-2">
-                <label className="text-sm font-medium text-gray-800">Tipo</label>
+        {errors.api && <p className="text-xs text-red-600">{errors.api}</p>}
+      </div>
 
-                <div className="flex flex-col gap-2 md:flex-row">
-                  <div className="flex-1">
-                    <CustomSelect
-                      value={typeId}
-                      onChange={(value) => setTypeId(value ? Number(value) : "")}
-                      options={typeOptions}
-                      placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
-                      disabled={!departmentId}
-                      zIndex={60}
-                    />
-                  </div>
+      {/* Modal "Editar monto y fecha" (filtrado por subtipo) */}
+      {openAmountModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+          <div className="flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100 max-h-[calc(100vh-2rem)]">
+            <div className="flex items-center justify-between border-b p-4 md:p-5">
+              <h2 className="text-lg font-semibold text-gray-900">Editar monto y fecha</h2>
+              <button
+                onClick={() => setOpenAmountModal(false)}
+                className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                aria-label="Cerrar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
-                  <div className="flex w-full gap-2 md:w-auto">
-                    <input
-                      className="flex-1 rounded-xl border border-gray-200 px-3 py-2 disabled:bg-gray-100"
-                      placeholder="Nuevo tipo"
-                      value={newType}
-                      onChange={(e) => setNewType(e.target.value)}
-                      disabled={!departmentId}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCreateType}
-                      disabled={mCreateType.loading || !newType.trim() || !departmentId}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
-                      title="Crear tipo"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Agregar
-                    </button>
-                  </div>
-                </div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
+              <SpendList subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined} />
+            </div>
 
-                {errors.typeId && <p className="text-xs text-red-600">{errors.typeId}</p>}
-                {errors.type && <p className="text-xs text-red-600">{errors.type}</p>}
-              </section>
+            <div className="flex items-center justify-end gap-3 border-t p-4 md:p-5">
+              <button
+                onClick={() => setOpenAmountModal(false)}
+                className="rounded-xl border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-50"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 
-              {/* Subtipo */}
-              <section className="grid gap-2">
-                <label className="text-sm font-medium text-gray-800">Subtipo</label>
+  // inline: se usa dentro del acordeón
+  if (inline) return inner;
 
-                <div className="flex gap-2">
-                  <input
-                    className="flex-1 rounded-xl border border-gray-200 px-3 py-2 disabled:bg-gray-100"
-                    placeholder="Nuevo subtipo"
-                    value={newSubType}
-                    onChange={(e) => setNewSubType(e.target.value)}
-                    disabled={!typeId}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleCreateSubType}
-                    disabled={mCreateSub.loading || !newSubType.trim() || !typeId}
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
-                    title="Crear subtipo"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Agregar
-                  </button>
-                </div>
+  // modal normal
+  const modalUI = (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} aria-hidden="true" />
 
-                {errors.subType && <p className="text-xs text-red-600">{errors.subType}</p>}
-              </section>
-            </>
-          )}
-
-          {errors.api && <p className="text-xs text-red-600">{errors.api}</p>}
+      <div className="relative z-[1001] flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100 max-h-[calc(100vh-2rem)]">
+        <div className="flex items-center justify-between border-b p-4 md:p-5">
+          <h2 className="text-lg font-semibold text-gray-900">
+            {mode === "edit" ? "Editar catálogo de Egresos" : "Catálogo de Egresos"}
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+            aria-label="Cerrar"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
+        <div className="min-h-0 flex-1 overflow-y-auto">{inner}</div>
+
         <div className="flex items-center justify-end gap-3 border-t p-4 md:p-5">
-          <button onClick={onClose} className="rounded-xl border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-50">
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-50"
+          >
             Salir
           </button>
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalUI, document.body);
 }
