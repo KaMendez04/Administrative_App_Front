@@ -46,7 +46,6 @@ export default function InitialPage() {
             totalReal={incomeTotalReal}
             totalProjected={incomeTotalProjected}
             totalDiff={incomeTotalDiff}
-            context="income"
           />
           <DataTable
             title="Egresos"
@@ -56,7 +55,6 @@ export default function InitialPage() {
             totalReal={spendTotalReal}
             totalProjected={spendTotalProjected}
             totalDiff={spendTotalDiff}
-            context="spend"
           />
         </div>
       </div>
