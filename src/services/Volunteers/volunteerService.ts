@@ -1,4 +1,4 @@
-import type { TipoSolicitante, VolunteerDocsLinkResponse } from "@/types/volunteersType";
+import type {VolunteerDocsLinkResponse } from "@/types/volunteersType";
 import apiConfig from "../../apiConfig/apiConfig";
 import {
   type SolicitudVoluntariado,
