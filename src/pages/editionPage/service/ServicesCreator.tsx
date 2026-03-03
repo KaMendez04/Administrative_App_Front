@@ -244,15 +244,6 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
 
   const removeAt = (idx: number) => setImages((prev) => prev.filter((_, i) => i !== idx))
 
-  const move = (from: number, to: number) =>
-    setImages((prev) => {
-      if (to < 0 || to >= prev.length) return prev
-      const copy = [...prev]
-      const [item] = copy.splice(from, 1)
-      copy.splice(to, 0, item)
-      return copy
-    })
-
   const handleSave = async () => {
     if (!title.trim() || !cardDescription.trim() || !modalDescription.trim()) return
 
@@ -277,9 +268,11 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
       setOffset({ x: 0, y: 0 })
 
       showSuccessAlert("Servicio creado exitosamente")
-    } catch (err) {
-      console.error("Error al guardar:", err)
-    } finally {
+    } catch (err: any) {
+  console.error("Error al guardar:", err?.response?.data ?? err)
+}
+    
+    finally {
       setIsSaving(false)
     }
   }
@@ -440,31 +433,59 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
           <span className="text-sm text-gray-500">La primera imagen será la portada.</span>
         </div>
 
-        {/* ✅ Lista con orden */}
+        {/* ✅ Lista (sin flechas): ★ portada y ✕ quitar */}
         {images.length > 0 && (
           <div className="mt-4 space-y-2">
             <p className="text-sm font-medium text-gray-700">Imágenes del servicio (la primera es portada)</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {images.map((url, idx) => (
-                <div key={`${url}-${idx}`} className="border rounded-lg p-2 space-y-2">
-                  <img src={url} className="w-full h-24 object-cover rounded-md" />
-                  <div className="flex items-center justify-between gap-2 text-sm">
-                    <span className={idx === 0 ? "text-green-700 font-semibold" : "text-gray-500"}>
-                      {idx === 0 ? "Portada" : `#${idx + 1}`}
+                <div
+                  key={`${url}-${idx}`}
+                  className="w-full rounded-xl border border-[#E7E2D7] bg-white p-2 overflow-hidden"
+                >
+                  <img src={url} className="w-full h-24 object-cover rounded-md" alt={`Imagen ${idx + 1}`} />
+
+                  <div className="mt-3 flex flex-col gap-2">
+                    <span className={`text-xs ${idx === 0 ? "text-[#5B732E] font-semibold" : "text-gray-500"}`}>
+                      {idx === 0 ? "Portada" : "\u00A0"}
                     </span>
-                    <div className="flex gap-1">
-                      <button onClick={() => move(idx, idx - 1)} disabled={idx === 0} className="px-2 border rounded">
-                        ↑
-                      </button>
+
+                    <div className="flex items-center justify-end gap-3">
+                      {/* ★ Poner como portada (mueve a la posición 0) */}
                       <button
-                        onClick={() => move(idx, idx + 1)}
-                        disabled={idx === images.length - 1}
-                        className="px-2 border rounded"
+                        type="button"
+                        onClick={() =>
+                          setImages((prev) => {
+                            if (idx <= 0) return prev
+                            const copy = [...prev]
+                            const [item] = copy.splice(idx, 1)
+                            copy.unshift(item)
+                            return copy
+                          })
+                        }
+                        disabled={idx === 0}
+                        className={`w-10 h-10 rounded-xl border flex items-center justify-center text-lg leading-none
+                          ${
+                            idx === 0
+                              ? "bg-[#5B732E] text-white border-[#5B732E]"
+                              : "bg-white text-[#5B732E] border-[#5B732E] hover:bg-[#EAEFE0]"
+                          }
+                          disabled:opacity-60 disabled:cursor-not-allowed`}
+                        title={idx === 0 ? "Portada" : "Poner como portada"}
+                        aria-label="Poner como portada"
                       >
-                        ↓
+                        ★
                       </button>
-                      <button onClick={() => removeAt(idx)} className="px-2 border rounded">
+
+                      {/* ✕ Quitar */}
+                      <button
+                        type="button"
+                        onClick={() => removeAt(idx)}
+                        className="w-10 h-10 rounded-xl border border-[#B85C4C] text-[#B85C4C] bg-white hover:bg-[#E6C3B4] flex items-center justify-center text-lg leading-none"
+                        title="Quitar"
+                        aria-label="Quitar"
+                      >
                         ✕
                       </button>
                     </div>
@@ -472,6 +493,8 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
                 </div>
               ))}
             </div>
+
+            <p className="text-xs text-gray-500">★ = poner como portada (la mueve a la primera posición).</p>
           </div>
         )}
       </div>
