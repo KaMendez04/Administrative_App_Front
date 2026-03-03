@@ -3,9 +3,6 @@ import { showSuccessAlert, showSuccessDeleteAlert } from "../../../utils/alerts"
 import { CustomSelect } from "../../../components/CustomSelect"
 import { ActionButtons } from "../../../components/ActionButtons"
 import { useCloudinaryUpload } from "../../../hooks/Cloudinary/useCloudinaryUpload"
-import { Loader2, Upload } from "lucide-react"
-
-// ✅ usa el utils que te di antes (ajustá la ruta si tu archivo está en otra carpeta)
 import { cropToBlob, blobToFile } from "../../../utils/mediaBuildTransformed"
 
 const CROP_W = 1200
@@ -23,7 +20,11 @@ export default function ServicesInformativeEditor({
   const [title, setTitle] = useState("")
   const [cardDescription, setCardDescription] = useState("")
   const [modalDescription, setModalDescription] = useState("")
-  const [image, setImage] = useState("")
+
+  // ✅ MULTI
+  const [images, setImages] = useState<string[]>([])
+  const [imageUrlDraft, setImageUrlDraft] = useState("")
+  const [activeIndex, setActiveIndex] = useState(0)
 
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -32,10 +33,10 @@ export default function ServicesInformativeEditor({
   const [initialTitle, setInitialTitle] = useState("")
   const [initialCardDescription, setInitialCardDescription] = useState("")
   const [initialModalDescription, setInitialModalDescription] = useState("")
-  const [initialImage, setInitialImage] = useState("")
+  const [initialImages, setInitialImages] = useState<string[]>([])
   const [hasChanges, setHasChanges] = useState(false)
 
-  // ✅ NUEVO: file pendiente (NO se sube hasta guardar)
+  // ✅ file pendiente (NO se sube hasta agregar)
   const upload = useCloudinaryUpload()
   const fileRef = useRef<HTMLInputElement>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
@@ -60,13 +61,17 @@ export default function ServicesInformativeEditor({
       setTitle(selected.title)
       setCardDescription(selected.cardDescription)
       setModalDescription(selected.modalDescription)
-      setImage(selected.image || "")
+
+      const selImages = Array.isArray(selected.images) ? selected.images : []
+      setImages(selImages)
+      setActiveIndex(0)
 
       setInitialTitle(selected.title)
       setInitialCardDescription(selected.cardDescription)
       setInitialModalDescription(selected.modalDescription)
-      setInitialImage(selected.image || "")
+      setInitialImages(selImages)
 
+      setImageUrlDraft("")
       setPendingFile(null)
       if (localPreview) URL.revokeObjectURL(localPreview)
       setLocalPreview("")
@@ -75,13 +80,15 @@ export default function ServicesInformativeEditor({
       setTitle("")
       setCardDescription("")
       setModalDescription("")
-      setImage("")
+      setImages([])
+      setActiveIndex(0)
 
       setInitialTitle("")
       setInitialCardDescription("")
       setInitialModalDescription("")
-      setInitialImage("")
+      setInitialImages([])
 
+      setImageUrlDraft("")
       setPendingFile(null)
       if (localPreview) URL.revokeObjectURL(localPreview)
       setLocalPreview("")
@@ -97,25 +104,27 @@ export default function ServicesInformativeEditor({
       title !== initialTitle ||
       cardDescription !== initialCardDescription ||
       modalDescription !== initialModalDescription ||
-      image !== initialImage ||
+      imageUrlDraft.trim() !== "" ||
+      JSON.stringify(images) !== JSON.stringify(initialImages) ||
       !!pendingFile
     setHasChanges(changed)
   }, [
     title,
     cardDescription,
     modalDescription,
-    image,
+    imageUrlDraft,
+    images,
     initialTitle,
     initialCardDescription,
     initialModalDescription,
-    initialImage,
+    initialImages,
     pendingFile,
     selected,
   ])
 
   useEffect(() => {
     setOffset({ x: 0, y: 0 })
-  }, [image, localPreview])
+  }, [localPreview, imageUrlDraft, activeIndex])
 
   useEffect(() => {
     return () => {
@@ -123,10 +132,30 @@ export default function ServicesInformativeEditor({
     }
   }, [localPreview])
 
+  const handlePick = () => fileRef.current?.click()
+
+  const onPickFile = (file: File | null) => {
+    if (!file) return
+
+    if (localPreview) URL.revokeObjectURL(localPreview)
+    const obj = URL.createObjectURL(file)
+
+    setPendingFile(file)
+    setLocalPreview(obj)
+    setOffset({ x: 0, y: 0 })
+
+    // si escoge archivo, limpiamos URL draft para evitar confusión
+    setImageUrlDraft("")
+
+    if (fileRef.current) fileRef.current.value = ""
+  }
+
+  // src para preview (archivo primero, si no URL draft, si no imagen activa)
   const previewSrc = useMemo(() => {
     if (pendingFile && localPreview) return localPreview
-    return image || ""
-  }, [pendingFile, localPreview, image])
+    if (imageUrlDraft.trim()) return imageUrlDraft.trim()
+    return images[activeIndex] || images[0] || ""
+  }, [pendingFile, localPreview, imageUrlDraft, images, activeIndex])
 
   const positionAsPercent = useMemo(() => {
     if (!dragRef.current || !imageRef.current) return { x: 50, y: 50 }
@@ -161,22 +190,6 @@ export default function ServicesInformativeEditor({
       y: Math.max(0, Math.min(100, percentY)),
     }
   }, [offset])
-
-  const handlePick = () => fileRef.current?.click()
-
-  const onPickFile = (file: File | null) => {
-    if (!file) return
-
-    if (localPreview) URL.revokeObjectURL(localPreview)
-    const obj = URL.createObjectURL(file)
-
-    setPendingFile(file)
-    setLocalPreview(obj)
-    setOffset({ x: 0, y: 0 })
-
-    // si escoge archivo, NO tocamos image todavía (se actualizará al guardar)
-    if (fileRef.current) fileRef.current.value = ""
-  }
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (!dragRef.current) return
@@ -265,28 +278,89 @@ export default function ServicesInformativeEditor({
       })
     })
 
+  // ✅ Agregar por URL
+  const addFromUrl = () => {
+    const url = imageUrlDraft.trim()
+    if (!url) return
+    setImages((prev) => {
+      const next = [...prev, url]
+      setActiveIndex(next.length - 1)
+      return next
+    })
+    setImageUrlDraft("")
+    setOffset({ x: 0, y: 0 })
+  }
+
+  // ✅ Agregar desde archivo (recorta + sube)
+  const addFromFile = async () => {
+    if (!pendingFile || !localPreview) return
+    try {
+      const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
+      const croppedFile = blobToFile(blob, `service_${selected?.id ?? "x"}_${Date.now()}.jpg`)
+
+      const asset = await uploadAsync(croppedFile)
+      const url = asset?.url ?? asset?.secure_url
+      if (!url) return
+
+      setImages((prev) => {
+        const next = [...prev, url]
+        setActiveIndex(next.length - 1)
+        return next
+      })
+
+      setPendingFile(null)
+      if (localPreview) URL.revokeObjectURL(localPreview)
+      setLocalPreview("")
+      setOffset({ x: 0, y: 0 })
+    } catch (e) {
+      console.error("Error subiendo imagen:", e)
+    }
+  }
+
+  const clearDraft = () => {
+    setImageUrlDraft("")
+    setPendingFile(null)
+    if (localPreview) URL.revokeObjectURL(localPreview)
+    setLocalPreview("")
+    setOffset({ x: 0, y: 0 })
+  }
+
+  const removeAt = (idx: number) => {
+    setImages((prev) => {
+      const next = prev.filter((_, i) => i !== idx)
+      setActiveIndex((prevIdx) => {
+        if (next.length === 0) return 0
+        if (idx === 0) return 0
+        if (prevIdx >= idx) return Math.max(0, prevIdx - 1)
+        return Math.min(prevIdx, next.length - 1)
+      })
+      return next
+    })
+  }
+
+  const setAsCover = (idx: number) => {
+    setImages((prev) => {
+      if (idx <= 0 || idx >= prev.length) return prev
+      const copy = [...prev]
+      const [item] = copy.splice(idx, 1)
+      copy.unshift(item)
+      return copy
+    })
+    setActiveIndex(0)
+  }
+
+  const canAdd = (!!pendingFile && !!localPreview) || imageUrlDraft.trim() !== ""
+
   const handleSave = async () => {
     if (!selected) return
     setIsSaving(true)
     try {
-      let finalImage = image
-
-      // ✅ si hay archivo pendiente, recorta + sube SOLO AHORA
-      if (pendingFile && localPreview) {
-        const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
-        const croppedFile = blobToFile(blob, `service_${selected.id}_${Date.now()}.jpg`)
-
-        const asset = await uploadAsync(croppedFile)
-        const url = asset?.url ?? asset?.secure_url
-        finalImage = url || ""
-      }
-
       await onUpdate({
         id: selected.id,
         title,
         cardDescription,
         modalDescription,
-        image: finalImage,
+        images, // ✅ guarda lista (primera = portada)
       })
 
       showSuccessAlert("Actualización completada")
@@ -294,12 +368,9 @@ export default function ServicesInformativeEditor({
       setInitialTitle(title)
       setInitialCardDescription(cardDescription)
       setInitialModalDescription(modalDescription)
-      setInitialImage(finalImage)
+      setInitialImages(images)
 
-      setPendingFile(null)
-      if (localPreview) URL.revokeObjectURL(localPreview)
-      setLocalPreview("")
-      setOffset({ x: 0, y: 0 })
+      clearDraft()
     } catch (err) {
       console.error("Error al guardar:", err)
     } finally {
@@ -325,13 +396,10 @@ export default function ServicesInformativeEditor({
     setTitle(initialTitle)
     setCardDescription(initialCardDescription)
     setModalDescription(initialModalDescription)
-    setImage(initialImage)
-
-    setPendingFile(null)
-    if (localPreview) URL.revokeObjectURL(localPreview)
-    setLocalPreview("")
+    setImages(initialImages)
+    setActiveIndex(0)
+    clearDraft()
     setSelectedId(null)
-    setOffset({ x: 0, y: 0 })
   }
 
   const serviceOptions = items.map((s: any) => ({
@@ -340,8 +408,8 @@ export default function ServicesInformativeEditor({
   }))
 
   return (
-    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-      <h2 className="text-2xl font-semibold mb-6">Editar Servicio Existente</h2>
+    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-4 sm:p-6 lg:p-8 shadow">
+      <h2 className="text-xl sm:text-2xl font-semibold">Editar Servicio Existente</h2>
 
       <CustomSelect
         value={selectedId ?? ""}
@@ -351,9 +419,10 @@ export default function ServicesInformativeEditor({
       />
 
       {selected && (
-        <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-4">
+        <div className="space-y-6">
+          {/* ✅ en desktop: 2 cols, en móvil: 1 col */}
+          <div className="grid gap-6 lg:grid-cols-[1fr_520px]">
+            <div className="space-y-4 w-full lg:min-w-[420px] lg:max-w-[520px] justify-self-end">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
                 <input
@@ -370,7 +439,7 @@ export default function ServicesInformativeEditor({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descripción de la tarjeta</label>
                 <textarea
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E] resize-none"
                   rows={3}
                   value={cardDescription}
                   onChange={(e) => setCardDescription(e.target.value)}
@@ -384,7 +453,7 @@ export default function ServicesInformativeEditor({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descripción del modal</label>
                 <textarea
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E] resize-none"
                   rows={5}
                   value={modalDescription}
                   onChange={(e) => setModalDescription(e.target.value)}
@@ -396,18 +465,17 @@ export default function ServicesInformativeEditor({
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Imagen (opcional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes (portada = primera)</label>
 
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     type="button"
                     onClick={handlePick}
                     disabled={isSaving || isDeleting || upload.isPending}
-                    className="inline-flex items-center justify-center gap-2 border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50 disabled:opacity-60"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50 disabled:opacity-60"
                   >
-                    {upload.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                     Elegir imagen
                   </button>
 
@@ -420,10 +488,10 @@ export default function ServicesInformativeEditor({
                   />
 
                   <input
-                    className="flex-1 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-                    value={image}
+                    className="w-full flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                    value={imageUrlDraft}
                     onChange={(e) => {
-                      setImage(e.target.value)
+                      setImageUrlDraft(e.target.value)
                       if (pendingFile) setPendingFile(null)
                       if (localPreview) {
                         URL.revokeObjectURL(localPreview)
@@ -438,14 +506,14 @@ export default function ServicesInformativeEditor({
               </div>
 
               {previewSrc && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700">
                     Vista previa (arrastrá para acomodar)
                   </label>
 
                   <div
                     ref={dragRef}
-                    className="relative w-full aspect-[1200/630] rounded-lg border-2 border-[#DCD6C9] overflow-hidden bg-[#F8F9F3] cursor-grab active:cursor-grabbing"
+                    className="relative w-full aspect-[1200/630] rounded-xl border border-[#DCD6C9] overflow-hidden bg-[#F8F9F3] cursor-grab active:cursor-grabbing"
                     style={{ touchAction: "none", WebkitUserSelect: "none", userSelect: "none" }}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
@@ -465,12 +533,97 @@ export default function ServicesInformativeEditor({
                       onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
                     />
                   </div>
+
+                  {/* ✅ solo el botón Agregar (centrado y responsive) */}
+                  <div className="flex justify-center sm:justify-start">
+                    <ActionButtons
+                      showCreate={true}
+                      createText="Agregar imagen"
+                      onCreate={pendingFile ? addFromFile : addFromUrl}
+                      disabled={!canAdd || isSaving || isDeleting || upload.isPending}
+                      showText={true}
+                      isSaving={upload.isPending}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {images.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700">
+                    Imágenes actuales {images.length > 1 ? `(viendo ${activeIndex + 1}/${images.length})` : ""}
+                  </p>
+
+                  {/* ✅ grid más flexible (evita el borde raro / cuadritos desalineados) */}
+                  <div className="grid w-full grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {images.map((url, idx) => (
+                      <div
+                        key={`${url}-${idx}`}
+                        className="w-full rounded-xl border border-[#E7E2D7] bg-white p-2 overflow-hidden"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setActiveIndex(idx)}
+                          className="w-full overflow-hidden rounded-lg border-0 outline-none ring-0 focus:outline-none focus:ring-0"
+                          title="Ver en grande"
+                        >
+                          <img
+                            src={url}
+                            className="w-full h-24 sm:h-28 object-cover"
+                            alt={`Imagen ${idx + 1}`}
+                          />
+                        </button>
+
+                        {/* ✅ fila inferior SIEMPRE alineada */}
+                        <div className="mt-3 flex flex-col gap-2">
+                          <span className={`text-xs ${idx === 0 ? "text-[#5B732E] font-semibold" : "text-gray-500"}`}>
+                            {idx === 0 ? "Portada" : "\u00A0"}
+                          </span>
+
+                          {/* Botones: siempre en fila, con espacio y sin romperse */}
+                          <div className="flex items-center justify-end gap-3">
+                            {/* ★ Portada */}
+                            <button
+                              type="button"
+                              onClick={() => setAsCover(idx)}
+                              disabled={idx === 0}
+                              className={`w-10 h-10 rounded-xl border flex items-center justify-center text-lg leading-none
+                                ${
+                                  idx === 0
+                                    ? "bg-[#5B732E] text-white border-[#5B732E]"
+                                    : "bg-white text-[#5B732E] border-[#5B732E] hover:bg-[#EAEFE0]"
+                                }
+                                disabled:opacity-60 disabled:cursor-not-allowed`}
+                              title={idx === 0 ? "Portada" : "Poner como portada"}
+                              aria-label="Poner como portada"
+                            >
+                              ★
+                            </button>
+
+                            {/* ✕ Quitar */}
+                            <button
+                              type="button"
+                              onClick={() => removeAt(idx)}
+                              className="w-10 h-10 rounded-xl border border-[#B85C4C] text-[#B85C4C] bg-white hover:bg-[#E6C3B4] flex items-center justify-center text-lg leading-none"
+                              title="Quitar"
+                              aria-label="Quitar"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-xs text-gray-500">★ = poner como portada (la mueve a la primera posición).</p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex justify-end">
+          {/* ✅ botones finales centrados en móvil */}
+          <div className="flex justify-center sm:justify-end">
             <ActionButtons
               onCancel={handleCancel}
               onSave={handleSave}
