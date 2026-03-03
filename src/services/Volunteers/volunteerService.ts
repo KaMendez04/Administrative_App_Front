@@ -1,3 +1,4 @@
+import type { TipoSolicitante, VolunteerDocsLinkResponse } from "@/types/volunteersType";
 import apiConfig from "../../apiConfig/apiConfig";
 import {
   type SolicitudVoluntariado,
@@ -171,3 +172,21 @@ export const voluntarioDetallePdfService = {
     setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
   },
 };
+
+export async function getSolicitudVoluntariadoDocumentsLink(idSolicitud: number) {
+  const { data } = await apiConfig.get<VolunteerDocsLinkResponse>(
+    `/solicitud-voluntariado/${idSolicitud}/documents-link`
+  )
+  return data
+}
+
+export async function getApprovedVoluntariadoDocumentsLink(params: {
+  tipo: "INDIVIDUAL" | "ORGANIZACION"
+  id: number
+}) {
+  const { tipo, id } = params
+  const { data } = await apiConfig.get<VolunteerDocsLinkResponse>(
+    `/solicitud-voluntariado/approved/${tipo}/${id}/documents-link`
+  )
+  return data
+}

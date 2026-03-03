@@ -107,3 +107,13 @@ export async function downloadSolicitudesPDF(params: PdfListParams): Promise<Blo
 
   return response.data as Blob;
 }
+
+export async function getDocsLinkByAsociado(idAsociado: number) {
+  const { data } = await apiConfig.get(`/solicitudes/by-asociado/${idAsociado}/documents-link`);
+  return data as { url: string; path: string };
+}
+
+export async function getDocsLinkBySolicitud(idSolicitud: number) {
+  const { data } = await apiConfig.get(`/solicitudes/${idSolicitud}/documents-link`);
+  return data as { url: string; path: string };
+}
