@@ -1,8 +1,10 @@
 import { useState } from "react";
 import type { Solicitud } from "../../schemas/adminSolicitudes";
 import { FincaAccordion } from "./FincaAccordion";
-import { Download } from "lucide-react";
+import { Download, FolderOpen } from "lucide-react";
 import { useDownloadSolicitudPDF } from "../../hooks/associates/useDownloadSolicitudPDF";
+import { useSolicitudHasDocs, useDocsLinkBySolicitud } from "../../hooks/associates/useSolicitudDocsLink";
+import { toast } from "sonner";
 
 type Props = {
   open: boolean;
@@ -11,12 +13,17 @@ type Props = {
   isLoading?: boolean;
 };
 
-type Tab = 'info' | 'finca';
+type Tab = "info" | "finca";
 
 export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Props) {
-  const [selectedTab, setSelectedTab] = useState<Tab>('info');
+  const [selectedTab, setSelectedTab] = useState<Tab>("info");
   const openSolicitudPDF = useDownloadSolicitudPDF();
 
+  // ✅ Hooks siempre arriba, antes de cualquier return
+  const docsLink = useDocsLinkBySolicitud();
+  const { data: hasDocs, isLoading: checkingDocs } = useSolicitudHasDocs(
+    solicitud ? Number(solicitud.idSolicitud) : null
+  );
 
   if (!open) return null;
 
@@ -30,8 +37,11 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
 
   if (isLoading || !solicitud) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-        <div 
+      <div
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        onClick={onClose}
+      >
+        <div
           className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-8"
           onClick={(e) => e.stopPropagation()}
         >
@@ -46,7 +56,10 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
 
   const personalFields = [
     { label: "Cédula", value: solicitud.persona.cedula },
-    { label: "Nombre completo", value: `${solicitud.persona.nombre} ${solicitud.persona.apellido1} ${solicitud.persona.apellido2}` },
+    {
+      label: "Nombre completo",
+      value: `${solicitud.persona.nombre} ${solicitud.persona.apellido1} ${solicitud.persona.apellido2}`,
+    },
     { label: "Fecha de nacimiento", value: formatDate(solicitud.persona.fechaNacimiento) },
     { label: "Teléfono", value: solicitud.persona.telefono },
     { label: "Email", value: solicitud.persona.email },
@@ -62,8 +75,11 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
   const nucleoFamiliar = solicitud.asociado.nucleoFamiliar;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -73,24 +89,34 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
             <div>
               <h3 className="text-2xl font-bold text-[#33361D]">Detalles de la Solicitud</h3>
               <div className="mt-2 flex items-center gap-2">
-                <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                  solicitud.estado === "PENDIENTE" ? "bg-yellow-100 text-yellow-800" :
-                  solicitud.estado === "APROBADO" ? "bg-green-100 text-green-800" :
-                  "bg-red-100 text-red-800"
-                }`}>
+                <span
+                  className={`px-3 py-1 rounded-lg text-sm font-bold ${
+                    solicitud.estado === "PENDIENTE"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : solicitud.estado === "APROBADO"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
                   {solicitud.estado}
                 </span>
-                
+
                 <div className="flex items-center gap-1.5">
-                  <div className={`w-2 h-2 rounded-full ${
-                    solicitud.estado === "PENDIENTE" ? "bg-yellow-500" :
-                    solicitud.estado === "APROBADO" ? "bg-green-500" :
-                    "bg-red-500"
-                  }`} />
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      solicitud.estado === "PENDIENTE"
+                        ? "bg-yellow-500"
+                        : solicitud.estado === "APROBADO"
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }`}
+                  />
                   <span className="text-xs text-gray-600 font-medium">
-                    {solicitud.estado === "PENDIENTE" ? "En revisión" :
-                     solicitud.estado === "APROBADO" ? "Aceptada" :
-                     "Rechazada"}
+                    {solicitud.estado === "PENDIENTE"
+                      ? "En revisión"
+                      : solicitud.estado === "APROBADO"
+                      ? "Aceptada"
+                      : "Rechazada"}
                   </span>
                 </div>
               </div>
@@ -102,48 +128,84 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
             </button>
           </div>
 
-          {/* BOTÓN DESCARGAR PDF */}
-          <div className="flex justify-start">
-<button
-  onClick={() => openSolicitudPDF.mutate(Number(solicitud?.idSolicitud))}
-  disabled={openSolicitudPDF.isPending}
-  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
->
-  {openSolicitudPDF.isPending ? (
-    <>
-      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-      Generando PDF...
-    </>
-  ) : (
-    <>
-      <Download className="w-4 h-4" />
-      Descargar PDF
-    </>
-  )}
-</button>
+          {/* BOTONES */}
+          <div className="flex flex-wrap gap-2 justify-start">
+            {/* ✅ Descargar PDF */}
+            <button
+              onClick={() => openSolicitudPDF.mutate(Number(solicitud?.idSolicitud))}
+              disabled={openSolicitudPDF.isPending}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
+              {openSolicitudPDF.isPending ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Generando PDF...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Descargar PDF
+                </>
+              )}
+            </button>
 
+            {/* Documentos: skeleton → botón → texto */}
+            {checkingDocs ? (
+              <div className="h-9 w-36 rounded-xl bg-gray-200 animate-pulse" />
+            ) : hasDocs ? (
+              <button
+                onClick={() => {
+                  docsLink.mutate(Number(solicitud.idSolicitud), {
+                    onSuccess: (r) => window.open(r.url, "_blank", "noopener,noreferrer"),
+                    onError: (err: any) => {
+                      const msg = err?.response?.data?.message || err?.message || "No se pudieron abrir los documentos";
+                      toast.error(Array.isArray(msg) ? msg.join(", ") : msg);
+                    },
+                  });
+                }}
+                disabled={docsLink.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#33361D] text-white font-semibold hover:bg-[#2b2d18] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                {docsLink.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Abriendo...
+                  </>
+                ) : (
+                  <>
+                    <FolderOpen className="w-4 h-4" />
+                    Ver documentos
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 text-gray-500 text-sm font-medium">
+                <FolderOpen className="w-4 h-4 opacity-50" />
+                No se adjuntaron documentos
+              </div>
+            )}
           </div>
         </div>
 
         {/* Tabs */}
         <div className="flex border-b border-[#EAEFE0] px-6 bg-white">
           <button
-            onClick={() => setSelectedTab('info')}
+            onClick={() => setSelectedTab("info")}
             className={`px-4 py-3 font-semibold text-sm transition ${
-              selectedTab === 'info'
-                ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
-                : 'text-[#33361D] hover:text-[#5B732E]'
+              selectedTab === "info"
+                ? "text-[#5B732E] border-b-2 border-[#5B732E]"
+                : "text-[#33361D] hover:text-[#5B732E]"
             }`}
           >
             Información General
           </button>
           {solicitud.asociado.fincas && solicitud.asociado.fincas.length > 0 && (
             <button
-              onClick={() => setSelectedTab('finca')}
+              onClick={() => setSelectedTab("finca")}
               className={`px-4 py-3 font-semibold text-sm transition ${
-                selectedTab === 'finca'
-                  ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
-                  : 'text-[#33361D] hover:text-[#5B732E]'
+                selectedTab === "finca"
+                  ? "text-[#5B732E] border-b-2 border-[#5B732E]"
+                  : "text-[#33361D] hover:text-[#5B732E]"
               }`}
             >
               Finca
@@ -154,7 +216,7 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-6">
           {/* TAB: INFORMACIÓN GENERAL */}
-          {selectedTab === 'info' && (
+          {selectedTab === "info" && (
             <div className="space-y-6">
               {/* Información Personal */}
               <div>
@@ -165,9 +227,7 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
                       <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
                         {field.label}
                       </div>
-                      <div className="text-base text-[#33361D] font-medium">
-                        {field.value}
-                      </div>
+                      <div className="text-base text-[#33361D] font-medium">{field.value}</div>
                     </div>
                   ))}
                 </div>
@@ -182,9 +242,7 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
                       <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
                         {field.label}
                       </div>
-                      <div className="text-base text-[#33361D] font-medium">
-                        {field.value}
-                      </div>
+                      <div className="text-base text-[#33361D] font-medium">{field.value}</div>
                     </div>
                   ))}
                 </div>
@@ -216,31 +274,23 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
                 <h4 className="text-lg font-bold text-[#33361D] mb-3">Estado de Solicitud</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                      Estado
-                    </div>
-                    <div className="text-base text-[#33361D] font-medium">
-                      {solicitud.estado}
-                    </div>
+                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Estado</div>
+                    <div className="text-base text-[#33361D] font-medium">{solicitud.estado}</div>
                   </div>
                   <div className="rounded-xl bg-[#F8F9F3] p-4">
                     <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
                       Fecha de solicitud
                     </div>
-                    <div className="text-base text-[#33361D] font-medium">
-                      {formatDate(solicitud.createdAt)}
-                    </div>
+                    <div className="text-base text-[#33361D] font-medium">{formatDate(solicitud.createdAt)}</div>
                   </div>
-                  
+
                   {/* Motivo de rechazo - si existe */}
                   {solicitud.motivo && (
                     <div className="rounded-xl bg-red-50 p-4 md:col-span-2 border border-red-200">
                       <div className="text-xs font-bold text-red-700 tracking-wider uppercase mb-1">
                         Motivo de rechazo
                       </div>
-                      <div className="text-base text-red-900 font-medium">
-                        {solicitud.motivo}
-                      </div>
+                      <div className="text-base text-red-900 font-medium">{solicitud.motivo}</div>
                     </div>
                   )}
                 </div>
@@ -249,7 +299,7 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
           )}
 
           {/* TAB: FINCA */}
-          {selectedTab === 'finca' && (
+          {selectedTab === "finca" && (
             <div>
               {solicitud.asociado.fincas && solicitud.asociado.fincas.length > 0 ? (
                 <div className="space-y-4">
@@ -264,9 +314,7 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-[#556B2F] text-lg mb-2">
-                    🏡 No hay fincas registradas
-                  </div>
+                  <div className="text-[#556B2F] text-lg mb-2">🏡 No hay fincas registradas</div>
                   <p className="text-sm text-[#556B2F] opacity-75">
                     Las fincas del asociado aparecerán aquí una vez sean registradas
                   </p>
@@ -279,7 +327,10 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
         {/* Footer */}
         <div className="border-t border-[#EAEFE0] px-6 py-4 bg-[#F8F9F3]">
           <div className="flex justify-end">
-            <button onClick={onClose} className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm">
+            <button
+              onClick={onClose}
+              className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm"
+            >
               Cerrar
             </button>
           </div>

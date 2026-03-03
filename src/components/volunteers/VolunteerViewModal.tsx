@@ -1,21 +1,26 @@
-import { useState } from "react";
-import type { SolicitudVoluntariado } from "../../schemas/volunteerSchemas";
-import { VolunteerIndividualInfo } from "./VolunteerIndividualInfo";
-import { OrganizacionInfo } from "./OrganizacionInfo";
-import { AreasInteresTab } from "./AreasInteresTab";
-import { DisponibilidadTab } from "./DisponibilidadTab";
-import { SolicitudStatusInfo } from "../SolicitudStatusInfo";
-import { useDownloadVoluntarioDetallePDF } from "@/hooks/Volunteers/useVoluntariosPdf";
-import { Download } from "lucide-react";
+import { useState } from "react"
+import type { SolicitudVoluntariado } from "../../schemas/volunteerSchemas"
+import { VolunteerIndividualInfo } from "./VolunteerIndividualInfo"
+import { OrganizacionInfo } from "./OrganizacionInfo"
+import { AreasInteresTab } from "./AreasInteresTab"
+import { DisponibilidadTab } from "./DisponibilidadTab"
+import { SolicitudStatusInfo } from "../SolicitudStatusInfo"
+import { useDownloadVoluntarioDetallePDF } from "@/hooks/Volunteers/useVoluntariosPdf"
+import { Download, FolderOpen } from "lucide-react"
+import {
+  useSolicitudHasDocs,
+  useSolicitudVoluntariadoDocsLink,
+} from "@/hooks/Volunteers/useVolunteerDocsLink"
+import { toast } from "sonner"
 
 interface VolunteerViewModalProps {
-  open: boolean;
-  onClose: () => void;
-  solicitud: SolicitudVoluntariado | null;
-  isLoading: boolean;
+  open: boolean
+  onClose: () => void
+  solicitud: SolicitudVoluntariado | null
+  isLoading: boolean
 }
 
-type Tab = "info" | "areas" | "disponibilidad";
+type Tab = "info" | "areas" | "disponibilidad"
 
 export function VolunteerViewModal({
   open,
@@ -23,23 +28,48 @@ export function VolunteerViewModal({
   solicitud,
   isLoading,
 }: VolunteerViewModalProps) {
-  const [selectedTab, setSelectedTab] = useState<Tab>("info");
-  const openSolicitudPDF = useDownloadVoluntarioDetallePDF();
+  const [selectedTab, setSelectedTab] = useState<Tab>("info")
+  const openSolicitudPDF = useDownloadVoluntarioDetallePDF()
+  const docsLinkMutation = useSolicitudVoluntariadoDocsLink()
 
-  if (!open) return null;
+  // Consulta silenciosa: ¿tiene documentos esta solicitud?
+  // Solo se ejecuta cuando hay un id válido. Resultado cacheado 5 min.
+  const idSolicitud = solicitud ? Number(solicitud.idSolicitudVoluntariado) : null
+  const { data: hasDocs, isLoading: checkingDocs } = useSolicitudHasDocs(idSolicitud)
+
+  const onOpenDocs = () => {
+    if (!solicitud) return
+    docsLinkMutation.mutate(Number(solicitud.idSolicitudVoluntariado), {
+      onSuccess: (res: any) => {
+        const url = res?.url ?? res?.link ?? res
+        if (typeof url === "string" && url.length > 0) {
+          window.open(url, "_blank", "noopener,noreferrer")
+        } else {
+          toast.error("No se pudo obtener el enlace de documentos")
+        }
+      },
+      onError: (err: any) => {
+        const msg =
+          err?.response?.data?.message ||
+          err?.message ||
+          "No se pudieron abrir los documentos"
+        toast.error(Array.isArray(msg) ? msg.join(", ") : msg)
+      },
+    })
+  }
+
+  if (!open) return null
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "—";
-
-    const date = new Date(dateString);
-
+    if (!dateString) return "—"
+    const date = new Date(dateString)
     return new Intl.DateTimeFormat("es-CR", {
       year: "numeric",
       month: "long",
       day: "numeric",
       timeZone: "UTC",
-    }).format(date);
-  };
+    }).format(date)
+  }
 
   if (isLoading || !solicitud) {
     return (
@@ -52,14 +82,12 @@ export function VolunteerViewModal({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B732E]"></div>
-            <p className="mt-4 text-[#556B2F] font-medium">
-              Cargando detalles...
-            </p>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B732E]" />
+            <p className="mt-4 text-[#556B2F] font-medium">Cargando detalles...</p>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   const hasAreasInteres =
@@ -68,7 +96,7 @@ export function VolunteerViewModal({
       solicitud.voluntario.areasInteres.length > 0) ||
     (solicitud.tipoSolicitante === "ORGANIZACION" &&
       solicitud.organizacion?.areasInteres &&
-      solicitud.organizacion.areasInteres.length > 0);
+      solicitud.organizacion.areasInteres.length > 0)
 
   const hasDisponibilidad =
     (solicitud.tipoSolicitante === "INDIVIDUAL" &&
@@ -76,13 +104,10 @@ export function VolunteerViewModal({
       solicitud.voluntario.disponibilidades.length > 0) ||
     (solicitud.tipoSolicitante === "ORGANIZACION" &&
       solicitud.organizacion?.disponibilidades &&
-      solicitud.organizacion.disponibilidades.length > 0);
+      solicitud.organizacion.disponibilidades.length > 0)
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
@@ -91,82 +116,60 @@ export function VolunteerViewModal({
         <div className="bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] p-6 border-b border-[#EAEFE0] rounded-t-2xl">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-2xl font-bold text-[#33361D]">
-                Detalles de la Solicitud de Voluntariado
-              </h3>
+              <h3 className="text-2xl font-bold text-[#33361D]">Detalles de la Solicitud de Voluntariado</h3>
 
-              <div className="mt-2 flex items-center gap-2">
-                <span
-                  className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                    solicitud.estado === "PENDIENTE"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : solicitud.estado === "APROBADO"
-                      ? "bg-[#E6EDC8] text-[#5A7018]"
-                      : "bg-[#F7E9E6] text-[#8C3A33]"
-                  }`}
+              <div className="mt-4 flex flex-wrap gap-3 items-center">
+                {/* Botón PDF — siempre visible */}
+                <button
+                  onClick={() => openSolicitudPDF.mutate(Number(solicitud.idSolicitudVoluntariado))}
+                  disabled={openSolicitudPDF.isPending}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
-                  {solicitud.estado}
-                </span>
+                  {openSolicitudPDF.isPending ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Generando PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Descargar PDF
+                    </>
+                  )}
+                </button>
 
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      solicitud.estado === "PENDIENTE"
-                        ? "bg-yellow-500"
-                        : solicitud.estado === "APROBADO"
-                        ? "bg-green-500"
-                        : "bg-red-500"
-                    }`}
-                  />
-                  <span className="text-xs text-gray-600 font-medium">
-                    {solicitud.estado === "PENDIENTE"
-                      ? "En revisión"
-                      : solicitud.estado === "APROBADO"
-                      ? "Aceptada"
-                      : "Rechazada"}
-                  </span>
-                </div>
-              </div>
-
-              {/* ✅ Botón debajo de las etiquetas (como en la foto) */}
-              <button
-                onClick={() =>
-                  openSolicitudPDF.mutate(Number(solicitud?.idSolicitudVoluntariado))
-                }
-                disabled={openSolicitudPDF.isPending}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              >
-                {openSolicitudPDF.isPending ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Generando PDF...
-                  </>
+                {/* Documentos: skeleton mientras verifica → botón si hay → texto si no hay */}
+                {checkingDocs ? (
+                  <div className="h-10 w-36 rounded-xl bg-gray-200 animate-pulse" />
+                ) : hasDocs ? (
+                  <button
+                    onClick={onOpenDocs}
+                    disabled={docsLinkMutation.isPending}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2D5F4F] text-white font-semibold hover:opacity-90 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  >
+                    {docsLinkMutation.isPending ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Abriendo...
+                      </>
+                    ) : (
+                      <>
+                        <FolderOpen className="w-4 h-4" />
+                        Ver documentos
+                      </>
+                    )}
+                  </button>
                 ) : (
-                  <>
-                    <Download className="w-4 h-4" />
-                    Descargar PDF
-                  </>
+                  <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-200 text-gray-500 text-sm font-medium">
+                    <FolderOpen className="w-4 h-4 opacity-50" />
+                    No se adjuntaron documentos
+                  </div>
                 )}
-              </button>
+              </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
+              ✕
             </button>
           </div>
         </div>
@@ -215,19 +218,12 @@ export function VolunteerViewModal({
         <div className="flex-1 overflow-y-auto p-6">
           {selectedTab === "info" && (
             <div className="space-y-6">
-              {solicitud.tipoSolicitante === "INDIVIDUAL" &&
-                solicitud.voluntario && (
-                  <VolunteerIndividualInfo
-                    voluntario={solicitud.voluntario}
-                    formatDate={formatDate}
-                  />
-                )}
-
-              {solicitud.tipoSolicitante === "ORGANIZACION" &&
-                solicitud.organizacion && (
-                  <OrganizacionInfo organizacion={solicitud.organizacion} />
-                )}
-
+              {solicitud.tipoSolicitante === "INDIVIDUAL" && solicitud.voluntario && (
+                <VolunteerIndividualInfo voluntario={solicitud.voluntario} formatDate={formatDate} />
+              )}
+              {solicitud.tipoSolicitante === "ORGANIZACION" && solicitud.organizacion && (
+                <OrganizacionInfo organizacion={solicitud.organizacion} />
+              )}
               <SolicitudStatusInfo
                 estado={solicitud.estado}
                 fechaSolicitud={solicitud.fechaSolicitud}
@@ -274,5 +270,5 @@ export function VolunteerViewModal({
         </div>
       </div>
     </div>
-  );
+  )
 }

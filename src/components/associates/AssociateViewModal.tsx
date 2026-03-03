@@ -2,6 +2,9 @@ import { useState } from "react";
 import type { Associate } from "../../schemas/adminSolicitudes";
 import { FincaAccordion } from "./FincaAccordion";
 import { useAssociateNecesidades } from "../../hooks/associates";
+import { FolderOpen } from "lucide-react";
+import { useAsociadoHasDocs, useDocsLinkByAsociado } from "../../hooks/associates/useSolicitudDocsLink";
+import { toast } from "sonner";
 
 type Props = {
   open: boolean;
@@ -10,13 +13,19 @@ type Props = {
   isLoading?: boolean;
 };
 
-type Tab = 'info' | 'necesidades' | 'finca'; // 🔸 Agregar 'finca'
+type Tab = "info" | "necesidades" | "finca";
 
 export function AssociateViewModal({ open, onClose, associate, isLoading }: Props) {
-  const [selectedTab, setSelectedTab] = useState<Tab>('info');
-  
+  const [selectedTab, setSelectedTab] = useState<Tab>("info");
+
   const { data: necesidades = [], isLoading: loadingNecesidades } = useAssociateNecesidades(
-    selectedTab === 'necesidades' && associate ? associate.idAsociado : null
+    selectedTab === "necesidades" && associate ? associate.idAsociado : null
+  );
+
+  // ✅ Hooks siempre arriba, antes de cualquier return
+  const docsLink = useDocsLinkByAsociado();
+  const { data: hasDocs, isLoading: checkingDocs } = useAsociadoHasDocs(
+    associate?.idAsociado ?? null
   );
 
   if (!open) return null;
@@ -32,7 +41,7 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
   if (isLoading || !associate) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-        <div 
+        <div
           className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-8"
           onClick={(e) => e.stopPropagation()}
         >
@@ -47,7 +56,10 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
 
   const personalFields = [
     { label: "Cédula", value: associate.persona.cedula },
-    { label: "Nombre completo", value: `${associate.persona.nombre} ${associate.persona.apellido1} ${associate.persona.apellido2}` },
+    {
+      label: "Nombre completo",
+      value: `${associate.persona.nombre} ${associate.persona.apellido1} ${associate.persona.apellido2}`,
+    },
     { label: "Fecha de nacimiento", value: formatDate(associate.persona.fechaNacimiento) },
     { label: "Teléfono", value: associate.persona.telefono },
     { label: "Email", value: associate.persona.email },
@@ -64,7 +76,7 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
+      <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -74,12 +86,14 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
             <div>
               <h3 className="text-2xl font-bold text-[#33361D]">Detalles del Asociado</h3>
               <div className="mt-2 flex items-center gap-2">
-                <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                  associate.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                }`}>
+                <span
+                  className={`px-3 py-1 rounded-lg text-sm font-bold ${
+                    associate.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                  }`}
+                >
                   {associate.estado ? "Activo" : "Inactivo"}
                 </span>
-                
+
                 <div className="flex items-center gap-1.5">
                   <div className={`w-2 h-2 rounded-full ${associate.estado ? "bg-green-500" : "bg-red-500"}`} />
                   <span className="text-xs text-gray-600 font-medium">
@@ -88,43 +102,83 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
                 </div>
               </div>
             </div>
+
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
+
+          {/* Documentos: skeleton → botón → texto */}
+          <div className="mt-4 flex justify-start">
+            {checkingDocs ? (
+              <div className="h-9 w-36 rounded-xl bg-gray-200 animate-pulse" />
+            ) : hasDocs ? (
+              <button
+                onClick={() => {
+                  docsLink.mutate(associate.idAsociado, {
+                    onSuccess: (r) => window.open(r.url, "_blank", "noopener,noreferrer"),
+                    onError: (err: any) => {
+                      const msg = err?.response?.data?.message || err?.message || "No se pudieron abrir los documentos";
+                      toast.error(Array.isArray(msg) ? msg.join(", ") : msg);
+                    },
+                  });
+                }}
+                disabled={docsLink.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#33361D] text-white font-semibold hover:bg-[#2b2d18] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                {docsLink.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Abriendo...
+                  </>
+                ) : (
+                  <>
+                    <FolderOpen className="w-4 h-4" />
+                    Ver documentos
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 text-gray-500 text-sm font-medium">
+                <FolderOpen className="w-4 h-4 opacity-50" />
+                No se adjuntaron documentos
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* 🔸 TABS */}
+        {/* Tabs */}
         <div className="flex border-b border-[#EAEFE0] px-6 bg-white">
           <button
-            onClick={() => setSelectedTab('info')}
+            onClick={() => setSelectedTab("info")}
             className={`px-4 py-3 font-semibold text-sm transition ${
-              selectedTab === 'info'
-                ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
-                : 'text-[#33361D] hover:text-[#5B732E]'
+              selectedTab === "info"
+                ? "text-[#5B732E] border-b-2 border-[#5B732E]"
+                : "text-[#33361D] hover:text-[#5B732E]"
             }`}
           >
             Información General
           </button>
-          {/* 🔸 NUEVA PESTAÑA */}
+
           <button
-            onClick={() => setSelectedTab('finca')}
+            onClick={() => setSelectedTab("finca")}
             className={`px-4 py-3 font-semibold text-sm transition ${
-              selectedTab === 'finca'
-                ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
-                : 'text-[#33361D] hover:text-[#5B732E]'
+              selectedTab === "finca"
+                ? "text-[#5B732E] border-b-2 border-[#5B732E]"
+                : "text-[#33361D] hover:text-[#5B732E]"
             }`}
           >
             Finca
           </button>
-                <button
-            onClick={() => setSelectedTab('necesidades')}
+
+          <button
+            onClick={() => setSelectedTab("necesidades")}
             className={`px-4 py-3 font-semibold text-sm transition ${
-              selectedTab === 'necesidades'
-                ? 'text-[#5B732E] border-b-2 border-[#5B732E]'
-                : 'text-[#33361D] hover:text-[#5B732E]'
+              selectedTab === "necesidades"
+                ? "text-[#5B732E] border-b-2 border-[#5B732E]"
+                : "text-[#33361D] hover:text-[#5B732E]"
             }`}
           >
             Necesidades y Observaciones
@@ -133,7 +187,7 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-6">
-          {selectedTab === 'info' && (
+          {selectedTab === "info" && (
             <div className="space-y-6">
               {/* Información Personal */}
               <div>
@@ -144,9 +198,7 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
                       <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
                         {field.label}
                       </div>
-                      <div className="text-base text-[#33361D] font-medium">
-                        {field.value}
-                      </div>
+                      <div className="text-base text-[#33361D] font-medium">{field.value}</div>
                     </div>
                   ))}
                 </div>
@@ -161,9 +213,7 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
                       <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
                         {field.label}
                       </div>
-                      <div className="text-base text-[#33361D] font-medium">
-                        {field.value}
-                      </div>
+                      <div className="text-base text-[#33361D] font-medium">{field.value}</div>
                     </div>
                   ))}
                 </div>
@@ -192,52 +242,48 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
             </div>
           )}
 
-          {selectedTab === 'necesidades' && (
+          {selectedTab === "necesidades" && (
             <div>
               {loadingNecesidades ? (
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B732E]"></div>
                   <p className="mt-4 text-sm text-[#556B2F]">Cargando necesidades...</p>
                 </div>
-              ) : (
-                <>
-                  {Array.isArray(necesidades) && necesidades.length > 0 ? (
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-bold text-[#33361D] mb-4 border-b-2 border-[#EAEFE0] pb-2">
-                        Necesidades y Mejoras Identificadas
-                      </h4>
-                      {necesidades.map((necesidad: any, i: number) => (
-                        <div key={necesidad?.idNecesidad ?? i} className="rounded-xl bg-[#F8F9F3] p-4 hover:bg-[#EAEFE0] transition">
-                          <div className="flex items-start gap-4">
-                            <span className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-[#5B732E] text-white text-sm font-bold">
-                              {necesidad?.orden ?? i + 1}
-                            </span>
-                            <div className="flex-1">
-                              <p className="text-base text-[#33361D] leading-relaxed">
-                                {necesidad?.descripcion ?? "—"}
-                              </p>
-                            </div>
-                          </div>
+              ) : Array.isArray(necesidades) && necesidades.length > 0 ? (
+                <div className="space-y-4">
+                  <h4 className="text-lg font-bold text-[#33361D] mb-4 border-b-2 border-[#EAEFE0] pb-2">
+                    Necesidades y Mejoras Identificadas
+                  </h4>
+                  {necesidades.map((necesidad: any, i: number) => (
+                    <div
+                      key={necesidad?.idNecesidad ?? i}
+                      className="rounded-xl bg-[#F8F9F3] p-4 hover:bg-[#EAEFE0] transition"
+                    >
+                      <div className="flex items-start gap-4">
+                        <span className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-[#5B732E] text-white text-sm font-bold">
+                          {necesidad?.orden ?? i + 1}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-base text-[#33361D] leading-relaxed">
+                            {necesidad?.descripcion ?? "—"}
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="text-[#556B2F] text-lg mb-2">
-                        📝 No hay necesidades registradas
                       </div>
-                      <p className="text-sm text-[#556B2F] opacity-75">
-                        Las necesidades y observaciones aparecerán aquí una vez sean registradas
-                      </p>
                     </div>
-                  )}
-                </>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-[#556B2F] text-lg mb-2">📝 No hay necesidades registradas</div>
+                  <p className="text-sm text-[#556B2F] opacity-75">
+                    Las necesidades y observaciones aparecerán aquí una vez sean registradas
+                  </p>
+                </div>
               )}
             </div>
           )}
 
-          {/* 🔸 TAB: FINCA */}
-          {selectedTab === 'finca' && (
+          {selectedTab === "finca" && (
             <div>
               {associate.fincas && associate.fincas.length > 0 ? (
                 <div className="space-y-4">
@@ -252,9 +298,7 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-[#556B2F] text-lg mb-2">
-                    🏡 No hay fincas registradas
-                  </div>
+                  <div className="text-[#556B2F] text-lg mb-2">🏡 No hay fincas registradas</div>
                   <p className="text-sm text-[#556B2F] opacity-75">
                     Las fincas del asociado aparecerán aquí una vez sean registradas
                   </p>
@@ -267,7 +311,10 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
         {/* Footer */}
         <div className="border-t border-[#EAEFE0] px-6 py-4 bg-[#F8F9F3]">
           <div className="flex justify-end">
-            <button onClick={onClose} className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm">
+            <button
+              onClick={onClose}
+              className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm"
+            >
               Cerrar
             </button>
           </div>

@@ -2,6 +2,12 @@ import { useState } from "react";
 import type { VoluntarioIndividual, Organizacion } from "../../schemas/volunteerSchemas";
 import { AreasInteresTab } from "../volunteers/AreasInteresTab";
 import { DisponibilidadTab } from "../volunteers/DisponibilidadTab";
+import { FolderOpen } from "lucide-react";
+import {
+  useApprovedHasDocs,
+  useApprovedVolunteerDocsLink,
+} from "@/hooks/Volunteers/useVolunteerDocsLink";
+import { toast } from "sonner";
 
 interface ApprovedVolunteerViewModalProps {
   open: boolean;
@@ -21,6 +27,44 @@ export function ApprovedVolunteerViewModal({
   isLoading,
 }: ApprovedVolunteerViewModalProps) {
   const [selectedTab, setSelectedTab] = useState<Tab>("info");
+
+  // Obtener el id según el tipo
+  const entityId =
+    data
+      ? tipo === "INDIVIDUAL"
+        ? (data as VoluntarioIndividual).idVoluntario
+        : (data as Organizacion).idOrganizacion
+      : null;
+
+  // Hooks siempre arriba
+  const docsLinkMutation = useApprovedVolunteerDocsLink();
+  const { data: hasDocs, isLoading: checkingDocs } = useApprovedHasDocs(
+    entityId ? { tipo, id: entityId } : null
+  );
+
+  const onOpenDocs = () => {
+    if (!entityId) return;
+    docsLinkMutation.mutate(
+      { tipo, id: entityId },
+      {
+        onSuccess: (res: any) => {
+          const url = res?.url ?? res?.link ?? res;
+          if (typeof url === "string" && url.length > 0) {
+            window.open(url, "_blank", "noopener,noreferrer");
+          } else {
+            toast.error("No se pudo obtener el enlace de documentos");
+          }
+        },
+        onError: (err: any) => {
+          const msg =
+            err?.response?.data?.message ||
+            err?.message ||
+            "No se pudieron abrir los documentos";
+          toast.error(Array.isArray(msg) ? msg.join(", ") : msg);
+        },
+      }
+    );
+  };
 
   if (!open) return null;
 
@@ -81,7 +125,7 @@ export function ApprovedVolunteerViewModal({
               <h3 className="text-2xl font-bold text-[#33361D]">
                 Detalles del {isIndividual ? "Voluntario" : "Organización"}
               </h3>
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-2">
                 <span
                   className={`px-3 py-1 rounded-lg text-sm font-bold ${
                     data.isActive
@@ -101,6 +145,34 @@ export function ApprovedVolunteerViewModal({
                 >
                   {tipo}
                 </span>
+
+                {/* Documentos: skeleton → botón → texto */}
+                {checkingDocs ? (
+                  <div className="h-8 w-36 rounded-lg bg-gray-200 animate-pulse" />
+                ) : hasDocs ? (
+                  <button
+                    onClick={onOpenDocs}
+                    disabled={docsLinkMutation.isPending}
+                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-[#2D5F4F] text-white font-semibold hover:opacity-90 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  >
+                    {docsLinkMutation.isPending ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Abriendo...
+                      </>
+                    ) : (
+                      <>
+                        <FolderOpen className="w-3.5 h-3.5" />
+                        Ver documentos
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gray-100 border border-gray-200 text-gray-500 text-sm font-medium">
+                    <FolderOpen className="w-3.5 h-3.5 opacity-50" />
+                    No se adjuntaron documentos
+                  </div>
+                )}
               </div>
             </div>
             <button

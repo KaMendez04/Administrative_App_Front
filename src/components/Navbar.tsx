@@ -4,8 +4,6 @@ import { useNavigate } from "@tanstack/react-router"
 import { getCurrentUser, clearSession } from "../auth/auth"
 import { showConfirmOutAlert } from "../utils/alerts"
 import { NotificationDropdown } from "./Notification/NotificationDropdown"
-
-// shadcn
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,25 +23,27 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
     typeof window !== "undefined" ? window.innerWidth >= 768 : true,
   )
 
+  // ✅ NUEVO: controlar si el dropdown de usuario está abierto
+  const [userMenuOpen, setUserMenuOpen] = React.useState(false)
+
   const navigate = useNavigate()
-
   const user = getCurrentUser()
-  const roleName = user?.role?.name?.toUpperCase()
-
-  const roleLabel =
-    roleName === "ADMIN"
-      ? "Administrador"
-      : roleName === "JUNTA"
-        ? "Junta Directiva"
-        : "Usuario"
-
+  const username = user?.username || user?.email || "Usuario"
+  
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen)
 
   const handleLogout = async () => {
+    // ✅ 1) cerrar dropdown antes de abrir el modal
+    setUserMenuOpen(false)
+
+    // ✅ 2) esperar 1 tick para que Radix cierre y libere el foco
+    await new Promise<void>((r) => requestAnimationFrame(() => r()))
+
     const confirmed = await showConfirmOutAlert(
       "Confirmar cierre de sesión",
       "¿Está seguro que desea salir?",
     )
+
     if (confirmed) {
       clearSession()
       navigate({ to: "/login" })
@@ -79,7 +79,7 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
           <NotificationDropdown />
 
           {/* Dropdown usuario */}
-          <DropdownMenu>
+          <DropdownMenu open={userMenuOpen} onOpenChange={setUserMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
@@ -90,8 +90,10 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
                   "transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FEF6E0]/25",
                 ].join(" ")}
               >
-                <User className="w-5 h-5 text-[#8B6C2E] hover:text-[#8B6C2E]" />
-                <span className="text-sm font-medium">{roleLabel}</span>
+                <User className="w-5 h-5 text-[#8B6C2E] hover:text-[#34270e]" />
+                <p className="text-sm font-semibold text-[#2E321B]">
+                  {username}
+                </p>
               </Button>
             </DropdownMenuTrigger>
 
@@ -103,10 +105,9 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
                 "p-2",
               ].join(" ")}
             >
-              {/* Opcional: encabezado pequeño */}
               <div className="px-2 py-1.5">
                 <p className="text-xs font-semibold text-[#2E321B]">Cuenta</p>
-                <p className="text-[11px] text-[#2E321B]/60">{roleLabel}</p>
+                <p className="text-[11px] text-[#2E321B]/60">{username}</p>
               </div>
 
               <DropdownMenuSeparator className="my-2 bg-[#E6E1D6]" />
@@ -117,7 +118,10 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
                   "rounded-xl px-2.5 py-2 cursor-pointer",
                   "focus:bg-[#F3F5EA] focus:text-[#2E321B]",
                 ].join(" ")}
-                onSelect={() => navigate({ to: "/settings" })}
+                onSelect={() => {
+                  setUserMenuOpen(false) // ✅ opcional, pero consistente
+                  navigate({ to: "/settings" })
+                }}
               >
                 <Settings className="w-4 h-4 mr-2 text-[#708C3E]" />
                 <span className="text-sm">Configuración</span>

@@ -15,7 +15,19 @@ import Swal from 'sweetalert2';
   `;
   document.head.appendChild(style);
 })();
-// ------------------------------------------------
+
+// ─── Configuración base de apariencia (solo fondo + tipografía + icono) ───────
+
+const LIGHT_BG = '#FFFCE6';
+
+const lightClass = {
+  popup: 'camara-popup',
+  title: 'camara-title',
+  htmlContainer: 'camara-text',
+  timerProgressBar: 'camara-progress',
+};
+
+// ─── Login ────────────────────────────────────────────────────────────────────
 
 export const showSuccessAlertLogin = (message: string) => {
   return Swal.fire({
@@ -27,9 +39,12 @@ export const showSuccessAlertLogin = (message: string) => {
     showConfirmButton: false,
     allowOutsideClick: false,
     allowEscapeKey: false,
+    background: LIGHT_BG,
+    customClass: { ...lightClass, icon: 'camara-icon-success' },
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 };
-
 
 export const showErrorAlertLogin = (message: string) => {
   return Swal.fire({
@@ -37,9 +52,14 @@ export const showErrorAlertLogin = (message: string) => {
     title: 'Inicio de sesión fallido',
     text: message,
     confirmButtonColor: '#48a6a7',
-    customClass: { confirmButton: 'no-border-button' },
+    customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
+    background: LIGHT_BG,
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 };
+
+// ─── Registro ─────────────────────────────────────────────────────────────────
 
 export const showSuccessAlertRegister = (message: string) => {
   return Swal.fire({
@@ -47,7 +67,12 @@ export const showSuccessAlertRegister = (message: string) => {
     title: 'Registro exitoso',
     text: message,
     timer: 2000,
+    timerProgressBar: true,
     showConfirmButton: false,
+    background: LIGHT_BG,
+    customClass: { ...lightClass, icon: 'camara-icon-success' },
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 };
 
@@ -56,6 +81,10 @@ export const showErrorAlertEmpty = (message: string) => {
     icon: 'error',
     title: 'Formulario inválido',
     text: message,
+    background: LIGHT_BG,
+    customClass: { ...lightClass, icon: 'camara-icon-error' },
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 };
 
@@ -65,7 +94,10 @@ export const showErrorDuplicateEmail = (message: string) => {
     title: 'Email duplicado',
     text: message,
     confirmButtonColor: '#48a6a7',
-    customClass: { confirmButton: 'no-border-button' },
+    customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
+    background: LIGHT_BG,
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 };
 
@@ -76,11 +108,14 @@ export const showWarningAlert = (message: string) => {
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#48a6a7',
-    customClass: { confirmButton: 'no-border-button' },
+    customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
     cancelButtonColor: '#d33',
     confirmButtonText: 'Sí, continuar',
     cancelButtonText: 'No, cancelar',
     reverseButtons: false,
+    background: LIGHT_BG,
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 };
 
@@ -90,30 +125,35 @@ export const showErrorAlertRegister = (message: string) => {
     title: 'Error al registrar',
     text: message,
     confirmButtonColor: '#48a6a7',
-    customClass: { confirmButton: 'no-border-button' },
+    customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
+    background: LIGHT_BG,
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 };
 
-// confirmación genérica
+// ─── Confirmaciones ───────────────────────────────────────────────────────────
+
 export const showConfirmAlert = async (title: string, text: string) => {
   const result = await Swal.fire({
     title,
     text,
-    icon: "warning",
+    icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: "#708C3E",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Sí, continuar",
-    cancelButtonText: "Cancelar",
+    confirmButtonColor: '#708C3E',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, continuar',
+    cancelButtonText: 'Cancelar',
     reverseButtons: false,
-    background: "#FAF9F5",
+    background: LIGHT_BG,
+    customClass: { ...lightClass, icon: 'camara-icon-error' },
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 
   return result.isConfirmed;
 };
 
-
-// confirmación genérica
 export const showConfirmDeleteAlert = async (title: string, text: string) => {
   const result = await Swal.fire({
     title,
@@ -122,52 +162,60 @@ export const showConfirmDeleteAlert = async (title: string, text: string) => {
     showCancelButton: true,
     confirmButtonColor: "#d33",
     cancelButtonColor: "#708C3E",
-    confirmButtonText: "Sí, eliminar",
+    confirmButtonText: "Sí, rechazar",
     cancelButtonText: "Cancelar",
     reverseButtons: false,
-    background: "#FAF9F5",
+
+    // 👇 ESTO ES LO QUE LO HACE IGUAL
+    background: LIGHT_BG,
+    customClass: { ...lightClass, icon: "camara-icon-error" },
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 
   return result.isConfirmed;
 };
 
-
-// Confirmar aprobación de solicitud previamente rechazada
 export const showConfirmApproveRejectedAlert = async () => {
   const result = await Swal.fire({
-    title: "Aprobar solicitud rechazada",
-    text: "¿Estás seguro de querer aprobar a este solicitante que había sido rechazado?",
-    icon: "warning",
+    title: 'Aprobar solicitud rechazada',
+    text: '¿Estás seguro de querer aprobar a este solicitante que había sido rechazado?',
+    icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: "#708C3E",
-    cancelButtonColor: "#8C3A33",
-    confirmButtonText: "Sí, aprobar",
-    cancelButtonText: "Cancelar",
-    background: "#FAF9F5",
-    customClass: { confirmButton: "no-border-button" },
+    confirmButtonColor: '#708C3E',
+    cancelButtonColor: '#8C3A33',
+    confirmButtonText: 'Sí, aprobar',
+    cancelButtonText: 'Cancelar',
+    background: LIGHT_BG,
+    customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 
   return result.isConfirmed;
 };
 
-// confirmación genérica
 export const showConfirmOutAlert = async (title: string, text: string) => {
   const result = await Swal.fire({
     title,
     text,
-    icon: "warning",
+    icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#708C3E",
-    confirmButtonText: "Sí, salir",
-    cancelButtonText: "Cancelar",
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#708C3E',
+    confirmButtonText: 'Sí, salir',
+    cancelButtonText: 'Cancelar',
     reverseButtons: false,
-    background: "#FAF9F5",
+    background: LIGHT_BG,
+    customClass: { ...lightClass, icon: 'camara-icon-error' },
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 
   return result.isConfirmed;
 };
 
+// ─── Éxito genérico ───────────────────────────────────────────────────────────
 
 export const showSuccessAlert = (message: string) => {
   return Swal.fire({
@@ -180,7 +228,10 @@ export const showSuccessAlert = (message: string) => {
     allowOutsideClick: false,
     allowEscapeKey: false,
     confirmButtonColor: '#708C3E',
-    background: '#FAF9F5',
+    background: LIGHT_BG,
+    customClass: { ...lightClass, icon: 'camara-icon-success' },
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 };
 
@@ -195,6 +246,9 @@ export const showSuccessDeleteAlert = (message: string) => {
     allowOutsideClick: false,
     allowEscapeKey: false,
     confirmButtonColor: '#708C3E',
-    background: '#FAF9F5',
+    background: LIGHT_BG,
+    customClass: { ...lightClass, icon: 'camara-icon-success' },
+    heightAuto: false,
+    scrollbarPadding: false,
   });
 };

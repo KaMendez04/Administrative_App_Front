@@ -11,3 +11,91 @@
     display: none;
   }
 }
+
+/* ─── SweetAlert2 — estilos Cámara Ganaderos ─────────────────────────────── */
+
+.swal2-popup.camara-popup {
+  border-radius: 18px !important;
+  border: 1px solid rgba(167, 196, 160, 0.35) !important;
+  box-shadow: 0 20px 50px rgba(11, 11, 11, 0.15) !important;
+  padding: 22px 22px 18px !important;
+  font-family: inherit !important;
+}
+
+.swal2-title.camara-title {
+  color: #1f3d2b !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.swal2-html-container.camara-text {
+  color: rgba(31, 61, 43, 0.82) !important;
+  line-height: 1.45 !important;
+  margin-top: 6px !important;
+}
+
+.swal2-timer-progress-bar.camara-progress {
+  background: rgba(112, 140, 62, 0.55) !important; /* #708C3E */
+}
+
+.swal2-icon.camara-icon-success {
+  border-color: rgba(109, 139, 55, 0.45) !important;
+  color: #2f5f0b !important;
+}
+
+.swal2-icon.camara-icon-error {
+  border-color: rgba(194, 183, 79, 0.55) !important;
+  color: #7a6f1a !important;
+}
+
+/* ─── SweetAlert2: estilo de botones sin cambiar colores ───────────── */
+
+/* Base (aplica a confirm y cancel) */
+.swal2-styled {
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 10px 22px !important;
+  min-height: 42px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
+  transition: transform 150ms ease, box-shadow 150ms ease !important;
+
+  /*CLAVE: NO tocar background/color */
+  background-image: none !important;
+  
+}
+
+/* Hover: NO cambiamos color, solo elevación */
+.swal2-styled:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22) !important;
+}
+
+/* Active: vuelve a su lugar */
+.swal2-styled:active {
+  transform: translateY(0px) !important;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Quitar outline feo */
+.swal2-styled:focus {
+  outline: none !important;
+}
+
+/* Layout bonito entre botones */
+.swal2-actions {
+  gap: 12px !important;
+  margin-top: 14px !important;
+}
+
+/* Oculta scrollbar pero permite scroll */
+html, body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE y Edge antiguos */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
