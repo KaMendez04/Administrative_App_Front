@@ -18,20 +18,19 @@ export async function getService(id: number): Promise<ServicesInformative> {
 
 // POST /servicesInformative
 export async function createService(
-  input: ServicesInformativeInput,
+  input: ServicesInformativeInput
 ): Promise<ServicesInformative> {
-  const { data } = await apiConfig.post<ServicesInformative>("/servicesInformative", input);
-  return data;
+  const { data } = await apiConfig.post<ServicesInformative>("/servicesInformative", input)
+  return data
 }
 
 // PUT /servicesInformative/:id
 export async function updateService(
   id: number,
-  input: ServicesInformativeInput,
-) {
-
-  const { data } = await apiConfig.put(`/servicesInformative/${id}`, input);
-  return data;
+  input: ServicesInformativeInput
+): Promise<ServicesInformative> {
+  const { data } = await apiConfig.put<ServicesInformative>(`/servicesInformative/${id}`, input)
+  return data
 }
 
 // DELETE /servicesInformative/:id

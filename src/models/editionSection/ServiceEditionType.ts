@@ -3,7 +3,7 @@ export interface ServicesInformative {
   title: string
   cardDescription: string
   modalDescription: string
-  image: string
+  images: string[] 
 }
 
-export type ServicesInformativeInput = Omit<ServicesInformative, 'id'>
+export type ServicesInformativeInput = Omit<ServicesInformative, "id">

@@ -15,7 +15,13 @@ export function useServicesInformative() {
     setError(null)
     try {
       const list = await fetchServices()
-      setItems(list)
+      const normalized = list.map((s: any) => ({
+        ...s,
+        images: Array.isArray(s.images)
+          ? s.images
+          : (s.image ? [s.image] : []),
+      }))
+      setItems(normalized)
     } catch (e: any) {
       setError(e?.message ?? "Error cargando servicios")
     } finally {

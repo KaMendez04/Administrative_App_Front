@@ -14,17 +14,18 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
   const [title, setTitle] = useState("")
   const [cardDescription, setCardDescription] = useState("")
   const [modalDescription, setModalDescription] = useState("")
-  const [image, setImage] = useState("") // si pega URL
+  const [images, setImages] = useState<string[]>([])
+  const [imageUrlDraft, setImageUrlDraft] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
 
-  // ✅ NUEVO: file pendiente (NO se sube hasta guardar)
+  // ✅ file pendiente (NO se sube hasta agregar)
   const upload = useCloudinaryUpload()
   const fileRef = useRef<HTMLInputElement>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [localPreview, setLocalPreview] = useState<string>("")
 
-  // drag/crop (mismo patrón que ya usaste)
+  // drag/crop
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const dragRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
@@ -44,15 +45,16 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
       title.trim() !== "" ||
       cardDescription.trim() !== "" ||
       modalDescription.trim() !== "" ||
-      image.trim() !== "" ||
+      imageUrlDraft.trim() !== "" ||
+      images.length > 0 ||
       !!pendingFile
     setHasChanges(changed)
-  }, [title, cardDescription, modalDescription, image, pendingFile])
+  }, [title, cardDescription, modalDescription, imageUrlDraft, images.length, pendingFile])
 
-  // reset offset cuando cambia imagen
+  // reset offset cuando cambia preview
   useEffect(() => {
     setOffset({ x: 0, y: 0 })
-  }, [image, localPreview])
+  }, [localPreview, imageUrlDraft])
 
   // liberar objectURL
   useEffect(() => {
@@ -61,11 +63,11 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
     }
   }, [localPreview])
 
-  // src para preview
+  // src para preview (archivo seleccionado tiene prioridad; si no, muestra la URL draft)
   const previewSrc = useMemo(() => {
     if (pendingFile && localPreview) return localPreview
-    return image || ""
-  }, [pendingFile, localPreview, image])
+    return imageUrlDraft || ""
+  }, [pendingFile, localPreview, imageUrlDraft])
 
   // convertir offset -> percent para recorte
   const positionAsPercent = useMemo(() => {
@@ -104,7 +106,7 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
 
   const handlePick = () => fileRef.current?.click()
 
-  // ✅ YA NO sube: solo guarda file + preview local
+  // ✅ NO sube todavía: solo guarda file + preview local
   const onPickFile = (file: File | null) => {
     if (!file) return
 
@@ -115,7 +117,7 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
     setLocalPreview(obj)
 
     // si escoge archivo, vaciamos el input de URL para evitar confusión
-    setImage("")
+    setImageUrlDraft("")
     setOffset({ x: 0, y: 0 })
 
     if (fileRef.current) fileRef.current.value = ""
@@ -209,35 +211,66 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
       })
     })
 
+  // ✅ Agregar imagen por URL
+  const addFromUrl = () => {
+    const url = imageUrlDraft.trim()
+    if (!url) return
+    setImages((prev) => [...prev, url])
+    setImageUrlDraft("")
+    setOffset({ x: 0, y: 0 })
+  }
+
+  // ✅ Agregar imagen desde archivo (recorta + sube y guarda URL)
+  const addFromFile = async () => {
+    if (!pendingFile || !localPreview) return
+    try {
+      const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
+      const croppedFile = blobToFile(blob, `service_${Date.now()}.jpg`)
+
+      const asset = await uploadAsync(croppedFile)
+      const url = asset?.url ?? asset?.secure_url
+      if (!url) return
+
+      setImages((prev) => [...prev, url])
+
+      setPendingFile(null)
+      if (localPreview) URL.revokeObjectURL(localPreview)
+      setLocalPreview("")
+      setOffset({ x: 0, y: 0 })
+    } catch (e) {
+      console.error("Error subiendo imagen:", e)
+    }
+  }
+
+  const removeAt = (idx: number) => setImages((prev) => prev.filter((_, i) => i !== idx))
+
+  const move = (from: number, to: number) =>
+    setImages((prev) => {
+      if (to < 0 || to >= prev.length) return prev
+      const copy = [...prev]
+      const [item] = copy.splice(from, 1)
+      copy.splice(to, 0, item)
+      return copy
+    })
+
   const handleSave = async () => {
     if (!title.trim() || !cardDescription.trim() || !modalDescription.trim()) return
 
     setIsSaving(true)
     try {
-      let finalImage = image.trim()
-
-      // ✅ si hay archivo local, recortamos a 1200x630 y subimos SOLO AHORA
-      if (pendingFile && localPreview) {
-        const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
-        const croppedFile = blobToFile(blob, `service_${Date.now()}.jpg`)
-
-        const asset = await uploadAsync(croppedFile)
-        const url = asset?.url ?? asset?.secure_url
-        finalImage = url || ""
-      }
-
       await onSubmit({
         title,
         cardDescription,
         modalDescription,
-        image: finalImage, // ✅ guarda url final recortada
+        images, // ✅ guarda la lista (primera = portada)
       })
 
       // limpiar
       setTitle("")
       setCardDescription("")
       setModalDescription("")
-      setImage("")
+      setImages([])
+      setImageUrlDraft("")
       setPendingFile(null)
       if (localPreview) URL.revokeObjectURL(localPreview)
       setLocalPreview("")
@@ -255,7 +288,8 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
     setTitle("")
     setCardDescription("")
     setModalDescription("")
-    setImage("")
+    setImages([])
+    setImageUrlDraft("")
     setPendingFile(null)
     if (localPreview) URL.revokeObjectURL(localPreview)
     setLocalPreview("")
@@ -263,6 +297,8 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
   }
 
   const canSave = title.trim() !== "" && cardDescription.trim() !== "" && modalDescription.trim() !== ""
+
+  const canAdd = (!!pendingFile && !!localPreview) || imageUrlDraft.trim() !== ""
 
   return (
     <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
@@ -317,9 +353,7 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
 
       {/* ✅ Imagen: archivo (no sube) + URL opcional */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Imagen (opcional)
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Imagen (opcional)</label>
 
         <div className="flex flex-col sm:flex-row gap-2">
           <button
@@ -347,9 +381,9 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
           <input
             className="flex-1 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
             placeholder="...o pega una URL (https://...)"
-            value={image}
+            value={imageUrlDraft}
             onChange={(e) => {
-              setImage(e.target.value)
+              setImageUrlDraft(e.target.value)
               // si escribe URL, cancelamos archivo local
               if (pendingFile) setPendingFile(null)
               if (localPreview) {
@@ -364,9 +398,7 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
 
         {previewSrc && (
           <div className="mt-3">
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Vista previa (arrastrá para acomodar):
-            </p>
+            <p className="text-sm font-medium text-gray-700 mb-2">Vista previa (arrastrá para acomodar):</p>
 
             <div
               ref={dragRef}
@@ -391,6 +423,54 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
                   ;(e.target as HTMLImageElement).style.display = "none"
                 }}
               />
+            </div>
+          </div>
+        )}
+
+        {/* ✅ Agregar a lista */}
+        <div className="flex items-center gap-2 pt-2">
+          <button
+            type="button"
+            onClick={pendingFile ? addFromFile : addFromUrl}
+            disabled={!canAdd || isSaving || upload.isPending}
+            className="border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50 disabled:opacity-60"
+          >
+            Agregar imagen
+          </button>
+          <span className="text-sm text-gray-500">La primera imagen será la portada.</span>
+        </div>
+
+        {/* ✅ Lista con orden */}
+        {images.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <p className="text-sm font-medium text-gray-700">Imágenes del servicio (la primera es portada)</p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {images.map((url, idx) => (
+                <div key={`${url}-${idx}`} className="border rounded-lg p-2 space-y-2">
+                  <img src={url} className="w-full h-24 object-cover rounded-md" />
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className={idx === 0 ? "text-green-700 font-semibold" : "text-gray-500"}>
+                      {idx === 0 ? "Portada" : `#${idx + 1}`}
+                    </span>
+                    <div className="flex gap-1">
+                      <button onClick={() => move(idx, idx - 1)} disabled={idx === 0} className="px-2 border rounded">
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => move(idx, idx + 1)}
+                        disabled={idx === images.length - 1}
+                        className="px-2 border rounded"
+                      >
+                        ↓
+                      </button>
+                      <button onClick={() => removeAt(idx)} className="px-2 border rounded">
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
