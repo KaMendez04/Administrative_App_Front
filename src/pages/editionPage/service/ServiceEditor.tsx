@@ -408,7 +408,7 @@ export default function ServicesInformativeEditor({
   }))
 
   return (
-    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-4 sm:p-6 lg:p-8 shadow">
+    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-4 sm:p-6 lg:p-8 shadow overflow-x-hidden">
       <h2 className="text-xl sm:text-2xl font-semibold">Editar Servicio Existente</h2>
 
       <CustomSelect
@@ -419,7 +419,7 @@ export default function ServicesInformativeEditor({
       />
 
       {selected && (
-        <div className="space-y-6">
+        <div className="space-y-4 overflow-x-hidden">
           {/* ✅ en desktop: 2 cols, en móvil: 1 col */}
           <div className="grid gap-6 lg:grid-cols-[1fr_520px]">
             <div className="space-y-4 w-full lg:min-w-[420px] lg:max-w-[520px] justify-self-end">
@@ -513,7 +513,7 @@ export default function ServicesInformativeEditor({
 
                   <div
                     ref={dragRef}
-                    className="relative w-full aspect-[1200/630] rounded-xl border border-[#DCD6C9] overflow-hidden bg-[#F8F9F3] cursor-grab active:cursor-grabbing"
+                    className="relative w-full max-w-full aspect-[1200/630] rounded-lg border border-[#DCD6C9] overflow-hidden bg-[#F8F9F3] cursor-grab active:cursor-grabbing"
                     style={{ touchAction: "none", WebkitUserSelect: "none", userSelect: "none" }}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
