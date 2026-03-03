@@ -17,7 +17,6 @@ export function NotificationDropdown() {
     return date.toLocaleDateString("es-CR")
   }
 
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -48,7 +47,17 @@ export function NotificationDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 max-h-[600px] rounded-lg bg-white shadow-lg border border-gray-200 z-50 overflow-hidden">
+        <div
+          className="
+            fixed sm:absolute
+            top-16 sm:top-auto
+            left-2 right-2 sm:left-auto sm:right-0
+            mt-0 sm:mt-2
+            w-auto sm:w-96
+            max-h-[calc(100dvh-5rem)] sm:max-h-[600px]
+            rounded-lg bg-white shadow-lg border border-gray-200 z-50 overflow-hidden
+          "
+        >
           <div className="px-4 py-3 border-b border-gray-200 bg-[#f7f8f5]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -56,7 +65,10 @@ export function NotificationDropdown() {
                 <h3 className="font-semibold text-[#33361D] text-sm">Notificaciones</h3>
                 {unreadCount > 0 && <span className="text-xs text-[#5B732E] font-medium">({unreadCount})</span>}
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -83,7 +95,7 @@ export function NotificationDropdown() {
             )}
           </div>
 
-          <div className="max-h-[500px] overflow-y-auto">
+          <div className="max-h-[calc(100dvh-11rem)] sm:max-h-[500px] overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="py-12 text-center">
                 <Bell className="w-10 h-10 text-gray-300 mx-auto mb-2" />

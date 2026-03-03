@@ -4,6 +4,7 @@ import { personalApi } from "../../services/personalPageService"
 import { useEditPersonalPageModal } from "../../hooks/Personal/useEditPersonalPageModal"
 import { showSuccessAlertRegister, showErrorAlertRegister } from "../../utils/alerts"
 import { ActionButtons } from "../../components/ActionButtons"
+import { BirthDatePicker } from "../ui/birthDayPicker"
 
 interface EditPersonalPageModalProps {
   personalPage: PersonalPageType;
@@ -46,7 +47,6 @@ export function EditPersonalPageModal({
   // Para startWorkDate: no puede ser hoy (máximo ayer)
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = formatYMD(yesterday);
 
   // Normalizador del payload
   const normalizePayload = (formData: PersonalPageType, base: any) => ({
@@ -274,41 +274,42 @@ export function EditPersonalPageModal({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Fecha de nacimiento */}
-              <form.Field name="birthDate" validators={validators.birthDate}>
-                {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
-                  return (
-                    <div>
-                      <label className={label} htmlFor="birthdate">Fecha de nacimiento</label>
-                      <input
-                        id="birthdate"
-                        type="date"
-                        value={personalPage.birthDate ?? ""}
-                        min="1900-01-01"
-                        max={cutoffStr}
-                        defaultValue={!personalPage.birthDate ? cutoffStr : undefined}
-                        disabled={isSaving}
-                        onChange={(e) => {
-                          const v = e.target.value
-                          if (v && (v < '1900-01-01' || v > cutoffStr)) {
-                            e.target.value = personalPage.birthDate ?? '';
-                            return;
-                          }
-                          setPersonalPage({ ...personalPage, birthDate: v })
-                          fieldApi.handleChange(v)
-                        }}
-                        className={inputClass}
-                        required
-                      />
-                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-                      <p className="mt-1 text-xs text-gray-500">
-                        Debe tener al menos 18 años cumplidos. (Máximo: {cutoffStr})
-                      </p>
-                    </div>
-                  )
-                }}
-              </form.Field>
+
+        {/* Fecha de nacimiento */}
+          <form.Field name="birthDate" validators={validators.birthDate}>
+            {(fieldApi) => {
+              const err = fieldApi.state.meta.errors[0]
+
+              return (
+                <div>
+                  <label className={label} htmlFor="birthdate">
+                    Fecha de nacimiento
+                  </label>
+
+      <BirthDatePicker
+            value={personalPage.birthDate ?? ""}
+            disabled={isSaving}
+            minAge={18}
+            placeholder="Seleccione una fecha"
+            error={err}
+            onChange={(v) => {
+              if (v && (v < "1900-01-01" || v > cutoffStr)) return
+              setPersonalPage({ ...personalPage, birthDate: v })
+              fieldApi.handleChange(v)
+            }}
+            className="w-full"
+          />
+                  {/* Si tu BirthDatePicker ya muestra error, esto es opcional.
+                      Pero lo dejo igual que tu input para no cambiar tu UI. */}
+                  {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+
+                  <p className="mt-1 text-xs text-gray-500">
+                    Debe tener al menos 18 años cumplidos.
+                  </p>
+                </div>
+              )
+            }}
+          </form.Field>
 
               <div />
             </div>
@@ -460,105 +461,106 @@ export function EditPersonalPageModal({
             </div>
 
             {/* Fechas laborales */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-              {/* Fecha de inicio laboral */}
-              <form.Field name="startWorkDate" validators={validators.startWorkDate}>
-                {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
-                  return (
-                    <div>
-                      <label className={label} htmlFor="startWorkDate">Fecha de inicio laboral</label>
-                      <input
-                        id="startWorkDate"
-                        type="date"
-                        value={personalPage.startWorkDate ?? ""}
-                        min="1925-01-01"
-                        max={yesterdayStr}
-                        disabled={isSaving}
-                        onChange={(e) => {
-                          const v = e.target.value
-                          if (v && v >= todayStr) return
+{/* Fechas laborales */}
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+  {/* Fecha de inicio laboral */}
+  <form.Field name="startWorkDate" validators={validators.startWorkDate}>
+    {(fieldApi) => {
+      const err = fieldApi.state.meta.errors[0]
 
-                          let nextEnd = personalPage.endWorkDate ?? ""
-                          if (nextEnd && v) {
-                            const startDate = new Date(v)
-                            const endDate = new Date(nextEnd)
-                            const dayAfterStart = new Date(startDate)
-                            dayAfterStart.setDate(dayAfterStart.getDate() + 1)
-                            
-                            if (endDate <= startDate) {
-                              nextEnd = ""
-                            }
-                          }
+      return (
+        <div>
+          <label className={label} htmlFor="startWorkDate">
+            Fecha de inicio laboral
+          </label>
 
-                          setPersonalPage({ ...personalPage, startWorkDate: v, endWorkDate: nextEnd })
-                          fieldApi.handleChange(v)
-                        }}
-                        placeholder="YYYY-MM-DD"
-                        className={inputClass}
-                      />
-                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-                      <p className="mt-1 text-xs text-gray-500">
-                        Debe ser anterior a hoy.
-                      </p>
-                    </div>
-                  )
-                }}
-              </form.Field>
+          <BirthDatePicker
+            value={personalPage.startWorkDate ?? ""}
+            disabled={isSaving}
+            placeholder="Seleccione una fecha"
+            error={err}
+            // ✅ rango: mínimo 1925-01-01, máximo ayer (para que sea anterior a hoy)
+            minDate="1925-01-01"
+            helperText="Debe ser anterior a hoy."
+            triggerClassName={inputClass}
+            onChange={(v) => {
+              // igual que tu lógica: no permitir hoy o futuro
+              if (v && v >= todayStr) return
 
-              {/* Fecha de salida */}
-              <form.Field name="endWorkDate" validators={validators.endWorkDate}>
-                {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
-                  const start = personalPage.startWorkDate ?? ""
-                  
-                  let minEndDate = "1925-01-01"
-                  if (start) {
-                    const startDate = new Date(start)
-                    startDate.setDate(startDate.getDate() + 1)
-                    minEndDate = formatYMD(startDate)
-                  }
-                  
-                  return (
-                    <div>
-                      <label className={label} htmlFor="endWorkDate">Fecha de salida</label>
-                      <input
-                        id="endWorkDate"
-                        type="date"
-                        value={personalPage.endWorkDate ?? ""}
-                        min={minEndDate}
-                        disabled={personalPage.isActive || isSaving}
-                        onChange={(e) => {
-                          if (personalPage.isActive) return
-                          const v = e.target.value
-                          
-                          if (start && v) {
-                            const startDate = new Date(start)
-                            const endDate = new Date(v)
-                            
-                            if (endDate <= startDate) return
-                          }
-                          
-                          setPersonalPage({ ...personalPage, endWorkDate: v })
-                          fieldApi.handleChange(v)
-                        }}
-                        placeholder="YYYY-MM-DD"
-                        className={`${inputClass} ${personalPage.isActive ? readOnlyStyle : ""}`}
-                        readOnly={personalPage.isActive}
-                      />
-                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-                      {start && !personalPage.isActive && (
-                        <p className="mt-1 text-xs text-gray-500">
-                          Debe ser al menos 1 día después de la fecha de inicio.
-                        </p>
-                      )}
-                    </div>
-                  )
-                }}
-              </form.Field>
+              let nextEnd = personalPage.endWorkDate ?? ""
+              if (nextEnd && v) {
+                const startDate = new Date(v)
+                const endDate = new Date(nextEnd)
 
-              <div className="hidden md:block" />
-            </div>
+                if (endDate <= startDate) {
+                  nextEnd = ""
+                }
+              }
+
+              setPersonalPage({ ...personalPage, startWorkDate: v, endWorkDate: nextEnd })
+              fieldApi.handleChange(v)
+            }}
+          />
+
+          {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+        </div>
+      )
+    }}
+  </form.Field>
+
+  {/* Fecha de salida */}
+  <form.Field name="endWorkDate" validators={validators.endWorkDate}>
+    {(fieldApi) => {
+      const err = fieldApi.state.meta.errors[0]
+      const start = personalPage.startWorkDate ?? ""
+
+      let minEndDate = "1925-01-01"
+      if (start) {
+        const startDate = new Date(start)
+        startDate.setDate(startDate.getDate() + 1)
+        minEndDate = formatYMD(startDate)
+      }
+
+      return (
+        <div>
+          <label className={label} htmlFor="endWorkDate">
+            Fecha de salida
+          </label>
+
+          <BirthDatePicker
+            value={personalPage.endWorkDate ?? ""}
+            disabled={personalPage.isActive || isSaving}
+            placeholder="Seleccione una fecha"
+            error={err}
+            minDate={minEndDate}
+            helperText={
+              start && !personalPage.isActive
+                ? "Debe ser al menos 1 día después de la fecha de inicio."
+                : undefined
+            }
+            triggerClassName={`${inputClass} ${personalPage.isActive ? readOnlyStyle : ""}`}
+            onChange={(v) => {
+              if (personalPage.isActive) return
+
+              if (start && v) {
+                const startDate = new Date(start)
+                const endDate = new Date(v)
+                if (endDate <= startDate) return
+              }
+
+              setPersonalPage({ ...personalPage, endWorkDate: v })
+              fieldApi.handleChange(v)
+            }}
+          />
+
+          {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+        </div>
+      )
+    }}
+  </form.Field>
+
+  <div className="hidden md:block" />
+</div>
           </section>
 
           {/* Footer con ActionButtons - ✅ ARREGLADO */}

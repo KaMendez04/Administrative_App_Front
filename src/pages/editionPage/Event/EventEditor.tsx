@@ -4,6 +4,7 @@ import { CustomSelect } from "../../../components/CustomSelect"
 import { ActionButtons } from "../../../components/ActionButtons"
 import { useCloudinaryUpload } from "../../../hooks/Cloudinary/useCloudinaryUpload"
 import { Loader2, Upload } from "lucide-react"
+import { BirthDatePicker } from "@/components/ui/birthDayPicker"
 
 const CROP_W = 1200
 const CROP_H = 630
@@ -441,20 +442,20 @@ export default function EventEditor({
                 <div className="text-sm text-gray-500 mt-1">Quedan {75 - title.length} de 75 caracteres</div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha del evento <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  min={minDate}
-                  disabled={isSaving || isDeleting || upload.isPending}
-                />
-                <div className="text-xs text-gray-500 mt-1">Solo se permiten fechas a partir de hoy</div>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Fecha del evento <span className="text-red-500">*</span>
+              </label>
+
+              <BirthDatePicker
+                value={date}
+                onChange={(iso) => setDate(iso)}
+                minDate={minDate} // hoy en formato YYYY-MM-DD
+                helperText="Solo se permiten fechas a partir de hoy"
+                placeholder="Seleccione una fecha"
+                disabled={isSaving || isDeleting || upload.isPending}
+              />
+            </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

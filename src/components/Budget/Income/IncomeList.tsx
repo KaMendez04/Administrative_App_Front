@@ -6,6 +6,9 @@ import { useIncomesList } from "../../../hooks/Budget/income/useIncomeCatalog";
 import { GenericTable } from "../../GenericTable";
 import { useUpdateIncome } from "../../../hooks/Budget/income/useIncomeMutation";
 
+// ✅ NUEVO: import del picker
+import { BirthDatePicker } from "@/components/ui/birthDayPicker";
+
 function formatMoneyCR(v: string | number) {
   const n = Number(v ?? 0);
   return n.toLocaleString("es-CR", { style: "currency", currency: "CRC" });
@@ -116,13 +119,13 @@ export default function IncomeList({ subTypeId }: Props) {
   async function saveEdit(row: Row) {
     const amountNumber = parseCRCToNumber(amountRef.current);
 
-    const dateValue = (dateRef.current ?? "").trim(); 
+    const dateValue = (dateRef.current ?? "").trim();
 
     try {
       await mUpdate.mutate({
         id: row.id,
         amount: amountNumber,
-        date: dateValue, 
+        date: dateValue,
       });
       cancelEdit();
     } catch {
@@ -142,20 +145,26 @@ export default function IncomeList({ subTypeId }: Props) {
           if (!isEditing) return formatDateCR(r?.date);
 
           return (
-            <input
-              type="date"
-              className="w-full max-w-[170px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
-              value={draftDate}
-              onChange={(e) => {
-                const v = e.target.value; // YYYY-MM-DD
-                setDraftDate(v);
-                dateRef.current = v;
-              }}
+            <div
+              className="w-full"
               onKeyDown={(e) => {
                 if (e.key === "Escape") cancelEdit();
                 if (e.key === "Enter") saveEdit(r);
               }}
-            />
+            >
+              <BirthDatePicker
+                value={draftDate}
+                onChange={(v) => {
+                  setDraftDate(v)
+                  dateRef.current = v
+                }}
+                placeholder="Seleccione una fecha"
+                disabled={mUpdate.loading}
+                className="w-full"
+                helperText=""
+                triggerClassName="min-w-[240px] w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
+              />
+            </div>
           );
         },
       },
@@ -188,7 +197,7 @@ export default function IncomeList({ subTypeId }: Props) {
               }}
               placeholder="₡0,00"
               inputMode="decimal"
-              autoFocus 
+              autoFocus
             />
           );
         },
@@ -255,7 +264,6 @@ export default function IncomeList({ subTypeId }: Props) {
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-4">
-
       <GenericTable<Row> data={rows} columns={columns} isLoading={q.loading} />
 
       {!q.loading && rows.length === 0 && subTypeId && (

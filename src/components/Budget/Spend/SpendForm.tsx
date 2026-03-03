@@ -17,6 +17,7 @@ import {
 } from "../../../hooks/Budget/spend/useSpendMutation";
 
 import type { CreateSpendDTO } from "../../../models/Budget/SpendType";
+import { BirthDatePicker } from "@/components/ui/birthDayPicker";
 
 type Props = {
   onSuccess?: (createdId: number) => void;
@@ -221,18 +222,26 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
 
-      {/* Fecha */}
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-[#33361D]">Fecha</label>
-        <input
-          type="date"
-          className="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          disabled={disabled}
-        />
-        {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
-      </div>
+{/* Fecha */}
+<div className="flex flex-col gap-2">
+  <label className="text-sm font-medium text-[#33361D]">Fecha</label>
+
+  <BirthDatePicker
+    value={date}
+    onChange={(iso) => setDate(iso)}
+    disabled={disabled}
+    placeholder="Seleccione una fecha"
+    error={errors.date}
+    // ✅ para eventos: no permitir fechas pasadas (si eso quieres)
+    minDate={new Date().toISOString().slice(0, 10)}
+    helperText=""
+    // ✅ aplica el estilo “input” al botón interno (no al wrapper)
+    triggerClassName="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
+    className="w-full"
+  />
+
+  {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
+</div>
 
       {/* Monto */}
       <div className="flex flex-col gap-2">

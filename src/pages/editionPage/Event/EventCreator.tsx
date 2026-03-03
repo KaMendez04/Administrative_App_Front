@@ -5,6 +5,9 @@ import type { EventInput } from "../../../models/editionSection/EventEditionType
 import { useCloudinaryUpload } from "../../../hooks/Cloudinary/useCloudinaryUpload"
 import { Loader2, Upload } from "lucide-react"
 
+// ✅ USAR SOLO BirthDatePicker
+import { BirthDatePicker } from "@/components/ui/birthDayPicker"
+
 const CROP_W = 1200
 const CROP_H = 630
 
@@ -107,13 +110,13 @@ export default function EventCreator({
   onSubmit: (data: EventInput) => void
 }) {
   const [title, setTitle] = useState("")
-  const [date, setDate] = useState("")
+  const [date, setDate] = useState("") // ISO YYYY-MM-DD
   const [description, setDescription] = useState("")
 
   // input text puede ser URL pegada
   const [illustration, setIllustration] = useState("")
 
-  // ✅ NUEVO: si el usuario escogió archivo, lo guardamos aquí (SIN subir)
+  // ✅ si el usuario escogió archivo, lo guardamos aquí (SIN subir)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [localPreview, setLocalPreview] = useState<string>("") // objectURL
 
@@ -321,6 +324,7 @@ export default function EventCreator({
   const handleSave = async () => {
     if (!title.trim() || !date.trim() || !description.trim()) return
 
+    // ✅ validar que no sea pasada (como en tu lógica original)
     if (date < minDate) {
       showSuccessAlert("No se pueden crear eventos con fechas pasadas")
       return
@@ -340,16 +344,11 @@ export default function EventCreator({
         finalIllustration = url || ""
       }
 
-      // ✅ Si NO hay archivo local, pero hay URL cloudinary pegada,
-      // y querés que quede almacenada "real" sin re-subir, NO se puede sin backend.
-      // Así que aquí guardamos la URL tal cual (si es cloudinary, podés guardar transformada si querés).
-      // Como vos querés archivo real, eso solo aplica a pendingFile (arriba).
-
       await onSubmit({
         title,
         date,
         description,
-        illustration: finalIllustration || "", // tu BD no debe quedar sin valor si es NOT NULL
+        illustration: finalIllustration || "",
       } as any)
 
       // reset
@@ -407,14 +406,16 @@ export default function EventCreator({
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Fecha del evento <span className="text-red-500">*</span>
         </label>
-        <input
-          type="date"
-          className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          min={minDate}
-          disabled={isSaving || upload.isPending}
-        />
+
+<BirthDatePicker
+  value={date}
+  onChange={setDate}
+  minDate={minDate} // hoy (YYYY-MM-DD)
+  helperText="Solo se permiten fechas a partir de hoy"
+  placeholder="Seleccione una fecha"
+  disabled={isSaving || upload.isPending}
+/>
+
         <div className="text-xs text-gray-500 mt-1">Solo se permiten fechas a partir de hoy</div>
       </div>
 
@@ -466,7 +467,6 @@ export default function EventCreator({
             placeholder="...o pega una URL (https://...)"
             value={illustration}
             onChange={(e) => {
-              // si pega URL, “desactivamos” pendingFile
               setIllustration(e.target.value)
               if (pendingFile) setPendingFile(null)
               if (localPreview) {
@@ -481,9 +481,7 @@ export default function EventCreator({
 
         {previewSrc && (
           <div className="mt-3">
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Vista previa (arrastrá para acomodar):
-            </p>
+            <p className="text-sm font-medium text-gray-700 mb-2">Vista previa (arrastrá para acomodar):</p>
 
             <div
               ref={dragRef}

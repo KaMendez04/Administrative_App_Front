@@ -5,6 +5,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useSpendsList } from "../../../hooks/Budget/spend/useSpendCatalog";
 import { GenericTable } from "../../GenericTable";
 import { useUpdateSpend } from "../../../hooks/Budget/spend/useSpendMutation";
+import { BirthDatePicker } from "../../ui/birthDayPicker"; // ✅ NUEVO
 
 function formatMoneyCR(v: string | number) {
   const n = Number(v ?? 0);
@@ -141,20 +142,18 @@ export default function SpendList({ subTypeId }: Props) {
           if (!isEditing) return formatDateCR(r?.date);
 
           return (
-            <input
-              type="date"
-              className="w-full max-w-[170px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
-              value={draftDate}
-              onChange={(e) => {
-                const v = e.target.value; // YYYY-MM-DD
-                setDraftDate(v);
-                dateRef.current = v;
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") cancelEdit();
-                if (e.key === "Enter") saveEdit(r);
-              }}
-            />
+            <BirthDatePicker
+                value={draftDate}
+                onChange={(v) => {
+                  setDraftDate(v)
+                  dateRef.current = v
+                }}
+                placeholder="Seleccione una fecha"
+                disabled={mUpdate.loading}
+                className="w-full"
+                helperText=""
+                triggerClassName="min-w-[240px] w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
+              />
           );
         },
       },
@@ -264,9 +263,7 @@ export default function SpendList({ subTypeId }: Props) {
         <p className="mt-3 text-xs text-gray-500">No hay egresos aún.</p>
       )}
 
-      {mUpdate.error && (
-        <p className="mt-3 text-xs text-red-600">{mUpdate.error}</p>
-      )}
+      {mUpdate.error && <p className="mt-3 text-xs text-red-600">{mUpdate.error}</p>}
     </div>
   );
 }
