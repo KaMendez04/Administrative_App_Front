@@ -2,10 +2,16 @@ import type { AssignExtraordinaryDto } from "../../../models/Budget/extraordinar
 import type { Extraordinary } from "../../../models/Budget/extraordinary/extraordinaryInterface";
 import type { Department } from "../../../models/Budget/IncomeType";
 import apiConfig from "../../../apiConfig/apiConfig";
+import { ExtraordinaryListSchema, ExtraordinarySchema } from "@/schemas/extraordinarySchema";
 
 export async function listExtraordinary(): Promise<Extraordinary[]> {
-  const { data } = await apiConfig.get<Extraordinary[]>("/extraordinary");
-  return data;
+  const res = await apiConfig.get("/extraordinary")
+  return ExtraordinaryListSchema.parse(res.data)
+}
+
+export async function getExtraordinary(id: number): Promise<Extraordinary> {
+  const res = await apiConfig.get(`/extraordinary/${id}`)
+  return ExtraordinarySchema.parse(res.data)
 }
 
 export async function createExtraordinary(
@@ -13,6 +19,14 @@ export async function createExtraordinary(
 ): Promise<Extraordinary> {
   const { data } = await apiConfig.post<Extraordinary>("/extraordinary", body);
   return data;
+}
+
+export async function updateExtraordinary(
+  id: number,
+  patch: Partial<Pick<{ name: string; amount: string; date?: string | null }, "name" | "amount" | "date">>
+) {
+  const response = await apiConfig.patch(`/extraordinary/${id}`, patch);
+  return response.data;
 }
 
 export async function deleteExtraordinary(id: number): Promise<void> {
