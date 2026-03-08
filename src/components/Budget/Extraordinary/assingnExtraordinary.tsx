@@ -1,6 +1,6 @@
 import React from "react"
-import { Calendar, Coins, ArrowRightLeft, Plus, X } from "lucide-react"
-import { useForm } from "@tanstack/react-form"
+import { Coins, Plus, X } from "lucide-react"
+import { useForm, type Updater } from "@tanstack/react-form"
 import { AssignExtraordinarySchema } from "../../../schemas/extraordinarySchema"
 import {
   useAssignExtraordinary,
@@ -8,6 +8,10 @@ import {
   useExtraordinaryList,
 } from "../../../hooks/Budget/extraordinary/useExtraordinary"
 import { CustomSelect } from "../../CustomSelect"
+import { Input } from "@/components/ui/input"
+import { ActionButtons } from "../../ActionButtons"
+import { BirthDatePicker } from "@/components/ui/birthDayPicker"
+import { parseCR, useMoneyInput } from "@/hooks/Budget/useMoneyInput"
 
 type Props = {
   className?: string
@@ -15,19 +19,14 @@ type Props = {
   defaultOpen?: boolean
 }
 
-const inputClass =
-  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 outline-none focus:ring-4 focus:ring-[#708C3E]/20"
-
 export default function AssignExtraordinaryCard({
   className,
   onAssigned,
   defaultOpen = true,
 }: Props) {
   const [open, setOpen] = React.useState<boolean>(defaultOpen)
-
-  // error para saldo insuficiente
   const [saldoInsuficiente, setSaldoInsuficiente] = React.useState(false)
-
+  const money = useMoneyInput("")
   const { data: extras, loading: loadingExtras } = useExtraordinaryList()
   const { data: departments, loading: loadingDepts } = useDepartmentsE()
   const { submit: assign, loading: assigning } = useAssignExtraordinary()
@@ -38,14 +37,14 @@ export default function AssignExtraordinaryCard({
       amount: "",
       departmentId: 0,
       subTypeName: "",
-      date: "",
+      date: "", // ✅ opcional
     },
     onSubmit: async ({ value }) => {
       const parsed = AssignExtraordinarySchema.safeParse(value)
       if (!parsed.success) return
 
-      // ✅ FIX (estrictamente necesario): recalcular saldo del extraordinario seleccionado dentro del submit
-      const amountNumber = Number(String(parsed.data.amount).replace(",", "."))
+      // recalcular saldo dentro del submit
+      const amountNumber = parseCR(parsed.data.amount)
       const selectedExtra = extras.find((e) => e.id === parsed.data.extraordinaryId)
       const remainingNow = selectedExtra
         ? Math.max(0, Number(selectedExtra.amount) - Number(selectedExtra.used))
@@ -70,7 +69,7 @@ export default function AssignExtraordinaryCard({
           date: parsed.data.date || undefined,
         })
 
-        Form.reset()
+        form.reset() // ✅
         onAssigned?.(payload)
       } catch (error) {
         console.error("Error assigning extraordinary:", error)
@@ -81,13 +80,10 @@ export default function AssignExtraordinaryCard({
   const Form = form
   const loading = loadingExtras || loadingDepts || assigning
 
-  // saldo disponible del extraordinario seleccionado (para mostrar en UI)
   const remaining = (() => {
     const x = extras.find((e) => e.id === Form.state.values.extraordinaryId)
     if (!x) return 0
-    const amt = Number(x.amount)
-    const used = Number(x.used)
-    return Math.max(0, amt - used)
+    return Math.max(0, Number(x.amount) - Number(x.used))
   })()
 
   const extraordinaryOptions = React.useMemo(() => {
@@ -124,6 +120,7 @@ export default function AssignExtraordinaryCard({
           onClick={() => setOpen((v) => !v)}
           className="flex h-9 w-9 items-center justify-center rounded-full bg-[#708C3E] text-white shadow hover:bg-[#5e732f]"
           title={open ? "Ocultar sección" : "Mostrar sección"}
+          type="button"
         >
           {open ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
         </button>
@@ -132,8 +129,7 @@ export default function AssignExtraordinaryCard({
       {open && (
         <p className="mt-1 text-sm text-gray-600">
           Selecciona el extraordinario, indica cuánto se usará y a qué ingreso
-          (tipo del departamento) se sumará. Si no especificas fecha, se usa la
-          actual.
+          se sumará. Si no especificas fecha, se usa la actual.
         </p>
       )}
 
@@ -174,30 +170,25 @@ export default function AssignExtraordinaryCard({
                 <p className="mt-1 text-xs text-gray-500">
                   Saldo disponible:{" "}
                   <span className="font-medium">
-                    ₡
-                    {remaining.toLocaleString("es-CR", {
-                      minimumFractionDigits: 2,
-                    })}
+                    ₡{remaining.toLocaleString("es-CR", { minimumFractionDigits: 2 })}
                   </span>
                 </p>
 
-                {field.state.meta.errors[0] && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {field.state.meta.errors[0]}
-                  </p>
+                {field.state.meta.errors?.[0] && (
+                  <p className="mt-1 text-xs text-[#9c1414]">{field.state.meta.errors[0]}</p>
                 )}
               </div>
             )}
           </Form.Field>
 
-          {/* Monto */}
+          {/* Monto (shadcn Input) */}
           <Form.Field
             name="amount"
             validators={{
-              onChange: ({ value }) =>
-                AssignExtraordinarySchema.shape.amount.safeParse(value).success
-                  ? undefined
-                  : "Monto inválido (ej: 1000.50)",
+              onChange: ({ value }) => {
+                const ok = AssignExtraordinarySchema.shape.amount.safeParse(value).success
+                return ok ? undefined : "Monto inválido (ej: 70 000,90)"
+              },
             }}
           >
             {(field) => (
@@ -205,35 +196,37 @@ export default function AssignExtraordinaryCard({
                 <label className="mb-1 block text-xs font-semibold text-gray-700">
                   Monto a asignar
                 </label>
+
                 <div className="relative">
                   <Coins className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <span className="pointer-events-none absolute left-8 top-1/2 -translate-y-1/2 select-none text-gray-500">
                     ₡
                   </span>
-                  <input
+
+                  <Input
                     inputMode="decimal"
-                    value={field.state.value}
+                    value={money.value}
                     onChange={(e) => {
-                      field.handleChange(e.target.value.slice(0, 15))
+                      const formatted = money.handleValue(e.target.value)
+                      field.handleChange(formatted)
                       setSaldoInsuficiente(false)
                     }}
-                    placeholder="0"
-                    className={`pl-14 ${inputClass}`}
+                    className="border-[#DCD6C9] focus-visible:ring-[#708C3E]/30 focus-visible:ring-2 focus-visible:ring-offset-0 pl-12"
                     disabled={loading}
                   />
                 </div>
 
-                {field.state.meta.errors[0] && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {field.state.meta.errors[0]}
-                  </p>
+                {field.state.meta.errors?.[0] && (
+                  <p className="mt-1 text-xs text-[#9c1414]">{field.state.meta.errors[0]}</p>
                 )}
 
                 {saldoInsuficiente && (
-                  <p className="mt-1 text-xs text-red-600">
+                  <p className="mt-1 text-xs text-[#9c1414]">
                     Saldo insuficiente, por favor ingrese un monto válido
                   </p>
                 )}
+
+                <p className="text-xs text-gray-600 mt-1">Ejemplo: 70 000,90</p>
               </div>
             )}
           </Form.Field>
@@ -261,22 +254,19 @@ export default function AssignExtraordinaryCard({
                   zIndex={20}
                 />
 
-                {field.state.meta.errors[0] && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {field.state.meta.errors[0]}
-                  </p>
+                {field.state.meta.errors?.[0] && (
+                  <p className="mt-1 text-xs text-[#9c1414]">{field.state.meta.errors[0]}</p>
                 )}
+                <p className="text-xs text-gray-600 mt-1">Ejemplo: Donación, Rifa benéfica…</p>
               </div>
             )}
           </Form.Field>
 
-          {/* Subtipo */}
           <Form.Field
             name="subTypeName"
             validators={{
               onChange: ({ value }) =>
-                AssignExtraordinarySchema.shape.subTypeName.safeParse(value)
-                  .success
+                AssignExtraordinarySchema.shape.subTypeName.safeParse(value).success
                   ? undefined
                   : "Texto inválido (3–50)",
             }}
@@ -284,103 +274,76 @@ export default function AssignExtraordinaryCard({
             {(field) => (
               <div>
                 <label className="mb-1 block text-xs font-semibold text-gray-700">
-                  Subtipo (razón)
+                  Subtipo (Razón)
                 </label>
-                <input
+
+                <Input
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value.slice(0, 50))}
-                  placeholder="Ej. Donación, Rifa benéfica…"
-                  className={inputClass}
+                  className="border-[#DCD6C9] focus-visible:ring-[#708C3E]/30 focus-visible:ring-2 focus-visible:ring-offset-0"
                   disabled={loading}
                 />
-                {field.state.meta.errors[0] && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {field.state.meta.errors[0]}
-                  </p>
+
+                {field.state.meta.errors?.[0] && (
+                  <p className="mt-1 text-xs text-[#9c1414]">{field.state.meta.errors[0]}</p>
                 )}
+                <p className="text-xs text-gray-600 mt-1">Ejemplo: Donación, Rifa benéfica…</p>
               </div>
             )}
           </Form.Field>
 
-          {/* Fecha */}
+          {/* Fecha (tu calendario) */}
           <Form.Field
             name="date"
             validators={{
               onChange: ({ value }) =>
-                !value || /^\d{4}-\d{2}-\d{2}$/.test(value)
-                  ? undefined
-                  : "Fecha inválida",
+                !value || /^\d{4}-\d{2}-\d{2}$/.test(value) ? undefined : "Fecha inválida",
             }}
           >
             {(field) => (
               <div>
                 <label className="mb-1 block text-xs font-semibold text-gray-700">
-                  Fecha (opcional)
+                  Fecha (Opcional)
                 </label>
-                <div className="relative">
-                  <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="date"
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    className={`pl-10 ${inputClass}`}
+
+                <div className="space-y-2">
+                  <BirthDatePicker
+                    value={field.state.value || ""}
+                    onChange={(iso: Updater<string>) => field.handleChange(iso)}
+                    placeholder="Seleccione una fecha"
                     disabled={loading}
+                    error={field.state.meta.errors?.[0] ? String(field.state.meta.errors[0]) : undefined}
+                    className="w-full"
                   />
                 </div>
+
                 <p className="mt-1 text-xs text-gray-500">
                   Si no la eliges, se usa la fecha actual.
                 </p>
-                {field.state.meta.errors[0] && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {field.state.meta.errors[0]}
-                  </p>
-                )}
               </div>
             )}
           </Form.Field>
 
-          <div className="md:col-span-2 flex justify-end">
-            <Form.Subscribe
-              selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
-            >
-              {({ canSubmit, isSubmitting }) => (
-                <div className="flex items-center justify-end gap-2 pt-1">
-                  <button
-                    type="submit"
-                    disabled={!canSubmit || isSubmitting}
-                    className="inline-flex items-center gap-2 
-                      rounded-xl bg-white px-4 py-2 
-                      font-medium text-[#6F8C1F]
-                      border border-[#6F8C1F]
-                      hover:bg-[#E6EDC8] 
-                      hover:text-[#5A7018]  
-                      transition-colors
-                      disabled:cursor-not-allowed
-                      disabled:opacity-60
-                      disabled:hover:bg-white"
-                  >
-                    <ArrowRightLeft className="h-5 w-5" />
-                    {isSubmitting ? "Asignando…" : "Asignar a ingreso"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      Form.reset()
-                      setSaldoInsuficiente(false)
-                    }}
-                    className="rounded-xl bg-white 
-                  border border-[#6B6B6B] px-4 py-2 
-                  text-[#6B6B6B] hover:bg-[#ECECEC]
-                  hover:text-[#4F4F4F]
-                  transition-colors
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                  disabled:hover:bg-white"
-                  >
-                    Cancelar
-                  </button>
-                </div>
+          {/* Botones usando ActionButtons */}
+          <div className="md:col-span-2 flex justify-end pt-2">
+            <Form.Subscribe selector={(s) => ({ canSubmit: s.canSubmit })}>
+              {({ canSubmit }) => (
+                <ActionButtons
+                  onCancel={() => {
+                    Form.reset()
+                    setSaldoInsuficiente(false)
+                  }}
+                  showCancel
+                  cancelText="Cancelar"
+                  requireConfirmCancel={false}
+                  onSave={() => { }}
+                  showSave
+                  showText
+                  saveButtonType="submit"
+                  isSaving={assigning}
+                  saveText={assigning ? "Asignando…" : "Asignar a Ingreso"}
+                  disabled={loading || !canSubmit}
+                />
               )}
             </Form.Subscribe>
           </div>

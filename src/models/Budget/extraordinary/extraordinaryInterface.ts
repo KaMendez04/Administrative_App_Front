@@ -1,13 +1,28 @@
-export interface Extraordinary {
-  id: number;
-  name: string;
-  amount: string; // TypeORM decimal suele venir como string
-  used: string;
-  date?: string | null;
+export type Extraordinary = {
+  id: number
+  name: string
+  amount: string
+  used: string
+  date?: string | null
+  createdAt?: string
+  updatedAt?: string
+  canEditAmount?: boolean
 }
 
-export const initialState = {
+export type UpdateExtraordinaryPayload = {
+  name?: string
+  date?: string | null
+  amount?: string
+}
+
+export type FormValues = {
+  name: string
+  amount: string
+  date: string
+}
+
+export const initialState: FormValues = {
   name: "",
   amount: "",
-  date: null,
-};
+  date: "",
+}

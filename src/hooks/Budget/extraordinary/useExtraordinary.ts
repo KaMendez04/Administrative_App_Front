@@ -12,7 +12,10 @@ import {
   remainingExtraordinary,
   fetchDepartments,
   assignExtraordinary,
+  getExtraordinary,
+  updateExtraordinary,
 } from "../../../services/Budget/extraordinary/ExtraordinaryService";
+import { showConfirmAlert, showErrorAlertRegister, showSuccessAlert } from '@/utils/alerts';
 
 // Query Keys
 export const extraordinaryKeys = {
@@ -21,6 +24,7 @@ export const extraordinaryKeys = {
   list: (filters?: any) => [...extraordinaryKeys.lists(), filters] as const,
   departments: ['departments'] as const,
   remaining: (id: number) => [...extraordinaryKeys.all, 'remaining', id] as const,
+  detail: (id: number) => [...extraordinaryKeys.all, "detail", id] as const,
 };
 
 // ===== QUERIES (para leer datos) =====
@@ -30,6 +34,15 @@ export function useExtraordinaryListQuery() {
     queryKey: extraordinaryKeys.list(),
     queryFn: listExtraordinary,
     staleTime: 2 * 60 * 1000, // 2 minutos
+  });
+}
+
+export function useExtraordinaryDetailQuery(id: number, enabled = true) {
+  return useQuery({
+    queryKey: extraordinaryKeys.detail(id),
+    queryFn: () => getExtraordinary(id), // ✅ solo si existe en service
+    enabled: enabled && id > 0,
+    staleTime: 30 * 1000,
   });
 }
 
@@ -54,9 +67,9 @@ export function useRemainingQuery(id: number, enabled = false) {
 
 export function useCreateExtraordinaryMutation() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (data: Pick<Extraordinary, "name" | "amount" | "date">) => 
+    mutationFn: (data: Pick<Extraordinary, "name" | "amount" | "date">) =>
       createExtraordinary(data),
     onSuccess: () => {
       // Invalidar la lista para que se recargue automáticamente
@@ -67,7 +80,7 @@ export function useCreateExtraordinaryMutation() {
 
 export function useDeleteExtraordinaryMutation() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: number) => deleteExtraordinary(id),
     onSuccess: () => {
@@ -78,9 +91,9 @@ export function useDeleteExtraordinaryMutation() {
 
 export function useAllocateExtraordinaryMutation() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, amount }: { id: number; amount: number }) => 
+    mutationFn: ({ id, amount }: { id: number; amount: number }) =>
       allocateExtraordinary(id, amount),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: extraordinaryKeys.list() });
@@ -92,13 +105,78 @@ export function useAllocateExtraordinaryMutation() {
 
 export function useAssignExtraordinaryMutation() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (dto: AssignExtraordinaryDto) => assignExtraordinary(dto),
-    onSuccess: () => {
-      // Invalidar tanto extraordinarios como departamentos
+
+    // ✅ confirmar antes de ejecutar
+    onMutate: async (dto) => {
+      const ok = await showConfirmAlert(
+        "¿Asignar extraordinario?",
+        `Se asignará ₡${Number(dto.amount).toLocaleString("es-CR", { minimumFractionDigits: 2 })} al ingreso del departamento seleccionado.`
+      );
+
+      if (!ok) {
+        throw new Error("CANCELLED_BY_USER");
+      }
+    },
+
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: extraordinaryKeys.list() });
       queryClient.invalidateQueries({ queryKey: extraordinaryKeys.departments });
+      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.all });
+
+      await showSuccessAlert("El movimiento extraordinario fue asignado al ingreso correctamente.");
+    },
+
+    onError: async (err: any) => {
+      if (err?.message === "CANCELLED_BY_USER") return;
+
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "No se pudo asignar el movimiento extraordinario.";
+
+      await showErrorAlertRegister(typeof msg === "string" ? msg : "No se pudo asignar el movimiento extraordinario.");
+    },
+  });
+}
+
+export function useUpdateExtraordinaryMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, patch }: { id: number; patch: Partial<Pick<Extraordinary, "name" | "amount" | "date">> }) => {
+      return updateExtraordinary(id, patch);
+    },
+
+    onMutate: async () => {
+      const ok = await showConfirmAlert(
+        "¿Guardar cambios?",
+        "Se actualizará el movimiento extraordinario."
+      );
+
+      if (!ok) {
+        throw new Error("CANCELLED_BY_USER");
+      }
+    },
+
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.list() });
+      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.all });
+
+      await showSuccessAlert("Los cambios del movimiento extraordinario fueron guardados.");
+    },
+
+    onError: async (err: any) => {
+      if (err?.message === "CANCELLED_BY_USER") return;
+
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "No se pudieron guardar los cambios.";
+
+      await showErrorAlertRegister(typeof msg === "string" ? msg : "No se pudieron guardar los cambios.");
     },
   });
 }
@@ -108,7 +186,7 @@ export function useAssignExtraordinaryMutation() {
 // Para mantener compatibilidad con tu código existente
 export function useExtraordinaryList() {
   const query = useExtraordinaryListQuery();
-  
+
   return {
     data: query.data ?? [],
     loading: query.isLoading,
@@ -119,7 +197,7 @@ export function useExtraordinaryList() {
 
 export function useDepartmentsE() {
   const query = useDepartmentsQuery();
-  
+
   return {
     data: query.data ?? [],
     loading: query.isLoading,
@@ -130,7 +208,18 @@ export function useDepartmentsE() {
 
 export function useAssignExtraordinary() {
   const mutation = useAssignExtraordinaryMutation();
-  
+
+  return {
+    submit: mutation.mutateAsync,
+    loading: mutation.isPending,
+    error: mutation.error,
+    lastResult: mutation.data,
+  };
+}
+
+export function useUpdateExtraordinary() {
+  const mutation = useUpdateExtraordinaryMutation();
+
   return {
     submit: mutation.mutateAsync,
     loading: mutation.isPending,
