@@ -249,11 +249,29 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
 
     setIsSaving(true)
     try {
+      let finalImages = [...images];
+
+      // ¡NUEVA LÓGICA AQUÍ!
+      // Si el usuario seleccionó un archivo pero no le dio a "Agregar imagen"
+      if (pendingFile && localPreview) {
+        const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
+        const croppedFile = blobToFile(blob, `service_${Date.now()}.jpg`)
+        const asset = await uploadAsync(croppedFile)
+        const url = asset?.url ?? asset?.secure_url
+        if (url) {
+          finalImages.push(url);
+        }
+      } 
+      // O si el usuario pegó una URL pero no le dio a "Agregar imagen"
+      else if (imageUrlDraft.trim() !== "") {
+        finalImages.push(imageUrlDraft.trim());
+      }
+
       await onSubmit({
         title,
         cardDescription,
         modalDescription,
-        images, // ✅ guarda la lista (primera = portada)
+        images: finalImages, // ✅ Ahora mandamos el arreglo asegurado
       })
 
       // limpiar
@@ -269,10 +287,8 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
 
       showSuccessAlert("Servicio creado exitosamente")
     } catch (err: any) {
-  console.error("Error al guardar:", err?.response?.data ?? err)
-}
-    
-    finally {
+      console.error("Error al guardar:", err?.response?.data ?? err)
+    } finally {
       setIsSaving(false)
     }
   }

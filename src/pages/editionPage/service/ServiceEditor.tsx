@@ -351,16 +351,31 @@ export default function ServicesInformativeEditor({
 
   const canAdd = (!!pendingFile && !!localPreview) || imageUrlDraft.trim() !== ""
 
-  const handleSave = async () => {
+const handleSave = async () => {
     if (!selected) return
     setIsSaving(true)
     try {
+      let finalImages = [...images];
+
+      // ¡AÑADE ESTO AL EDITOR!
+      if (pendingFile && localPreview) {
+        const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
+        const croppedFile = blobToFile(blob, `service_${selected?.id ?? "x"}_${Date.now()}.jpg`)
+        const asset = await uploadAsync(croppedFile)
+        const url = asset?.url ?? asset?.secure_url
+        if (url) {
+          finalImages.push(url);
+        }
+      } else if (imageUrlDraft.trim() !== "") {
+        finalImages.push(imageUrlDraft.trim());
+      }
+
       await onUpdate({
         id: selected.id,
         title,
         cardDescription,
         modalDescription,
-        images, // ✅ guarda lista (primera = portada)
+        images: finalImages, // ✅ Guarda la lista actualizada
       })
 
       showSuccessAlert("Actualización completada")
@@ -368,7 +383,8 @@ export default function ServicesInformativeEditor({
       setInitialTitle(title)
       setInitialCardDescription(cardDescription)
       setInitialModalDescription(modalDescription)
-      setInitialImages(images)
+      setInitialImages(finalImages) // Actualizamos initialImages con las nuevas
+      setImages(finalImages) // Actualizamos el estado actual
 
       clearDraft()
     } catch (err) {
@@ -377,7 +393,6 @@ export default function ServicesInformativeEditor({
       setIsSaving(false)
     }
   }
-
   const handleDelete = async () => {
     if (!selected) return
     setIsDeleting(true)
