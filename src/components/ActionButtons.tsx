@@ -193,6 +193,11 @@ export function ActionButtons({
         cancelButtonText: "Cancelar",
         reverseButtons: false,
         background: "#FAF9F5",
+        scrollbarPadding: false,
+        heightAuto: false,
+        focusConfirm: false,
+        focusCancel: true,
+        returnFocus: false,
         customClass: {
           popup: "rounded-2xl",
           confirmButton: "rounded-xl px-6 py-3 font-semibold",
@@ -210,32 +215,46 @@ export function ActionButtons({
 
   // Handler para rechazar con confirmación
   const handleReject = async () => {
-    if (requireConfirmReject) {
-      const result = await Swal.fire({
-        title: rejectConfirmTitle,
-        text: rejectConfirmText,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#B85C4C",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, rechazar",
-        cancelButtonText: "Cancelar",
-        reverseButtons: false,
-        background: "#FAF9F5",
-        customClass: {
-          popup: "rounded-2xl",
-          confirmButton: "rounded-xl px-6 py-3 font-semibold",
-          cancelButton: "rounded-xl px-6 py-3 font-semibold",
-        },
-      });
+  if (requireConfirmReject) {
+    const result = await Swal.fire({
+      title: rejectConfirmTitle,
+      text: rejectConfirmText,
+      icon: "warning",
+      showCancelButton: true,
 
-      if (result.isConfirmed) {
-        onReject?.();
-      }
-    } else {
+      // Colores
+      confirmButtonColor: "#d33",     // rojo para "Sí, rechazar"
+      cancelButtonColor: "#5B732E",   // verde para "Cancelar"
+
+      confirmButtonText: "Sí, rechazar",
+      cancelButtonText: "Cancelar",
+
+      reverseButtons: false,
+      background: "#FAF9F5",
+
+      // Ayuda a evitar el comportamiento raro de foco / doble click
+      focusConfirm: false,
+      focusCancel: true,
+      allowOutsideClick: false,
+      allowEscapeKey: true,
+      stopKeydownPropagation: false,
+      returnFocus: false,
+      scrollbarPadding: false,
+      heightAuto: false,
+      customClass: {
+        popup: "rounded-2xl",
+        confirmButton: "rounded-xl px-6 py-3 font-semibold",
+        cancelButton: "rounded-xl px-6 py-3 font-semibold",
+      },
+    });
+
+    if (result.isConfirmed) {
       onReject?.();
     }
-  };
+  } else {
+    onReject?.();
+  }
+};
 
   // Handler para eliminar con confirmación
   const handleDelete = async () => {
@@ -251,6 +270,11 @@ export function ActionButtons({
         cancelButtonText: "Cancelar",
         reverseButtons: false,
         background: "#FAF9F5",
+        scrollbarPadding: false,
+        heightAuto: false,
+        focusConfirm: false,
+        focusCancel: true,
+        returnFocus: false,
         customClass: {
           popup: "rounded-2xl",
           confirmButton: "rounded-xl px-6 py-3 font-semibold",
@@ -274,12 +298,17 @@ export function ActionButtons({
         text: cancelConfirmText,
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#5B732E",
-        cancelButtonColor: "#d33",
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#5B732E",
         confirmButtonText: "Sí, cancelar",
         cancelButtonText: "No, continuar",
         reverseButtons: false,
         background: "#FAF9F5",
+        scrollbarPadding: false,
+        heightAuto: false,
+        focusConfirm: false,
+        focusCancel: true,
+        returnFocus: false,
         customClass: {
           popup: "rounded-2xl",
           confirmButton: "rounded-xl px-6 py-3 font-semibold",
@@ -309,6 +338,13 @@ export function ActionButtons({
         cancelButtonText: "Cancelar",
         reverseButtons: false,
         background: "#FAF9F5",
+
+        scrollbarPadding: false,
+        heightAuto: false,
+        focusConfirm: false,
+        focusCancel: true,
+        returnFocus: false,
+
         customClass: {
           popup: "rounded-2xl",
           confirmButton: "rounded-xl px-6 py-3 font-semibold",

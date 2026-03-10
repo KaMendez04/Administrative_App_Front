@@ -8,6 +8,7 @@ import {
   useApprovedVolunteerDocsLink,
 } from "@/hooks/Volunteers/useVolunteerDocsLink";
 import { toast } from "sonner";
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 
 interface ApprovedVolunteerViewModalProps {
   open: boolean;
@@ -28,6 +29,7 @@ export function ApprovedVolunteerViewModal({
 }: ApprovedVolunteerViewModalProps) {
   const [selectedTab, setSelectedTab] = useState<Tab>("info");
 
+  useLockBodyScroll(open);
   // Obtener el id según el tipo
   const entityId =
     data

@@ -5,6 +5,7 @@ import { Download, FolderOpen } from "lucide-react";
 import { useDownloadSolicitudPDF } from "../../hooks/associates/useDownloadSolicitudPDF";
 import { useSolicitudHasDocs, useDocsLinkBySolicitud } from "../../hooks/associates/useSolicitudDocsLink";
 import { toast } from "sonner";
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 
 type Props = {
   open: boolean;
@@ -25,6 +26,8 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
     solicitud ? Number(solicitud.idSolicitud) : null
   );
 
+  useLockBodyScroll(open);
+    
   if (!open) return null;
 
   const formatDate = (dateString: string) => {

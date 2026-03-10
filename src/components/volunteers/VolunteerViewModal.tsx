@@ -12,6 +12,7 @@ import {
   useSolicitudVoluntariadoDocsLink,
 } from "@/hooks/Volunteers/useVolunteerDocsLink"
 import { toast } from "sonner"
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll"
 
 interface VolunteerViewModalProps {
   open: boolean
@@ -57,6 +58,8 @@ export function VolunteerViewModal({
       },
     })
   }
+
+  useLockBodyScroll(open);
 
   if (!open) return null
 
