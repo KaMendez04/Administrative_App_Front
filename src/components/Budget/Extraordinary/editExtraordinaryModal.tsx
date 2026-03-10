@@ -9,6 +9,7 @@ import { UpdateExtraordinarySchema } from "@/schemas/extraordinarySchema"
 import { Input } from "@/components/ui/input"
 import { BirthDatePicker } from "@/components/ui/birthDayPicker"
 import { formatCR, parseCR } from "@/hooks/Budget/useMoneyInput"
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll"
 
 type Props = {
     extraordinary: Extraordinary
@@ -19,6 +20,7 @@ type Props = {
 export default function EditExtraordinaryModal({ extraordinary, onClose, onSaved }: Props) {
     const detail = useExtraordinaryDetailQuery?.(extraordinary.id, true)
     const current = (detail?.data as Extraordinary | undefined) ?? extraordinary
+    useLockBodyScroll(true);
 
     const canEditAmount = current.canEditAmount === true
     const m = useUpdateExtraordinary()

@@ -19,6 +19,7 @@ import {
 } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
 
 import PIncomeList from "./PIncomeList";
+import { useBodyScrollLock } from "@/hooks/modals/useBodyScrollLock";
 
 type Props = {
   open: boolean;
@@ -337,6 +338,39 @@ export default function CatalogModal({
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo actualizar el subtipo" }));
     }
   }
+
+  const shouldLockScroll = (!inline && open) || openAmountModal;
+  useBodyScrollLock(shouldLockScroll);
+
+    useEffect(() => {
+    if (!open) return;
+
+    setErrors({});
+    setNewDepartment("");
+    setNewType("");
+    setNewSubType("");
+
+    setDepartmentId("");
+    setTypeId("");
+
+    setEditDepartmentId("");
+    setEditDepartmentName("");
+    setEditTypeDepartmentId("");
+    setEditTypeId("");
+    setEditTypeName("");
+
+    setEditSubTypeDepartmentId("");
+    setEditSubTypeTypeId("");
+    setEditSubTypeId("");
+    setEditSubTypeName("");
+
+    setOpenAmountModal(false);
+
+    if (mode === "create" && defaultDepartmentId) {
+      setDepartmentId(defaultDepartmentId);
+      setTypeId(defaultIncomeTypeId ?? "");
+    }
+  }, [open, mode, defaultDepartmentId, defaultIncomeTypeId]);
 
   if (!open) return null;
 

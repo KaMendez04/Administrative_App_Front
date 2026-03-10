@@ -34,9 +34,38 @@ export default function CloudinaryUploadSheet({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isMounted, setIsMounted] = useState(open);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (open) {
+      setIsClosing(false);
+      setIsMounted(true);
+
+      const raf = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+        });
+      });
+
+      return () => cancelAnimationFrame(raf);
+    }
+
+    // Salida: marcar como cerrando, quitar visibilidad
+    setIsClosing(true);
+    setIsVisible(false);
+
+    const timeout = setTimeout(() => {
+      setIsMounted(false);
+      setIsClosing(false);
+    }, 380);
+
+    return () => clearTimeout(timeout);
+  }, [open]);
+
+  useEffect(() => {
+    if (!isMounted) return;
 
     const originalOverflow = document.body.style.overflow;
     const originalTouchAction = document.body.style.touchAction;
@@ -48,9 +77,9 @@ export default function CloudinaryUploadSheet({
       document.body.style.overflow = originalOverflow;
       document.body.style.touchAction = originalTouchAction;
     };
-  }, [open]);
+  }, [isMounted]);
 
-  if (!open) return null;
+  if (!isMounted) return null;
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -58,16 +87,34 @@ export default function CloudinaryUploadSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-[120]">
+    <div className="fixed inset-0 z-[120] overflow-hidden">
+      {/* Overlay: entra suave, sale más rápido */}
       <div
-        className="absolute inset-0 bg-black/35 backdrop-blur-[1px]"
+        style={{
+          transition: isClosing
+            ? "opacity 320ms cubic-bezier(0.4, 0, 1, 1)"
+            : "opacity 480ms cubic-bezier(0.0, 0, 0.2, 1)",
+        }}
+        className={`absolute inset-0 bg-black/35 backdrop-blur-[1.5px] ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}
         onClick={() => {
           if (!isUploading) onClose();
         }}
       />
 
-      <aside className="absolute right-0 top-0 flex h-full w-full max-w-[520px] flex-col border-l border-[#E5E7EB] bg-white shadow-2xl">
-        <div className="flex items-start justify-between border-b border-[#E5E7EB] bg-[#FAF9F5] px-5 py-4">
+      {/* Sheet: entrada con spring suave, salida limpia y rápida */}
+      <aside
+        style={{
+          transition: isClosing
+            ? "transform 340ms cubic-bezier(0.4, 0, 0.6, 1)"
+            : "transform 560ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+        className={`absolute right-0 top-0 flex h-full w-full max-w-[520px] flex-col border-l border-[#E5E7EB] bg-white shadow-2xl will-change-transform ${
+          isVisible ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex items-start justify-between border-b border-[#E5E7EB] bg-[#FAF9F5] px-5 py-3">
           <div className="flex items-start gap-3">
             <div className="rounded-xl bg-white p-2.5">
               <ImagePlus className="h-5 w-5 text-[#556B2F]" />
@@ -77,7 +124,6 @@ export default function CloudinaryUploadSheet({
               <h2 className="text-lg font-semibold text-[#243127]">
                 Subir archivos
               </h2>
-
             </div>
           </div>
 
@@ -87,7 +133,7 @@ export default function CloudinaryUploadSheet({
               if (!isUploading) onClose();
             }}
             disabled={isUploading}
-            className="rounded-lg border border-[#E5E7EB] p-2 text-[#6B7280] hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[#E5E7EB] p-2 text-[#6B7280] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <X className="h-4 w-4" />
           </button>
@@ -105,7 +151,7 @@ export default function CloudinaryUploadSheet({
               setIsDragging(false);
               handleFiles(e.dataTransfer.files);
             }}
-            className={`rounded-2xl border-2 border-dashed p-6 text-center transition ${
+            className={`rounded-2xl border-2 border-dashed px-6 pb-6 pt-3 text-center transition ${
               isDragging
                 ? "border-[#7A9538] bg-[#F3F8EA]"
                 : "border-[#D6DDE5] bg-[#FAF9F5]"
@@ -148,7 +194,7 @@ export default function CloudinaryUploadSheet({
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="mt-4 flex items-center justify-between">
             <h4 className="text-sm font-semibold text-[#243127]">
               Cola de subida
             </h4>
@@ -157,13 +203,13 @@ export default function CloudinaryUploadSheet({
               type="button"
               onClick={onClearFinished}
               disabled={isUploading}
-              className="text-sm font-medium text-[#556B2F] hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+              className="text-sm font-medium text-[#556B2F] transition hover:underline disabled:cursor-not-allowed disabled:opacity-50"
             >
               Limpiar terminados
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="mt-4 space-y-3">
             {queue.length === 0 ? (
               <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAF9F5] p-4 text-sm text-[#6B7280]">
                 No hay archivos en espera todavía.
@@ -215,7 +261,7 @@ export default function CloudinaryUploadSheet({
                             <button
                               type="button"
                               onClick={() => onRemove(item.id)}
-                              className="rounded-md p-1 text-[#6B7280] hover:bg-[#F8FAFC]"
+                              className="rounded-md p-1 text-[#6B7280] transition hover:bg-[#F8FAFC]"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>

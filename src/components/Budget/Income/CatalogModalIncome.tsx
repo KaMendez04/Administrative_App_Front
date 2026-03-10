@@ -19,6 +19,7 @@ import {
 
 import { CustomSelect } from "../../CustomSelect";
 import IncomeList from "./IncomeList";
+import { useBodyScrollLock } from "@/hooks/modals/useBodyScrollLock";
 
 type Props = {
   open: boolean;
@@ -44,15 +45,8 @@ export default function CatalogModalIncome({
 
   useEffect(() => setMounted(true), []);
 
-  // Bloqueo scroll (solo modal real)
-  useEffect(() => {
-    if (!open || inline) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open, inline]);
+  const shouldLockScroll = (!inline && open) || openAmountModal;
+  useBodyScrollLock(shouldLockScroll);
 
   // ESC (solo modal real)
   useEffect(() => {
