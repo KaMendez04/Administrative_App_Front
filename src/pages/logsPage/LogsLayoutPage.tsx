@@ -1,4 +1,4 @@
-import LogsPage from "@/components/logs/LogsPage"
+import LogsPage from "@/components/logsComponents/LogsPage"
 import { ScrollText } from "lucide-react"
 
 export default function LogsLayoutPage() {
