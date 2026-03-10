@@ -6,11 +6,20 @@ import { Button } from "@/components/ui/button"
 import { useRequestEmailChange } from "@/hooks/settings/useRequestEmailChange"
 import { useAuth } from "@/auth/AuthProvider"
 import { zodMsg } from "@/shared/validators/zod"
+import { CharCounter } from "../CharCounter"
 
 const schema = z
   .object({
-    newEmail: z.string().trim().email("Escribe un correo válido."),
-    confirmEmail: z.string().trim().email("Confirma con un correo válido."),
+    newEmail: z
+      .string()
+      .trim()
+      .max(75, "El correo no puede tener más de 75 caracteres.")
+      .email("Escribe un correo válido."),
+    confirmEmail: z
+      .string()
+      .trim()
+      .max(75, "El correo no puede tener más de 75 caracteres.")
+      .email("Confirma con un correo válido."),
   })
   .refine((data) => data.newEmail === data.confirmEmail, {
     path: ["confirmEmail"],
@@ -78,11 +87,13 @@ export default function ChangeEmailSection() {
               <label className="text-sm font-medium text-[#2E321B]">Nuevo correo</label>
               <Input
                 type="email"
+                maxLength={75}
                 value={field.state.value}
                 onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
+                onChange={(e) => field.handleChange(e.target.value.slice(0, 75))}
                 className="border-[#DCD6C9] focus-visible:ring-[#708C3E]/30 focus-visible:ring-2 focus-visible:ring-offset-0 rounded-md"
               />
+              <CharCounter value={field.state.value} max={75} />
               <p className="mt-1 text-xs text-gray-500">Ejemplo: nuevocorreo@dominio.com</p>
               {!!field.state.meta.errors?.[0] && (
                 <p className="mt-2 text-xs text-red-600">{field.state.meta.errors[0]}</p>
@@ -133,11 +144,13 @@ export default function ChangeEmailSection() {
               </label>
               <Input
                 type="email"
+                maxLength={75}
                 value={field.state.value}
                 onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
+                onChange={(e) => field.handleChange(e.target.value.slice(0, 75))}
                 className="border-[#DCD6C9] focus-visible:ring-[#708C3E]/30 focus-visible:ring-2 focus-visible:ring-offset-0 rounded-md"
               />
+              <CharCounter value={field.state.value} max={75} />
               <p className="mt-1 text-xs text-gray-500">Repite el nuevo correo</p>
 
               {!!field.state.meta.errors?.[0] && (

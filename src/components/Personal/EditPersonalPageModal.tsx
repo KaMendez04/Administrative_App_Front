@@ -5,14 +5,13 @@ import { useEditPersonalPageModal } from "../../hooks/Personal/useEditPersonalPa
 import { showSuccessAlertRegister, showErrorAlertRegister } from "../../utils/alerts"
 import { ActionButtons } from "../../components/ActionButtons"
 import { BirthDatePicker } from "../ui/birthDayPicker"
-import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll"
 
 interface EditPersonalPageModalProps {
-  personalPage: PersonalPageType;
-  setPersonalPage: React.Dispatch<React.SetStateAction<PersonalPageType | null>>;
-  isNew?: boolean;
-  onSaved?: () => void;
-  lookup: (id: string) => Promise<any>;
+  personalPage: PersonalPageType
+  setPersonalPage: React.Dispatch<React.SetStateAction<PersonalPageType | null>>
+  isNew?: boolean
+  onSaved?: () => void
+  lookup: (id: string) => Promise<any>
 }
 
 export function EditPersonalPageModal({
@@ -25,31 +24,40 @@ export function EditPersonalPageModal({
   const [isSaving, setIsSaving] = React.useState(false)
   useLockBodyScroll(true);
   const inputClass =
-    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white";
+    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white"
   const label =
-    "block text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide mb-1";
+    "block text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide mb-1"
   const readOnlyStyle =
-    "bg-gray-100 text-gray-500 border-dashed border-gray-300 cursor-not-allowed opacity-80 select-none";
+    "bg-gray-100 text-gray-500 border-dashed border-gray-300 cursor-not-allowed opacity-80 select-none"
 
-  const todayISO = () => new Date().toISOString().slice(0, 10);
+  const selectButtonClass =
+    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white"
 
-  // TanStack Form + validadores (extraídos al hook)
+  const IDE_MAX = 20
+  const NAME_MAX = 50
+  const LASTNAME_MAX = 50
+  const EMAIL_MAX = 75
+  const PHONE_MAX = 8
+  const DIRECTION_MAX = 100
+  const OCCUPATION_MAX = 75
+
+  const todayISO = () => new Date().toISOString().slice(0, 10)
+
+  const statusOptions = [
+    { value: "activo", label: "Activo" },
+    { value: "inactivo", label: "Inactivo" },
+  ]
+
   const { form, validators } = useEditPersonalPageModal(personalPage)
 
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const todayStr = formatYMD(new Date());
+  const pad = (n: number) => String(n).padStart(2, "0")
+  const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  const todayStr = formatYMD(new Date())
 
-  // Fecha límite: hoy menos 18 años
-  const cutoff = new Date();
-  cutoff.setFullYear(cutoff.getFullYear() - 18);
-  const cutoffStr = cutoff.toISOString().split("T")[0];
+  const cutoff = new Date()
+  cutoff.setFullYear(cutoff.getFullYear() - 18)
+  const cutoffStr = cutoff.toISOString().split("T")[0]
 
-  // Para startWorkDate: no puede ser hoy (máximo ayer)
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  // Normalizador del payload
   const normalizePayload = (formData: PersonalPageType, base: any) => ({
     ...base,
     startWorkDate:
@@ -58,12 +66,11 @@ export function EditPersonalPageModal({
         : undefined,
     endWorkDate: formData.isActive
       ? null
-      : (formData.endWorkDate && formData.endWorkDate.trim() !== ""
-          ? formData.endWorkDate
-          : todayISO()),
+      : formData.endWorkDate && formData.endWorkDate.trim() !== ""
+        ? formData.endWorkDate
+        : todayISO(),
   })
 
-  // Submit
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     await form.handleSubmit()
@@ -72,7 +79,6 @@ export function EditPersonalPageModal({
     const { id, IdUser, ...rest } = personalPage as any
     let payload: any = { ...rest }
 
-    // Normaliza fechas antes de enviar
     payload = normalizePayload(personalPage, payload)
 
     try {
@@ -125,27 +131,30 @@ export function EditPersonalPageModal({
           className="px-6 py-6 space-y-6 overflow-y-auto flex-1"
           style={{ WebkitOverflowScrolling: "touch" }}
         >
-          {/* Identificación */}
           <section>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">Identificación</h3>
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">
+              Identificación
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              {/* Cédula */}
               <form.Field name="IDE">
                 {(fieldApi) => (
                   <div>
-                    <label className={label} htmlFor="ide">Cédula</label>
+                    <label className={label} htmlFor="ide">
+                      Cédula
+                    </label>
                     <input
                       id="ide"
                       type="text"
                       placeholder="Número de cédula"
                       value={personalPage.IDE ?? ""}
+                      maxLength={IDE_MAX}
                       disabled={!isNew || isSaving}
                       readOnly={!isNew}
                       title={!isNew ? "Este campo no se puede modificar al editar" : undefined}
                       onChange={async (e) => {
                         if (!isNew) return
-                        const IDE = e.target.value.replace(/[-\s]/g, "")
+                        const IDE = e.target.value.replace(/[-\s]/g, "").slice(0, IDE_MAX)
                         fieldApi.handleChange(IDE)
                         let next = { ...personalPage, IDE }
                         if (IDE.length >= 9) {
@@ -163,6 +172,7 @@ export function EditPersonalPageModal({
                       }}
                       className={`${inputClass} ${!isNew ? readOnlyStyle : ""}`}
                     />
+                    {isNew && <CharCounter value={personalPage.IDE ?? ""} max={IDE_MAX} />}
                     {!isNew && (
                       <p className="mt-1 text-xs text-gray-500">
                         La cédula es un identificador y no puede modificarse al editar.
@@ -172,28 +182,32 @@ export function EditPersonalPageModal({
                 )}
               </form.Field>
 
-              {/* Nombre */}
               <form.Field name="name" validators={validators.name}>
                 {(fieldApi) => {
                   const err = fieldApi.state.meta.errors[0]
                   return (
                     <div>
-                      <label className={label} htmlFor="name">Nombre</label>
+                      <label className={label} htmlFor="name">
+                        Nombre
+                      </label>
                       <input
                         id="name"
                         type="text"
+                        maxLength={NAME_MAX}
                         value={personalPage.name ?? ""}
                         disabled={!isNew || isSaving}
                         readOnly={!isNew}
                         aria-disabled={!isNew}
                         onChange={(e) => {
-                          setPersonalPage({ ...personalPage, name: e.target.value })
-                          fieldApi.handleChange(e.target.value)
+                          const value = e.target.value.slice(0, NAME_MAX)
+                          setPersonalPage({ ...personalPage, name: value })
+                          fieldApi.handleChange(value)
                         }}
                         placeholder="Nombre"
                         className={`${inputClass} ${!isNew ? readOnlyStyle : ""}`}
                         required
                       />
+                      {isNew && <CharCounter value={personalPage.name ?? ""} max={NAME_MAX} />}
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                       {!isNew && (
                         <p className="mt-1 text-xs text-gray-500">
@@ -207,28 +221,32 @@ export function EditPersonalPageModal({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              {/* Primer apellido */}
               <form.Field name="lastname1" validators={validators.lastname1}>
                 {(fieldApi) => {
                   const err = fieldApi.state.meta.errors[0]
                   return (
                     <div>
-                      <label className={label} htmlFor="lastname1">Primer apellido</label>
+                      <label className={label} htmlFor="lastname1">
+                        Primer apellido
+                      </label>
                       <input
                         id="lastname1"
                         type="text"
+                        maxLength={LASTNAME_MAX}
                         disabled={!isNew || isSaving}
                         readOnly={!isNew}
                         aria-disabled={!isNew}
                         value={personalPage.lastname1 ?? ""}
                         onChange={(e) => {
-                          setPersonalPage({ ...personalPage, lastname1: e.target.value })
-                          fieldApi.handleChange(e.target.value)
+                          const value = e.target.value.slice(0, LASTNAME_MAX)
+                          setPersonalPage({ ...personalPage, lastname1: value })
+                          fieldApi.handleChange(value)
                         }}
                         placeholder="Primer apellido"
                         className={`${inputClass} ${!isNew ? readOnlyStyle : ""}`}
                         required
                       />
+                      {isNew && <CharCounter value={personalPage.lastname1 ?? ""} max={LASTNAME_MAX} />}
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                       {!isNew && (
                         <p className="mt-1 text-xs text-gray-500">
@@ -240,28 +258,32 @@ export function EditPersonalPageModal({
                 }}
               </form.Field>
 
-              {/* Segundo apellido */}
               <form.Field name="lastname2" validators={validators.lastname2}>
                 {(fieldApi) => {
                   const err = fieldApi.state.meta.errors[0]
                   return (
                     <div>
-                      <label className={label} htmlFor="lastname2">Segundo apellido</label>
+                      <label className={label} htmlFor="lastname2">
+                        Segundo apellido
+                      </label>
                       <input
                         id="lastname2"
                         type="text"
+                        maxLength={LASTNAME_MAX}
                         disabled={!isNew || isSaving}
                         readOnly={!isNew}
                         aria-disabled={!isNew}
                         value={personalPage.lastname2 ?? ""}
                         onChange={(e) => {
-                          setPersonalPage({ ...personalPage, lastname2: e.target.value })
-                          fieldApi.handleChange(e.target.value)
+                          const value = e.target.value.slice(0, LASTNAME_MAX)
+                          setPersonalPage({ ...personalPage, lastname2: value })
+                          fieldApi.handleChange(value)
                         }}
                         placeholder="Segundo apellido"
                         className={`${inputClass} ${!isNew ? readOnlyStyle : ""}`}
                         required
                       />
+                      {isNew && <CharCounter value={personalPage.lastname2 ?? ""} max={LASTNAME_MAX} />}
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                       {!isNew && (
                         <p className="mt-1 text-xs text-gray-500">
@@ -275,93 +297,96 @@ export function EditPersonalPageModal({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form.Field name="birthDate" validators={validators.birthDate}>
+                {(fieldApi) => {
+                  const err = fieldApi.state.meta.errors[0]
 
-        {/* Fecha de nacimiento */}
-          <form.Field name="birthDate" validators={validators.birthDate}>
-            {(fieldApi) => {
-              const err = fieldApi.state.meta.errors[0]
+                  return (
+                    <div>
+                      <label className={label} htmlFor="birthdate">
+                        Fecha de nacimiento
+                      </label>
 
-              return (
-                <div>
-                  <label className={label} htmlFor="birthdate">
-                    Fecha de nacimiento
-                  </label>
+                      <BirthDatePicker
+                        value={personalPage.birthDate ?? ""}
+                        disabled={isSaving}
+                        minAge={18}
+                        placeholder="Seleccione una fecha"
+                        error={err}
+                        onChange={(v) => {
+                          if (v && (v < "1900-01-01" || v > cutoffStr)) return
+                          setPersonalPage({ ...personalPage, birthDate: v })
+                          fieldApi.handleChange(v)
+                        }}
+                        className="w-full"
+                      />
 
-      <BirthDatePicker
-            value={personalPage.birthDate ?? ""}
-            disabled={isSaving}
-            minAge={18}
-            placeholder="Seleccione una fecha"
-            error={err}
-            onChange={(v) => {
-              if (v && (v < "1900-01-01" || v > cutoffStr)) return
-              setPersonalPage({ ...personalPage, birthDate: v })
-              fieldApi.handleChange(v)
-            }}
-            className="w-full"
-          />
-                  {/* Si tu BirthDatePicker ya muestra error, esto es opcional.
-                      Pero lo dejo igual que tu input para no cambiar tu UI. */}
-                  {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
 
-                  <p className="mt-1 text-xs text-gray-500">
-                    Debe tener al menos 18 años cumplidos.
-                  </p>
-                </div>
-              )
-            }}
-          </form.Field>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Debe tener al menos 18 años cumplidos.
+                      </p>
+                    </div>
+                  )
+                }}
+              </form.Field>
 
               <div />
             </div>
           </section>
 
-          {/* Contacto y Datos */}
           <section>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">Contacto y Datos</h3>
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">
+              Contacto y Datos
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Email */}
               <form.Field name="email" validators={validators.email}>
                 {(fieldApi) => {
                   const err = fieldApi.state.meta.errors[0]
                   return (
                     <div>
-                      <label className={label} htmlFor="email">Correo</label>
+                      <label className={label} htmlFor="email">
+                        Correo
+                      </label>
                       <input
                         id="email"
                         type="email"
+                        maxLength={EMAIL_MAX}
                         value={personalPage.email ?? ""}
                         disabled={isSaving}
                         onChange={(e) => {
-                          setPersonalPage({ ...personalPage, email: e.target.value })
-                          fieldApi.handleChange(e.target.value)
+                          const value = e.target.value.slice(0, EMAIL_MAX)
+                          setPersonalPage({ ...personalPage, email: value })
+                          fieldApi.handleChange(value)
                         }}
                         placeholder="correo@dominio.com"
                         className={inputClass}
                       />
+                      <CharCounter value={personalPage.email ?? ""} max={EMAIL_MAX} />
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
                   )
                 }}
               </form.Field>
 
-              {/* Teléfono */}
               <form.Field name="phone" validators={validators.phone}>
                 {(fieldApi) => {
                   const err = fieldApi.state.meta.errors[0]
                   return (
                     <div>
-                      <label className={label} htmlFor="phone">Teléfono</label>
+                      <label className={label} htmlFor="phone">
+                        Teléfono
+                      </label>
                       <input
                         id="phone"
                         type="text"
                         inputMode="numeric"
-                        maxLength={8}
+                        maxLength={PHONE_MAX}
                         pattern="\d{8}"
                         value={personalPage.phone ?? ""}
                         disabled={isSaving}
                         onChange={(e) => {
-                          const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 8)
+                          const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, PHONE_MAX)
                           setPersonalPage({ ...personalPage, phone: onlyDigits })
                           fieldApi.handleChange(onlyDigits)
                         }}
@@ -369,32 +394,42 @@ export function EditPersonalPageModal({
                         className={inputClass}
                         required
                       />
+                      <CharCounter value={personalPage.phone ?? ""} max={PHONE_MAX} />
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
                   )
                 }}
               </form.Field>
 
-              {/* Dirección */}
               <form.Field name="direction" validators={validators.direction}>
                 {(fieldApi) => {
                   const err = fieldApi.state.meta.errors[0]
+                  const directionValue = personalPage.direction ?? ""
+
                   return (
                     <div className="md:col-span-2">
-                      <label className={label} htmlFor="direction">Dirección</label>
+                      <label className={label} htmlFor="direction">
+                        Dirección
+                      </label>
+
                       <input
                         id="direction"
                         type="text"
-                        value={personalPage.direction ?? ""}
+                        maxLength={DIRECTION_MAX}
+                        value={directionValue}
                         disabled={isSaving}
                         onChange={(e) => {
-                          setPersonalPage({ ...personalPage, direction: e.target.value })
-                          fieldApi.handleChange(e.target.value)
+                          const value = e.target.value.slice(0, DIRECTION_MAX)
+                          setPersonalPage({ ...personalPage, direction: value })
+                          fieldApi.handleChange(value)
                         }}
                         placeholder="Distrito, cantón, provincia…"
                         className={inputClass}
                         required
                       />
+
+                      <CharCounter value={directionValue} max={DIRECTION_MAX} />
+
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
                   )
@@ -403,176 +438,190 @@ export function EditPersonalPageModal({
             </div>
           </section>
 
-          {/* Perfil laboral y Estado */}
           <section>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">Perfil laboral y Estado</h3>
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#708C3E]">
+              Perfil laboral y Estado
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Ocupación */}
               <form.Field name="occupation" validators={validators.occupation}>
                 {(fieldApi) => {
                   const err = fieldApi.state.meta.errors[0]
+                  const occupationValue = personalPage.occupation ?? ""
+
                   return (
                     <div className="md:col-span-2">
-                      <label className={label} htmlFor="occupation">Ocupación</label>
+                      <label className={label} htmlFor="occupation">
+                        Ocupación
+                      </label>
+
                       <input
                         id="occupation"
                         type="text"
-                        value={personalPage.occupation ?? ""}
+                        maxLength={OCCUPATION_MAX}
+                        value={occupationValue}
                         disabled={isSaving}
                         onChange={(e) => {
-                          setPersonalPage({ ...personalPage, occupation: e.target.value })
-                          fieldApi.handleChange(e.target.value)
+                          const value = e.target.value.slice(0, OCCUPATION_MAX)
+                          setPersonalPage({ ...personalPage, occupation: value })
+                          fieldApi.handleChange(value)
                         }}
                         placeholder="Puesto / rol"
                         className={inputClass}
                         required
                       />
+
+                      <CharCounter value={occupationValue} max={OCCUPATION_MAX} />
+
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
                   )
                 }}
               </form.Field>
 
-              {/* Estado */}
               <form.Field name="isActive">
                 {(fieldApi) => (
                   <div>
-                    <label className={label} htmlFor="isActive">Estado</label>
-                    <select
-                      id="isActive"
+                    <label className={label} htmlFor="isActive">
+                      Estado
+                    </label>
+
+                    <CustomSelect
                       value={personalPage.isActive ? "activo" : "inactivo"}
                       disabled={isSaving}
-                      onChange={(e) => {
-                        const v = e.target.value === "activo"
+                      options={statusOptions}
+                      size="md"
+                      buttonClassName={selectButtonClass}
+                      onChange={(value) => {
+                        const v = value === "activo"
+
                         setPersonalPage({
                           ...personalPage,
                           isActive: v,
-                          endWorkDate: v ? null : (personalPage.endWorkDate && personalPage.endWorkDate.trim() !== "" ? personalPage.endWorkDate : todayISO()),
+                          endWorkDate:
+                            v
+                              ? null
+                              : personalPage.endWorkDate && personalPage.endWorkDate.trim() !== ""
+                                ? personalPage.endWorkDate
+                                : todayISO(),
                         })
+
                         fieldApi.handleChange(v)
                       }}
-                      className={inputClass}
-                    >
-                      <option value="activo">Activo</option>
-                      <option value="inactivo">Inactivo</option>
-                    </select>
+                    />
                   </div>
                 )}
               </form.Field>
             </div>
 
-            {/* Fechas laborales */}
-{/* Fechas laborales */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-  {/* Fecha de inicio laboral */}
-  <form.Field name="startWorkDate" validators={validators.startWorkDate}>
-    {(fieldApi) => {
-      const err = fieldApi.state.meta.errors[0]
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <form.Field name="startWorkDate" validators={validators.startWorkDate}>
+                {(fieldApi) => {
+                  const err = fieldApi.state.meta.errors[0]
 
-      return (
-        <div>
-          <label className={label} htmlFor="startWorkDate">
-            Fecha de inicio laboral
-          </label>
+                  return (
+                    <div>
+                      <label className={label} htmlFor="startWorkDate">
+                        Fecha de inicio laboral
+                      </label>
 
-          <BirthDatePicker
-            value={personalPage.startWorkDate ?? ""}
-            disabled={isSaving}
-            placeholder="Seleccione una fecha"
-            error={err}
-            // ✅ rango: mínimo 1925-01-01, máximo ayer (para que sea anterior a hoy)
-            minDate="1925-01-01"
-            helperText="Debe ser anterior a hoy."
-            triggerClassName={inputClass}
-            onChange={(v) => {
-              // igual que tu lógica: no permitir hoy o futuro
-              if (v && v >= todayStr) return
+                      <BirthDatePicker
+                        value={personalPage.startWorkDate ?? ""}
+                        disabled={isSaving}
+                        placeholder="Seleccione una fecha"
+                        error={err}
+                        minDate="1925-01-01"
+                        helperText="Debe ser anterior a hoy."
+                        triggerClassName={inputClass}
+                        onChange={(v) => {
+                          if (v && v >= todayStr) return
 
-              let nextEnd = personalPage.endWorkDate ?? ""
-              if (nextEnd && v) {
-                const startDate = new Date(v)
-                const endDate = new Date(nextEnd)
+                          let nextEnd = personalPage.endWorkDate ?? ""
+                          if (nextEnd && v) {
+                            const startDate = new Date(v)
+                            const endDate = new Date(nextEnd)
 
-                if (endDate <= startDate) {
-                  nextEnd = ""
-                }
-              }
+                            if (endDate <= startDate) {
+                              nextEnd = ""
+                            }
+                          }
 
-              setPersonalPage({ ...personalPage, startWorkDate: v, endWorkDate: nextEnd })
-              fieldApi.handleChange(v)
-            }}
-          />
+                          setPersonalPage({
+                            ...personalPage,
+                            startWorkDate: v,
+                            endWorkDate: nextEnd,
+                          })
+                          fieldApi.handleChange(v)
+                        }}
+                      />
 
-          {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-        </div>
-      )
-    }}
-  </form.Field>
+                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+                    </div>
+                  )
+                }}
+              </form.Field>
 
-  {/* Fecha de salida */}
-  <form.Field name="endWorkDate" validators={validators.endWorkDate}>
-    {(fieldApi) => {
-      const err = fieldApi.state.meta.errors[0]
-      const start = personalPage.startWorkDate ?? ""
+              <form.Field name="endWorkDate" validators={validators.endWorkDate}>
+                {(fieldApi) => {
+                  const err = fieldApi.state.meta.errors[0]
+                  const start = personalPage.startWorkDate ?? ""
 
-      let minEndDate = "1925-01-01"
-      if (start) {
-        const startDate = new Date(start)
-        startDate.setDate(startDate.getDate() + 1)
-        minEndDate = formatYMD(startDate)
-      }
+                  let minEndDate = "1925-01-01"
+                  if (start) {
+                    const startDate = new Date(start)
+                    startDate.setDate(startDate.getDate() + 1)
+                    minEndDate = formatYMD(startDate)
+                  }
 
-      return (
-        <div>
-          <label className={label} htmlFor="endWorkDate">
-            Fecha de salida
-          </label>
+                  return (
+                    <div>
+                      <label className={label} htmlFor="endWorkDate">
+                        Fecha de salida
+                      </label>
 
-          <BirthDatePicker
-            value={personalPage.endWorkDate ?? ""}
-            disabled={personalPage.isActive || isSaving}
-            placeholder="Seleccione una fecha"
-            error={err}
-            minDate={minEndDate}
-            helperText={
-              start && !personalPage.isActive
-                ? "Debe ser al menos 1 día después de la fecha de inicio."
-                : undefined
-            }
-            triggerClassName={`${inputClass} ${personalPage.isActive ? readOnlyStyle : ""}`}
-            onChange={(v) => {
-              if (personalPage.isActive) return
+                      <BirthDatePicker
+                        value={personalPage.endWorkDate ?? ""}
+                        disabled={personalPage.isActive || isSaving}
+                        placeholder="Seleccione una fecha"
+                        error={err}
+                        minDate={minEndDate}
+                        helperText={
+                          start && !personalPage.isActive
+                            ? "Debe ser al menos 1 día después de la fecha de inicio."
+                            : undefined
+                        }
+                        triggerClassName={`${inputClass} ${personalPage.isActive ? readOnlyStyle : ""}`}
+                        onChange={(v) => {
+                          if (personalPage.isActive) return
 
-              if (start && v) {
-                const startDate = new Date(start)
-                const endDate = new Date(v)
-                if (endDate <= startDate) return
-              }
+                          if (start && v) {
+                            const startDate = new Date(start)
+                            const endDate = new Date(v)
+                            if (endDate <= startDate) return
+                          }
 
-              setPersonalPage({ ...personalPage, endWorkDate: v })
-              fieldApi.handleChange(v)
-            }}
-          />
+                          setPersonalPage({ ...personalPage, endWorkDate: v })
+                          fieldApi.handleChange(v)
+                        }}
+                      />
 
-          {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-        </div>
-      )
-    }}
-  </form.Field>
+                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
+                    </div>
+                  )
+                }}
+              </form.Field>
 
-  <div className="hidden md:block" />
-</div>
+              <div className="hidden md:block" />
+            </div>
           </section>
 
-          {/* Footer con ActionButtons - ✅ ARREGLADO */}
           <div className="flex justify-end pt-5 border-t border-[#E6E1D6]">
             <ActionButtons
               onCancel={handleCancel}
-              onSave={() => {}}  // Vacío porque el submit lo maneja el form
+              onSave={() => {}}
               showCancel={true}
               showSave={true}
               showText={true}
-              saveButtonType="submit"  // ✅ CLAVE: El botón es type="submit"
+              saveButtonType="submit"
               isSaving={isSaving}
               requireConfirmCancel={true}
               cancelConfirmTitle="¿Está seguro?"

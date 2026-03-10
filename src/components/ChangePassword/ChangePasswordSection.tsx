@@ -4,12 +4,15 @@ import { FormLabel } from "./FormLabel"
 import { PasswordInput } from "./PasswordInput"
 import { FormError } from "./FormError"
 import { Button } from "../ui/button"
+import { CharCounter } from "../CharCounter"
 
 export default function ChangePasswordSection() {
   const { form, loading, banner } = useChangePassword()
 
   const fieldClass =
     "w-full h-11 rounded-xl border border-[#E6E1D6] bg-white/90 px-4 text-sm outline-none transition focus:border-[#A3853D]"
+
+    const PASSWORD_MAX = 75
 
   return (
     <section className="space-y-4">
@@ -49,10 +52,12 @@ export default function ChangePasswordSection() {
               <PasswordInput
                 value={field.state.value}
                 onBlur={field.handleBlur}
-                onChange={(v) => field.handleChange(v)}
+                onChange={(v) => field.handleChange(v.slice(0, PASSWORD_MAX))}
                 className={fieldClass}
                 autoComplete="current-password"
+                maxLength={PASSWORD_MAX}
               />
+              <CharCounter value={field.state.value} max={PASSWORD_MAX} />
               <p className="mt-1 text-xs text-gray-500">Escribe tu contraseña actual</p>
               <FormError message={field.state.meta.errors?.[0]} />
             </div>
@@ -66,10 +71,12 @@ export default function ChangePasswordSection() {
               <PasswordInput
                 value={field.state.value}
                 onBlur={field.handleBlur}
-                onChange={(v) => field.handleChange(v)}
+                onChange={(v) => field.handleChange(v.slice(0, PASSWORD_MAX))}
                 className={fieldClass}
                 autoComplete="new-password"
+                maxLength={PASSWORD_MAX}
               />
+              <CharCounter value={field.state.value} max={PASSWORD_MAX} />
               <FormError message={field.state.meta.errors?.[0]} />
               <ul className="mt-2 list-disc pl-5 text-[11px] text-gray-500">
                 <li>Al menos 8 caracteres</li>
@@ -89,10 +96,12 @@ export default function ChangePasswordSection() {
               <PasswordInput
                 value={field.state.value}
                 onBlur={field.handleBlur}
-                onChange={(v) => field.handleChange(v)}
+                onChange={(v) => field.handleChange(v.slice(0, PASSWORD_MAX))}
                 className={fieldClass}
                 autoComplete="new-password"
+                maxLength={PASSWORD_MAX}
               />
+              <CharCounter value={field.state.value} max={PASSWORD_MAX} />
               <p className="mt-1 text-xs text-gray-500">Repite tu nueva contraseña</p>
               <FormError message={field.state.meta.errors?.[0]} />
             </div>
