@@ -11,6 +11,7 @@ import { CustomSelect } from "../../../components/CustomSelect"
 
 // ✅ solo llamamos el componente/hook que ya tenés
 import { usePagination, PaginationBar } from "../../../components/ui/pagination"
+import { BirthDatePicker } from "@/components/ui/birthDayPicker"
 
 const crc = (n: number) =>
   new Intl.NumberFormat("es-CR", {
@@ -129,8 +130,8 @@ export default function SpendReportPage() {
   }, [rows, departmentName, spendTypeName, spendSubTypeName])
 
   // ------- UI: placeholder dd/mm/aaaa en inputs date -------
-  const [forceTextStart, setForceTextStart] = useState(!start)
-  const [forceTextEnd, setForceTextEnd] = useState(!end)
+  const [] = useState(!start)
+  const [] = useState(!end)
 
   const handlePreviewPDF = async () => {
     await pdfMutation.mutateAsync({ ...submitted, preview: true })
@@ -247,39 +248,36 @@ export default function SpendReportPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                Fecha de inicio
-              </label>
-              <input
-                type={forceTextStart ? "text" : "date"}
-                placeholder="dd/mm/aaaa"
-                value={start ?? ""}
-                onFocus={() => setForceTextStart(false)}
-                onBlur={(e) => {
-                  if (!e.target.value) setForceTextStart(true)
-                }}
-                onChange={(e) => setStart(e.target.value || undefined)}
-                className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                Fecha de fin
-              </label>
-              <input
-                type={forceTextEnd ? "text" : "date"}
-                placeholder="dd/mm/aaaa"
-                value={end ?? ""}
-                onFocus={() => setForceTextEnd(false)}
-                onBlur={(e) => {
-                  if (!e.target.value) setForceTextEnd(true)
-                }}
-                onChange={(e) => setEnd(e.target.value || undefined)}
-                className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
-              />
-            </div>
+                {/* Fecha inicio */}
+                <div>
+                  <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
+                    Fecha de inicio
+                  </label>
+  
+                  <BirthDatePicker
+                    value={start}
+                    onChange={(date) => setStart(date || undefined)}
+                    placeholder="Seleccione fecha de inicio"
+                    helperText=""
+                    triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
+                  />
+                </div>
+  
+                {/* Fecha fin */}
+                <div>
+                  <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
+                    Fecha de fin
+                  </label>
+  
+                  <BirthDatePicker
+                    value={end}
+                    onChange={(date) => setEnd(date || undefined)}
+                    minDate={start}
+                    placeholder="Seleccione fecha de fin"
+                    helperText={start ? "La fecha final no puede ser anterior a la fecha de inicio." : ""}
+                    triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
+                  />
+                </div>
           </div>
         </div>
 

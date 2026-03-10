@@ -10,6 +10,8 @@ import {
 
 // ✅ solo llamamos lo que ya tenés
 import { usePagination, PaginationBar } from "../../../components/ui/pagination"
+import { BirthDatePicker } from "@/components/ui/birthDayPicker"
+
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("es-CR", {
@@ -50,6 +52,13 @@ export default function ExtraReportPage() {
       name: name || undefined,
     })
   }, [start, end, name])
+
+  // ✅ evita que fecha fin quede menor que fecha inicio
+  useEffect(() => {
+    if (start && end && end < start) {
+      setEnd("")
+    }
+  }, [start, end])
 
   // ------- acciones -------
   const handlePreviewPDF = () => {
@@ -127,11 +136,12 @@ export default function ExtraReportPage() {
               <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
                 Fecha de inicio
               </label>
-              <input
-                type="date"
+              <BirthDatePicker
                 value={start}
-                onChange={(e) => setStart(e.target.value)}
-                className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
+                onChange={(date) => setStart(date)}
+                placeholder="Seleccione la fecha de inicio"
+                helperText=""
+                triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
               />
             </div>
 
@@ -139,11 +149,15 @@ export default function ExtraReportPage() {
               <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
                 Fecha de fin
               </label>
-              <input
-                type="date"
+              <BirthDatePicker
                 value={end}
-                onChange={(e) => setEnd(e.target.value)}
-                className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
+                onChange={(date) => setEnd(date)}
+                minDate={start || undefined}
+                placeholder="Seleccione la fecha de fin"
+                helperText={
+                  start ? "La fecha final no puede ser anterior a la fecha de inicio." : ""
+                }
+                triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
               />
             </div>
           </div>

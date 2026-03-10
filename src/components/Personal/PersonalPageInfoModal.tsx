@@ -102,7 +102,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">{row("Puesto / ocupación", show((item as any).occupation))}</div>
-              {row("Estado", (item as any).isActive ? "Activo" : "Inactivo")}
+              {row("Estadoo", (item as any).isActive ? "Activo" : "Inactivo")}
               {row("Fecha de inicio laboral", show((item as any).startWorkDate))}
               {!(item as any).isActive && row("Fecha de salida", show((item as any).endWorkDate))}
             </div>
