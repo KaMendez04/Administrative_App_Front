@@ -4,6 +4,7 @@ import { useToggleAssociateStatus } from "../../hooks/associates/useToggleAssoci
 import { ActionButtons } from "../../components/ActionButtons";
 import Swal from "sweetalert2";
 import { useState } from "react";
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 
 function validateWithZod(v: any) {
   const r = UpdateAssociateSchema.safeParse(v);
@@ -40,6 +41,7 @@ type Props = {
 export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toggleStatus = useToggleAssociateStatus();
+  useLockBodyScroll(open);
 
   const form = useForm({
     defaultValues: {

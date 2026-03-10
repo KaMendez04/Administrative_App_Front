@@ -5,6 +5,7 @@ import { useEditPersonalPageModal } from "../../hooks/Personal/useEditPersonalPa
 import { showSuccessAlertRegister, showErrorAlertRegister } from "../../utils/alerts"
 import { ActionButtons } from "../../components/ActionButtons"
 import { BirthDatePicker } from "../ui/birthDayPicker"
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll"
 
 interface EditPersonalPageModalProps {
   personalPage: PersonalPageType;
@@ -22,7 +23,7 @@ export function EditPersonalPageModal({
   lookup,
 }: EditPersonalPageModalProps) {
   const [isSaving, setIsSaving] = React.useState(false)
-
+  useLockBodyScroll(true);
   const inputClass =
     "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white";
   const label =

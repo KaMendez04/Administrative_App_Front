@@ -2,6 +2,7 @@ import React from "react"
 import { Download } from "lucide-react"
 import type { PersonalPageType } from "../../models/PersonalPageType"
 import { usePersonalPdf } from "../../hooks/Personal/usePersonalPageState"
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll"
 
 
 interface PersonalPageInfoModalProps {
@@ -21,6 +22,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
       <div className={box}>{v ?? "—"}</div>
     </div>
   )
+  useLockBodyScroll(true);
 
   const show = (v?: string | null) => (v && String(v).trim() !== "" ? v : "—")
 
