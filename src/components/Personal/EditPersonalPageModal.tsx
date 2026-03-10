@@ -5,6 +5,9 @@ import { useEditPersonalPageModal } from "../../hooks/Personal/useEditPersonalPa
 import { showSuccessAlertRegister, showErrorAlertRegister } from "../../utils/alerts"
 import { ActionButtons } from "../../components/ActionButtons"
 import { BirthDatePicker } from "../ui/birthDayPicker"
+import { CharCounter } from "../CharCounter"
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll"
+import { CustomSelect } from "../CustomSelect"
 
 interface EditPersonalPageModalProps {
   personalPage: PersonalPageType
