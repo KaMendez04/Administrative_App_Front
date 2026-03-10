@@ -19,6 +19,7 @@ import {
 } from "../../../hooks/Budget/spend/useSpendMutation";
 
 import SpendList from "./SpendList";
+import { useBodyScrollLock } from "@/hooks/modals/useBodyScrollLock";
 
 type Props = {
   open: boolean;
@@ -38,21 +39,14 @@ export default function CatalogModalSpend({
   inline = false,
 }: Props) {
   const [mounted, setMounted] = useState(false);
-
+  
   // modal interno "Editar monto"
   const [openAmountModal, setOpenAmountModal] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
-  // Bloqueo scroll (solo modal real)
-  useEffect(() => {
-    if (!open || inline) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open, inline]);
+  const shouldLockScroll = (!inline && open) || openAmountModal;
+  useBodyScrollLock(shouldLockScroll);
 
   // ESC (solo modal real)
   useEffect(() => {

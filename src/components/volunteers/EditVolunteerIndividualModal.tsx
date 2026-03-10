@@ -10,6 +10,7 @@ import { UpdateVoluntarioIndividualSchema } from "../../schemas/updateVolunteerS
 import Swal from "sweetalert2";
 import { useToggleVolunteerStatus } from "../../hooks/Volunteers/individual/useToggleVolunteerStatus";
 import { ActionButtons } from "../../components/ActionButtons";
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 
 interface EditVolunteerIndividualModalProps {
   voluntario: VoluntarioIndividual;
@@ -31,6 +32,7 @@ export function EditVolunteerIndividualModal({
     experiencia: voluntario.experiencia || "",
     nacionalidad: voluntario.nacionalidad || "",
   });
+  useLockBodyScroll(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { errors, validateField, validateAll } = useZodValidation(
@@ -120,7 +122,8 @@ export function EditVolunteerIndividualModal({
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-[#FAF9F5] border border-[#E6E1D6] rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white/60">
+      <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white/60 flex items-start justify-between">
+        <div>
           <h2 className="text-xl font-bold text-[#374321]">
             Editar Información del Voluntario
           </h2>
@@ -129,6 +132,16 @@ export function EditVolunteerIndividualModal({
             {voluntario.persona.apellido2}
           </p>
         </div>
+
+        {/* Botón cerrar */}
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-700 transition p-1 rounded-md"
+          aria-label="Cerrar modal"
+        >
+          ✕
+        </button>
+      </div>
 
         {/* Form */}
         <form

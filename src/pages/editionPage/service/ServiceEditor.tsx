@@ -20,33 +20,24 @@ export default function ServicesInformativeEditor({
   const [title, setTitle] = useState("")
   const [cardDescription, setCardDescription] = useState("")
   const [modalDescription, setModalDescription] = useState("")
-
-  // ✅ MULTI
   const [images, setImages] = useState<string[]>([])
   const [imageUrlDraft, setImageUrlDraft] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
-
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  // iniciales
   const [initialTitle, setInitialTitle] = useState("")
   const [initialCardDescription, setInitialCardDescription] = useState("")
   const [initialModalDescription, setInitialModalDescription] = useState("")
   const [initialImages, setInitialImages] = useState<string[]>([])
   const [hasChanges, setHasChanges] = useState(false)
 
-  // ✅ file pendiente (NO se sube hasta agregar)
   const upload = useCloudinaryUpload()
   const fileRef = useRef<HTMLInputElement>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [localPreview, setLocalPreview] = useState<string>("")
-
-  // drag/crop
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const dragRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
-
   const dragState = useRef({
     dragging: false,
     startX: 0,
@@ -61,16 +52,13 @@ export default function ServicesInformativeEditor({
       setTitle(selected.title)
       setCardDescription(selected.cardDescription)
       setModalDescription(selected.modalDescription)
-
       const selImages = Array.isArray(selected.images) ? selected.images : []
       setImages(selImages)
       setActiveIndex(0)
-
       setInitialTitle(selected.title)
       setInitialCardDescription(selected.cardDescription)
       setInitialModalDescription(selected.modalDescription)
       setInitialImages(selImages)
-
       setImageUrlDraft("")
       setPendingFile(null)
       if (localPreview) URL.revokeObjectURL(localPreview)
@@ -82,12 +70,10 @@ export default function ServicesInformativeEditor({
       setModalDescription("")
       setImages([])
       setActiveIndex(0)
-
       setInitialTitle("")
       setInitialCardDescription("")
       setInitialModalDescription("")
       setInitialImages([])
-
       setImageUrlDraft("")
       setPendingFile(null)
       if (localPreview) URL.revokeObjectURL(localPreview)
@@ -97,7 +83,6 @@ export default function ServicesInformativeEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId])
 
-  // cambios
   useEffect(() => {
     if (!selected) return
     const changed =
@@ -109,17 +94,9 @@ export default function ServicesInformativeEditor({
       !!pendingFile
     setHasChanges(changed)
   }, [
-    title,
-    cardDescription,
-    modalDescription,
-    imageUrlDraft,
-    images,
-    initialTitle,
-    initialCardDescription,
-    initialModalDescription,
-    initialImages,
-    pendingFile,
-    selected,
+    title, cardDescription, modalDescription, imageUrlDraft, images,
+    initialTitle, initialCardDescription, initialModalDescription,
+    initialImages, pendingFile, selected,
   ])
 
   useEffect(() => {
@@ -136,21 +113,15 @@ export default function ServicesInformativeEditor({
 
   const onPickFile = (file: File | null) => {
     if (!file) return
-
     if (localPreview) URL.revokeObjectURL(localPreview)
     const obj = URL.createObjectURL(file)
-
     setPendingFile(file)
     setLocalPreview(obj)
     setOffset({ x: 0, y: 0 })
-
-    // si escoge archivo, limpiamos URL draft para evitar confusión
     setImageUrlDraft("")
-
     if (fileRef.current) fileRef.current.value = ""
   }
 
-  // src para preview (archivo primero, si no URL draft, si no imagen activa)
   const previewSrc = useMemo(() => {
     if (pendingFile && localPreview) return localPreview
     if (imageUrlDraft.trim()) return imageUrlDraft.trim()
@@ -159,17 +130,13 @@ export default function ServicesInformativeEditor({
 
   const positionAsPercent = useMemo(() => {
     if (!dragRef.current || !imageRef.current) return { x: 50, y: 50 }
-
     const container = dragRef.current.getBoundingClientRect()
     const img = imageRef.current
-
     const imgWidth = img.naturalWidth
     const imgHeight = img.naturalHeight
     if (!imgWidth || !imgHeight) return { x: 50, y: 50 }
-
     const containerRatio = container.width / container.height
     const imageRatio = imgWidth / imgHeight
-
     let renderedWidth: number, renderedHeight: number
     if (imageRatio > containerRatio) {
       renderedHeight = container.height
@@ -178,13 +145,10 @@ export default function ServicesInformativeEditor({
       renderedWidth = container.width
       renderedHeight = renderedWidth / imageRatio
     }
-
     const maxOffsetX = Math.max(0, (renderedWidth - container.width) / 2)
     const maxOffsetY = Math.max(0, (renderedHeight - container.height) / 2)
-
     const percentX = maxOffsetX > 0 ? 50 + (offset.x / maxOffsetX) * 50 : 50
     const percentY = maxOffsetY > 0 ? 50 - (offset.y / maxOffsetY) * 50 : 50
-
     return {
       x: Math.max(0, Math.min(100, percentX)),
       y: Math.max(0, Math.min(100, percentY)),
@@ -192,9 +156,7 @@ export default function ServicesInformativeEditor({
   }, [offset])
 
   const onPointerDown = (e: React.PointerEvent) => {
-    if (!dragRef.current) return
-    if (!previewSrc) return
-
+    if (!dragRef.current || !previewSrc) return
     dragState.current = {
       dragging: true,
       startX: e.clientX,
@@ -203,7 +165,6 @@ export default function ServicesInformativeEditor({
       startOffsetY: offset.y,
       pointerId: e.pointerId,
     }
-
     const target = e.currentTarget as HTMLElement
     target.setPointerCapture(e.pointerId)
     e.preventDefault()
@@ -212,23 +173,17 @@ export default function ServicesInformativeEditor({
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragState.current.dragging) return
     if (e.pointerId !== dragState.current.pointerId) return
-
     e.preventDefault()
-
     const dx = e.clientX - dragState.current.startX
     const dy = e.clientY - dragState.current.startY
-
     if (!dragRef.current || !imageRef.current) return
-
     const container = dragRef.current.getBoundingClientRect()
     const img = imageRef.current
     const imgWidth = img.naturalWidth
     const imgHeight = img.naturalHeight
     if (!imgWidth || !imgHeight) return
-
     const containerRatio = container.width / container.height
     const imageRatio = imgWidth / imgHeight
-
     let renderedWidth: number, renderedHeight: number
     if (imageRatio > containerRatio) {
       renderedHeight = container.height
@@ -237,13 +192,10 @@ export default function ServicesInformativeEditor({
       renderedWidth = container.width
       renderedHeight = renderedWidth / imageRatio
     }
-
     const maxOffsetX = Math.max(0, (renderedWidth - container.width) / 2)
     const maxOffsetY = Math.max(0, (renderedHeight - container.height) / 2)
-
     const newX = dragState.current.startOffsetX + dx
     const newY = dragState.current.startOffsetY + dy
-
     setOffset({
       x: Math.max(-maxOffsetX, Math.min(maxOffsetX, newX)),
       y: Math.max(-maxOffsetY, Math.min(maxOffsetY, newY)),
@@ -253,9 +205,7 @@ export default function ServicesInformativeEditor({
   const onPointerUp = (e: React.PointerEvent) => {
     if (dragState.current.pointerId === e.pointerId) {
       const target = e.currentTarget as HTMLElement
-      try {
-        target.releasePointerCapture(e.pointerId)
-      } catch {}
+      try { target.releasePointerCapture(e.pointerId) } catch {}
       dragState.current.dragging = false
     }
   }
@@ -263,22 +213,16 @@ export default function ServicesInformativeEditor({
   const onPointerCancel = (e: React.PointerEvent) => {
     if (dragState.current.pointerId === e.pointerId) {
       const target = e.currentTarget as HTMLElement
-      try {
-        target.releasePointerCapture(e.pointerId)
-      } catch {}
+      try { target.releasePointerCapture(e.pointerId) } catch {}
       dragState.current.dragging = false
     }
   }
 
   const uploadAsync = (file: File) =>
     new Promise<any>((resolve, reject) => {
-      upload.mutate(file, {
-        onSuccess: resolve,
-        onError: reject,
-      })
+      upload.mutate(file, { onSuccess: resolve, onError: reject })
     })
 
-  // ✅ Agregar por URL
   const addFromUrl = () => {
     const url = imageUrlDraft.trim()
     if (!url) return
@@ -291,23 +235,19 @@ export default function ServicesInformativeEditor({
     setOffset({ x: 0, y: 0 })
   }
 
-  // ✅ Agregar desde archivo (recorta + sube)
   const addFromFile = async () => {
     if (!pendingFile || !localPreview) return
     try {
       const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
       const croppedFile = blobToFile(blob, `service_${selected?.id ?? "x"}_${Date.now()}.jpg`)
-
       const asset = await uploadAsync(croppedFile)
       const url = asset?.url ?? asset?.secure_url
       if (!url) return
-
       setImages((prev) => {
         const next = [...prev, url]
         setActiveIndex(next.length - 1)
         return next
       })
-
       setPendingFile(null)
       if (localPreview) URL.revokeObjectURL(localPreview)
       setLocalPreview("")
@@ -355,21 +295,23 @@ export default function ServicesInformativeEditor({
     if (!selected) return
     setIsSaving(true)
     try {
-      await onUpdate({
-        id: selected.id,
-        title,
-        cardDescription,
-        modalDescription,
-        images, // ✅ guarda lista (primera = portada)
-      })
-
+      let finalImages = [...images]
+      if (pendingFile && localPreview) {
+        const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
+        const croppedFile = blobToFile(blob, `service_${selected?.id ?? "x"}_${Date.now()}.jpg`)
+        const asset = await uploadAsync(croppedFile)
+        const url = asset?.url ?? asset?.secure_url
+        if (url) finalImages.push(url)
+      } else if (imageUrlDraft.trim() !== "") {
+        finalImages.push(imageUrlDraft.trim())
+      }
+      await onUpdate({ id: selected.id, title, cardDescription, modalDescription, images: finalImages })
       showSuccessAlert("Actualización completada")
-
       setInitialTitle(title)
       setInitialCardDescription(cardDescription)
       setInitialModalDescription(modalDescription)
-      setInitialImages(images)
-
+      setInitialImages(finalImages)
+      setImages(finalImages)
       clearDraft()
     } catch (err) {
       console.error("Error al guardar:", err)
@@ -402,13 +344,11 @@ export default function ServicesInformativeEditor({
     setSelectedId(null)
   }
 
-  const serviceOptions = items.map((s: any) => ({
-    value: s.id,
-    label: s.title,
-  }))
+  const serviceOptions = items.map((s: any) => ({ value: s.id, label: s.title }))
 
   return (
-    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-4 sm:p-6 lg:p-8 shadow overflow-x-hidden">
+    // ✅ Quitado overflow-x-hidden del contenedor principal
+    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-4 sm:p-6 lg:p-8 shadow">
       <h2 className="text-xl sm:text-2xl font-semibold">Editar Servicio Existente</h2>
 
       <CustomSelect
@@ -419,8 +359,8 @@ export default function ServicesInformativeEditor({
       />
 
       {selected && (
-        <div className="space-y-4 overflow-x-hidden">
-          {/* ✅ en desktop: 2 cols, en móvil: 1 col */}
+        // ✅ Quitado overflow-x-hidden aquí también
+        <div className="space-y-4">
           <div className="grid gap-6 lg:grid-cols-[1fr_520px]">
             <div className="space-y-4 w-full lg:min-w-[420px] lg:max-w-[520px] justify-self-end">
               <div>
@@ -468,7 +408,6 @@ export default function ServicesInformativeEditor({
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes (portada = primera)</label>
-
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     type="button"
@@ -478,7 +417,6 @@ export default function ServicesInformativeEditor({
                   >
                     Elegir imagen
                   </button>
-
                   <input
                     ref={fileRef}
                     type="file"
@@ -486,7 +424,6 @@ export default function ServicesInformativeEditor({
                     accept="image/*"
                     onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
                   />
-
                   <input
                     className="w-full flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
                     value={imageUrlDraft}
@@ -510,7 +447,6 @@ export default function ServicesInformativeEditor({
                   <label className="block text-sm font-medium text-gray-700">
                     Vista previa (arrastrá para acomodar)
                   </label>
-
                   <div
                     ref={dragRef}
                     className="relative w-full max-w-full aspect-[1200/630] rounded-lg border border-[#DCD6C9] overflow-hidden bg-[#F8F9F3] cursor-grab active:cursor-grabbing"
@@ -533,8 +469,6 @@ export default function ServicesInformativeEditor({
                       onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
                     />
                   </div>
-
-                  {/* ✅ solo el botón Agregar (centrado y responsive) */}
                   <div className="flex justify-center sm:justify-start">
                     <ActionButtons
                       showCreate={true}
@@ -553,8 +487,6 @@ export default function ServicesInformativeEditor({
                   <p className="text-sm font-medium text-gray-700">
                     Imágenes actuales {images.length > 1 ? `(viendo ${activeIndex + 1}/${images.length})` : ""}
                   </p>
-
-                  {/* ✅ grid más flexible (evita el borde raro / cuadritos desalineados) */}
                   <div className="grid w-full grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
                     {images.map((url, idx) => (
                       <div
@@ -573,34 +505,25 @@ export default function ServicesInformativeEditor({
                             alt={`Imagen ${idx + 1}`}
                           />
                         </button>
-
-                        {/* ✅ fila inferior SIEMPRE alineada */}
                         <div className="mt-3 flex flex-col gap-2">
                           <span className={`text-xs ${idx === 0 ? "text-[#5B732E] font-semibold" : "text-gray-500"}`}>
                             {idx === 0 ? "Portada" : "\u00A0"}
                           </span>
-
-                          {/* Botones: siempre en fila, con espacio y sin romperse */}
                           <div className="flex items-center justify-end gap-3">
-                            {/* ★ Portada */}
                             <button
                               type="button"
                               onClick={() => setAsCover(idx)}
                               disabled={idx === 0}
                               className={`w-10 h-10 rounded-xl border flex items-center justify-center text-lg leading-none
-                                ${
-                                  idx === 0
-                                    ? "bg-[#5B732E] text-white border-[#5B732E]"
-                                    : "bg-white text-[#5B732E] border-[#5B732E] hover:bg-[#EAEFE0]"
-                                }
-                                disabled:opacity-60 disabled:cursor-not-allowed`}
+                                ${idx === 0
+                                  ? "bg-[#5B732E] text-white border-[#5B732E]"
+                                  : "bg-white text-[#5B732E] border-[#5B732E] hover:bg-[#EAEFE0]"
+                                } disabled:opacity-60 disabled:cursor-not-allowed`}
                               title={idx === 0 ? "Portada" : "Poner como portada"}
                               aria-label="Poner como portada"
                             >
                               ★
                             </button>
-
-                            {/* ✕ Quitar */}
                             <button
                               type="button"
                               onClick={() => removeAt(idx)}
@@ -615,14 +538,12 @@ export default function ServicesInformativeEditor({
                       </div>
                     ))}
                   </div>
-
                   <p className="text-xs text-gray-500">★ = poner como portada (la mueve a la primera posición).</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* ✅ botones finales centrados en móvil */}
           <div className="flex justify-center sm:justify-end">
             <ActionButtons
               onCancel={handleCancel}

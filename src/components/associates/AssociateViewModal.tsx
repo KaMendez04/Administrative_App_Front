@@ -5,6 +5,7 @@ import { useAssociateNecesidades } from "../../hooks/associates";
 import { FolderOpen } from "lucide-react";
 import { useAsociadoHasDocs, useDocsLinkByAsociado } from "../../hooks/associates/useSolicitudDocsLink";
 import { toast } from "sonner";
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 
 type Props = {
   open: boolean;
@@ -18,6 +19,7 @@ type Tab = "info" | "necesidades" | "finca";
 export function AssociateViewModal({ open, onClose, associate, isLoading }: Props) {
   const [selectedTab, setSelectedTab] = useState<Tab>("info");
 
+  useLockBodyScroll(open);
   const { data: necesidades = [], isLoading: loadingNecesidades } = useAssociateNecesidades(
     selectedTab === "necesidades" && associate ? associate.idAsociado : null
   );

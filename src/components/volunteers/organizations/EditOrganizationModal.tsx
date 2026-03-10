@@ -7,6 +7,7 @@ import { useZodValidation } from "../../../hooks/Volunteers/useZodValidation";
 import Swal from "sweetalert2";
 import { useToggleOrganizacionStatus } from "../../../hooks/Volunteers/organizations/useToggleOrganizationStatus";
 import { ActionButtons } from "../../../components/ActionButtons";
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 
 interface EditOrganizationModalProps {
   organizacion: Organizacion;
@@ -38,7 +39,6 @@ export function EditOrganizationModal({
       direccion: rep.persona.direccion || "",
     })) || []
   );
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validaciones para organización
@@ -156,6 +156,8 @@ export function EditOrganizationModal({
     }
   };
 
+  useLockBodyScroll(true);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -227,13 +229,15 @@ export function EditOrganizationModal({
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-[#FAF9F5] border border-[#E6E1D6] rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white/60">
-          <h2 className="text-xl font-bold text-[#374321]">
-            Editar Información de la Organización
-          </h2>
-          <p className="text-sm text-[#8C3A33] mt-1">
-            {organizacion.nombre}
-          </p>
+        <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white/60 flex items-start justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-[#374321]">
+              Editar Información de la Organización
+            </h2>
+            <p className="text-sm text-[#8C3A33] mt-1">
+              {organizacion.nombre}
+            </p>
+          </div>
         </div>
 
         {/* Form */}

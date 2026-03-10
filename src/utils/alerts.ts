@@ -162,7 +162,7 @@ export const showConfirmDeleteAlert = async (title: string, text: string) => {
     showCancelButton: true,
     confirmButtonColor: "#d33",
     cancelButtonColor: "#708C3E",
-    confirmButtonText: "Sí, rechazar",
+    confirmButtonText: "Sí, eliminar",
     cancelButtonText: "Cancelar",
     reverseButtons: false,
 
