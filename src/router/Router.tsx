@@ -60,6 +60,7 @@ import ConfirmEmailChangePage from "@/pages/ConfirmEmailChangePage";
 import SettingsAccountPage from "@/pages/settings/SettingsAccountPage";
 import SettingsUsersPage from "@/pages/settings/SettingsUsersPage";
 import SettingsLayoutPage from "@/pages/settings/SettingsLayoutPage";
+import LogsLayoutPage from "@/pages/logsPage/LogsLayoutPage";
 
 // ================================
 // Root
@@ -192,6 +193,16 @@ const settingsUsersRoute = new Route({
 // ================================
 // Solo ADMIN
 // ================================
+const logsLayoutRoute = new Route({
+  getParentRoute: () => appLayoutRoute,
+  path: "/logs",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location)
+    return requireRole(context, ["ADMIN"], locationHref)
+  },
+  component: LogsLayoutPage,
+})
+
 const staffRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/staff",
@@ -500,6 +511,7 @@ const routeTree = rootRoute.addChildren([
     changePasswordRoute,
     staffRoute,
     cloudinaryMediaRoute,
+    logsLayoutRoute,
 
     editionLayoutRoute.addChildren([
       aboutUsEdition,

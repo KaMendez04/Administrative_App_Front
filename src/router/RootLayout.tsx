@@ -12,7 +12,6 @@ import type { ApiError } from "@/apiConfig/apiConfig";
 function ReactQueryAuthBridge() {
   const router = useRouter();
 
-  // 👇 ojo: ahora auth no vive aquí; si ocupás logout, lo pasamos desde afuera
   (globalThis as any).__APP_ROUTER__ = { router };
   return null;
 }

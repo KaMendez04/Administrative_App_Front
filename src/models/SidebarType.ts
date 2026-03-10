@@ -1,4 +1,4 @@
-import { Book, Briefcase, DollarSign, FileText, Home, User, Users, Image, Settings } from "lucide-react"
+import { Book, Briefcase, DollarSign, FileText, Home, User, Users, Image, Settings, Logs } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { AppRole } from "@/auth/guards"
 
@@ -56,6 +56,12 @@ export const sidebarItems: SidebarItem[] = [
     title: "Media",
     href: "/media",
     icon: Image,
+    roles: ["ADMIN", "JUNTA"],
+  },
+  {
+    title: "Bitácora",
+    href: "/logs",
+    icon: Logs,
     roles: ["ADMIN", "JUNTA"],
   },
   {
