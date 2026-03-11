@@ -2,20 +2,16 @@ import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 
 import {
-  buildChangeSummary,
   formatDateTime,
   getActionBadgeClass,
   getActionLabel,
   getEntityLabel,
-  getModuleLabel,
 } from "@/utils/auditLogUtils"
-import { LogsFilters, type LogsFiltersValue } from "./LogsFilters"
-import type { AuditLog } from "@/models/logs/AuditLog"
-import { useAuditLogs } from "@/hooks/logs/useAuditLogs"
-import { ActionButtons } from "../ActionButtons"
-import { GenericTable } from "../GenericTable"
-import { PaginationBar, usePagination } from "../ui/pagination"
-import { AuditLogDetailModal } from "./AuditLogDetailModal"
+import { LogsFilters, type LogsFiltersValue } from "../../components/logsComponents/LogsFilters"
+import { useAuditLogs } from "@/hooks/logsHooks/useAuditLogs"
+import { GenericTable } from "../../components/GenericTable"
+import { PaginationBar, usePagination } from "../../components/ui/pagination"
+import type { AuditUsersLog } from "@/models/logsModel/AuditUsersLog"
 
 function buildApiFilters(filters: LogsFiltersValue) {
   const params: Record<string, any> = {}
@@ -43,10 +39,8 @@ export default function LogsPage() {
     to: "",
   })
 
-  const [selectedLog, setSelectedLog] = React.useState<AuditLog | null>(null)
-
   const apiFilters = React.useMemo(() => buildApiFilters(filters), [filters])
-  const { data = [], isLoading } = useAuditLogs(apiFilters)
+  const { data = [], isLoading } = useAuditLogs(apiFilters) //Acá llamar al hook de useAuditUserLogs
 
   const visibleRows = React.useMemo(() => {
     if (!filters.search.trim()) return data
@@ -69,7 +63,7 @@ export default function LogsPage() {
     [filters.search, filters.module, filters.entityType, filters.actionType, filters.from, filters.to],
   )
 
-  const columns = React.useMemo<ColumnDef<AuditLog>[]>(
+  const columns = React.useMemo<ColumnDef<AuditUsersLog>[]>(
     () => [
       {
         accessorKey: "createdAt",
@@ -95,46 +89,16 @@ export default function LogsPage() {
         ),
       },
       {
-        id: "module",
-        header: "Módulo",
-        cell: ({ row }) => (
-          <span className="text-[#2E321B]">{getModuleLabel(row.original)}</span>
-        ),
-      },
-      {
-        accessorKey: "entityType",
-        header: "Entidad",
-        cell: ({ row }) => (
-          <span className="text-[#2E321B]">{getEntityLabel(row.original.entityType)}</span>
-        ),
-      },
-      {
         accessorKey: "actionType",
         header: "Acción",
         cell: ({ row }) => (
           <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getActionBadgeClass(
-              row.original.actionType,
-            )}`}
+            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getActionBadgeClass(row.original.actionType)}`}
           >
             {getActionLabel(row.original.actionType)}
           </span>
         ),
-      },
-      {
-        id: "summary",
-        header: "Descripción",
-        cell: ({ row }) => (
-          <div className="text-[#2E321B]">{buildChangeSummary(row.original)}</div>
-        ),
-      },
-      {
-        id: "detail",
-        header: "Detalle",
-        cell: ({ row }) => (
-          <ActionButtons onView={() => setSelectedLog(row.original)} showText={false} />
-        ),
-      },
+        }
     ],
     [],
   )
@@ -152,8 +116,8 @@ export default function LogsPage() {
 
   return (
     <>
-      <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="xl:sticky xl:top-4 xl:self-start">
+      <div className="">
+        <aside className="">
           <LogsFilters value={filters} onChange={setFilters} onClear={clearFilters} />
         </aside>
 
@@ -167,7 +131,7 @@ export default function LogsPage() {
             </div>
 
             <div className="p-4 sm:p-5">
-              <GenericTable<AuditLog>
+              <GenericTable<AuditUsersLog>
                 data={pagedItems}
                 columns={columns}
                 isLoading={isLoading}
@@ -185,11 +149,7 @@ export default function LogsPage() {
         </section>
       </div>
 
-      <AuditLogDetailModal
-        open={!!selectedLog}
-        onOpenChange={(open) => !open && setSelectedLog(null)}
-        log={selectedLog}
-      />
     </>
   )
 }
+

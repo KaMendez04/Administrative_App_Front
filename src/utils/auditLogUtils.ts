@@ -2,7 +2,7 @@ import type {
   AuditActionType,
   AuditEntityType,
   AuditLog,
-} from "@/models/logs/AuditLog"
+} from "@/models/logsModel/AuditLog"
 
 export function formatDateTime(value?: string | null) {
   if (!value) return "—"

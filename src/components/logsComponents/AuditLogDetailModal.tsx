@@ -1,5 +1,5 @@
 import { CalendarDays, FileText, ShieldCheck, X, History } from "lucide-react"
-import type { AuditLog } from "@/models/logs/AuditLog"
+import type { AuditLog } from "@/models/logsModel/AuditLog"
 import {
   formatDateTime,
   formatMoney,

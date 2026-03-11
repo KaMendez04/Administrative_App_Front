@@ -61,6 +61,8 @@ import SettingsAccountPage from "@/pages/settings/SettingsAccountPage";
 import SettingsUsersPage from "@/pages/settings/SettingsUsersPage";
 import SettingsLayoutPage from "@/pages/settings/SettingsLayoutPage";
 import LogsLayoutPage from "@/pages/logsPage/LogsLayoutPage";
+import LogsBudgetPage from "@/pages/logsPage/LogsBudgetPage";
+import LogsUsersPage from "@/pages/logsPage/LogsUsersPage";
 
 // ================================
 // Root
@@ -201,6 +203,34 @@ const logsLayoutRoute = new Route({
     return requireRole(context, ["ADMIN"], locationHref)
   },
   component: LogsLayoutPage,
+})
+
+const logsIndexRoute = new Route({
+  getParentRoute: () => logsLayoutRoute,
+  path: "/",
+  beforeLoad: () => {
+    throw redirect({ to: "/logs/budgetLogs" })
+  },
+})
+
+const logsBudgetRoute = new Route({
+  getParentRoute: () => logsLayoutRoute,
+  path: "/budgetLogs",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN",], locationHref);
+  },
+  component: LogsBudgetPage,
+})
+
+const logsUsersRoute = new Route({
+  getParentRoute: () => logsLayoutRoute,
+  path: "/usersLog",
+  beforeLoad: ({ context, location }) => {
+    const locationHref = getLocationHref(location);
+    return requireRole(context, ["ADMIN"], locationHref);
+  },
+  component: LogsUsersPage,
 })
 
 const staffRoute = new Route({
@@ -511,7 +541,6 @@ const routeTree = rootRoute.addChildren([
     changePasswordRoute,
     staffRoute,
     cloudinaryMediaRoute,
-    logsLayoutRoute,
 
     editionLayoutRoute.addChildren([
       aboutUsEdition,
@@ -560,6 +589,11 @@ const routeTree = rootRoute.addChildren([
       settingsAccountRoute,
       settingsUsersRoute,
     ]),
+    logsLayoutRoute.addChildren([
+        logsIndexRoute,
+        logsBudgetRoute,
+        logsUsersRoute,
+  ]),
   ]),
 ]);
 
