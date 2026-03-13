@@ -1,6 +1,5 @@
 import { useAuth } from "@/auth/AuthProvider"
 import type { AppRole } from "@/auth/guards"
-import LogsPage from "@/pages/logsPage/LogsBudgetPage"
 import { Link, Outlet, useRouterState } from "@tanstack/react-router"
 import { Menu, ScrollText, Users } from "lucide-react"
 import React from "react"

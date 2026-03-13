@@ -83,6 +83,12 @@ export function getActionLabel(action: AuditActionType) {
       return "Solicitud cambio correo"
     case "USER_EMAIL_CHANGE_CONFIRMED":
       return "Confirmación cambio correo"
+      case "USER_CREATED":
+      return "Creación"
+    case "USER_UPDATED":
+      return "Actualización"
+    case "USER_DELETED":
+      return "Eliminación"
     default:
       return action
   }
@@ -101,6 +107,19 @@ export function getActionBadgeClass(action: AuditActionType) {
       return "bg-[#E8DCF8] text-[#6E4AA3]"
     default:
       return "bg-[#ECECEC] text-[#5A5A5A]"
+    case "USER_CREATED":
+    case "USER_ACTIVATED":
+      return "bg-[#E6EDC8] text-[#5B732E]"
+    case "USER_UPDATED":
+      return "bg-[#FFF3D6] text-[#A3853D]"
+    case "USER_DELETED":
+      return "bg-[#F6D8D2] text-[#B85C4C]"
+    case "USER_DEACTIVATED":
+      return "bg-[#ECECEC] text-[#5A5A5A]"
+    case "USER_PASSWORD_CHANGED":
+    case "USER_EMAIL_CHANGE_REQUESTED":
+    case "USER_EMAIL_CHANGE_CONFIRMED":
+      return "bg-[#E8DCF8] text-[#6E4AA3]"
   }
 }
 
