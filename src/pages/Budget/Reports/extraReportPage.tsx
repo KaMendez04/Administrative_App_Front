@@ -61,18 +61,18 @@ export default function ExtraReportPage() {
   }, [start, end])
 
   // ------- acciones -------
-  const handlePreviewPDF = () => {
-    previewExtraReportPDF(submitted)
-  }
+const handlePreviewPDF = async () => {
+  await previewExtraReportPDF(submitted)
+}
 
-  const handleDownloadPDF = () => {
-    setIsDownloading(true)
-    try {
-      downloadExtraReportPDF(submitted)
-    } finally {
-      setTimeout(() => setIsDownloading(false), 1200)
-    }
+const handleDownloadPDF = async () => {
+  setIsDownloading(true)
+  try {
+    await downloadExtraReportPDF(submitted)
+  } finally {
+    setIsDownloading(false)
   }
+}
 
   const handleDownloadExcel = async () => {
     await excelMutation.mutateAsync(submitted)
