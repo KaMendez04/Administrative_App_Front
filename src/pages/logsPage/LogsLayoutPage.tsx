@@ -23,7 +23,7 @@ function isActive(pathname: string, to: string) {
 export default function LogsLayoutPage() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
     const { user } = useAuth() as any
-    const [open, setOpen] = React.useState(false)
+    const [, setOpen] = React.useState(false)
   
     const visibleItems = items.filter((item) => {
       if (!item.roles) return true

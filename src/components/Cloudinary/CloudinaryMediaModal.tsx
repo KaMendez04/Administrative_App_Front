@@ -1,5 +1,7 @@
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 import type { ViewMode } from "@/utils/cloudinaryMediaUtils";
 import { videoMp4Url, videoPosterJpg } from "@/utils/cloudinaryMediaUtils";
+import { useEffect } from "react";
 
 type Selected = { url: string; public_id: string; isVideo: boolean };
 
@@ -9,8 +11,10 @@ type Props = {
 };
 
 export default function CloudinaryMediaModal({ selected, onClose }: Props) {
-  if (!selected) return null;
+ useLockBodyScroll(true);
 
+  if (!selected) return null;
+  
   return (
     <div
       className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 sm:p-6"

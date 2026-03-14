@@ -14,6 +14,7 @@ import Swal from 'sweetalert2';
     .no-border-button { border: 0 !important; box-shadow: none !important; }
   `;
   document.head.appendChild(style);
+  
 })();
 
 // ─── Configuración base de apariencia (solo fondo + tipografía + icono) ───────
@@ -27,10 +28,24 @@ const lightClass = {
   timerProgressBar: 'camara-progress',
 };
 
+const BaseSwal = Swal.mixin({
+  background: LIGHT_BG,
+  heightAuto: false,
+  scrollbarPadding: false,
+
+didOpen: () => {
+  document.body.classList.add("overflow-hidden");
+},
+
+willClose: () => {
+  document.body.classList.remove("overflow-hidden");
+}
+});
+
 // ─── Login ────────────────────────────────────────────────────────────────────
 
 export const showSuccessAlertLogin = (message: string) => {
-  return Swal.fire({
+  return BaseSwal.fire({
     icon: 'success',
     title: 'Inicio de sesión exitoso',
     text: message,
@@ -40,6 +55,7 @@ export const showSuccessAlertLogin = (message: string) => {
     allowOutsideClick: false,
     allowEscapeKey: false,
     background: LIGHT_BG,
+    backdrop: true,
     customClass: { ...lightClass, icon: 'camara-icon-success' },
     heightAuto: false,
     scrollbarPadding: false,
@@ -47,37 +63,43 @@ export const showSuccessAlertLogin = (message: string) => {
 };
 
 export const showErrorAlertLogin = (message: string) => {
-  return Swal.fire({
+  return BaseSwal.fire({
     icon: 'error',
     title: 'Inicio de sesión fallido',
     text: message,
     confirmButtonColor: '#48a6a7',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
     customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
     background: LIGHT_BG,
     heightAuto: false,
     scrollbarPadding: false,
+    backdrop: true,
   });
 };
 
 // ─── Registro ─────────────────────────────────────────────────────────────────
 
 export const showSuccessAlertRegister = (message: string) => {
-  return Swal.fire({
+  return BaseSwal.fire({
     icon: 'success',
     title: 'Registro exitoso',
     text: message,
     timer: 2000,
     timerProgressBar: true,
     showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
     background: LIGHT_BG,
     customClass: { ...lightClass, icon: 'camara-icon-success' },
     heightAuto: false,
     scrollbarPadding: false,
+    backdrop: true,
   });
 };
 
 export const showErrorAlertEmpty = (message: string) => {
-  return Swal.fire({
+  return BaseSwal.fire({
     icon: 'error',
     title: 'Formulario inválido',
     text: message,
@@ -85,11 +107,14 @@ export const showErrorAlertEmpty = (message: string) => {
     customClass: { ...lightClass, icon: 'camara-icon-error' },
     heightAuto: false,
     scrollbarPadding: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    backdrop: true,
   });
 };
 
 export const showErrorDuplicateEmail = (message: string) => {
-  return Swal.fire({
+  return BaseSwal.fire({
     icon: 'warning',
     title: 'Email duplicado',
     text: message,
@@ -98,11 +123,14 @@ export const showErrorDuplicateEmail = (message: string) => {
     background: LIGHT_BG,
     heightAuto: false,
     scrollbarPadding: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    backdrop: true,
   });
 };
 
 export const showWarningAlert = (message: string) => {
-  return Swal.fire({
+  return BaseSwal.fire({
     title: '¿Desea continuar?',
     text: message,
     icon: 'warning',
@@ -116,11 +144,14 @@ export const showWarningAlert = (message: string) => {
     background: LIGHT_BG,
     heightAuto: false,
     scrollbarPadding: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    backdrop: true,
   });
 };
 
 export const showErrorAlertRegister = (message: string) => {
-  return Swal.fire({
+  return BaseSwal.fire({
     icon: 'error',
     title: 'Error al registrar',
     text: message,
@@ -129,13 +160,16 @@ export const showErrorAlertRegister = (message: string) => {
     background: LIGHT_BG,
     heightAuto: false,
     scrollbarPadding: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    backdrop: true,
   });
 };
 
 // ─── Confirmaciones ───────────────────────────────────────────────────────────
 
 export const showConfirmAlert = async (title: string, text: string) => {
-  const result = await Swal.fire({
+  const result = await BaseSwal.fire({
     title,
     text,
     icon: 'warning',
@@ -149,13 +183,16 @@ export const showConfirmAlert = async (title: string, text: string) => {
     customClass: { ...lightClass, icon: 'camara-icon-error' },
     heightAuto: false,
     scrollbarPadding: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    backdrop: true,
   });
 
   return result.isConfirmed;
 };
 
 export const showConfirmDeleteAlert = async (title: string, text: string) => {
-  const result = await Swal.fire({
+  const result = await BaseSwal.fire({
     title,
     text,
     icon: "warning",
@@ -171,13 +208,16 @@ export const showConfirmDeleteAlert = async (title: string, text: string) => {
     customClass: { ...lightClass, icon: "camara-icon-error" },
     heightAuto: false,
     scrollbarPadding: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    backdrop: true,
   });
 
   return result.isConfirmed;
 };
 
 export const showConfirmApproveRejectedAlert = async () => {
-  const result = await Swal.fire({
+  const result = await BaseSwal.fire({
     title: 'Aprobar solicitud rechazada',
     text: '¿Estás seguro de querer aprobar a este solicitante que había sido rechazado?',
     icon: 'warning',
@@ -190,13 +230,16 @@ export const showConfirmApproveRejectedAlert = async () => {
     customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
     heightAuto: false,
     scrollbarPadding: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    backdrop: true,
   });
 
   return result.isConfirmed;
 };
 
 export const showConfirmOutAlert = async (title: string, text: string) => {
-  const result = await Swal.fire({
+  const result = await BaseSwal.fire({
     title,
     text,
     icon: 'warning',
@@ -210,6 +253,9 @@ export const showConfirmOutAlert = async (title: string, text: string) => {
     customClass: { ...lightClass, icon: 'camara-icon-error' },
     heightAuto: false,
     scrollbarPadding: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    backdrop: true,
   });
 
   return result.isConfirmed;
@@ -218,7 +264,7 @@ export const showConfirmOutAlert = async (title: string, text: string) => {
 // ─── Éxito genérico ───────────────────────────────────────────────────────────
 
 export const showSuccessAlert = (message: string) => {
-  return Swal.fire({
+  return BaseSwal.fire({
     icon: 'success',
     title: 'Guardado con éxito',
     text: message,
@@ -232,11 +278,12 @@ export const showSuccessAlert = (message: string) => {
     customClass: { ...lightClass, icon: 'camara-icon-success' },
     heightAuto: false,
     scrollbarPadding: false,
+    backdrop: true,
   });
 };
 
 export const showSuccessDeleteAlert = (message: string) => {
-  return Swal.fire({
+  return BaseSwal.fire({
     icon: 'success',
     title: 'Eliminado con éxito',
     text: message,
@@ -250,5 +297,6 @@ export const showSuccessDeleteAlert = (message: string) => {
     customClass: { ...lightClass, icon: 'camara-icon-success' },
     heightAuto: false,
     scrollbarPadding: false,
+    backdrop: true,
   });
 };
