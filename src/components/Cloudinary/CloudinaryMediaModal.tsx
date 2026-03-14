@@ -1,7 +1,6 @@
 import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 import type { ViewMode } from "@/utils/cloudinaryMediaUtils";
 import { videoMp4Url, videoPosterJpg } from "@/utils/cloudinaryMediaUtils";
-import { useEffect } from "react";
 
 type Selected = { url: string; public_id: string; isVideo: boolean };
 
